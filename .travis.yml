@@ -15,7 +15,7 @@ install:
   - pip install -r devel.txt
 
 before_script:
-  - psql -c  "CREATE DATABASE kiwitcms_tenant_project ENCODING 'UTF8' LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8';" -U postgres
+  - psql -c  "CREATE DATABASE tenant_test_project ENCODING 'UTF8' LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8';" -U postgres
 
 script: ./run_tests.sh
 

@@ -19,17 +19,18 @@ TEMPLATE_DEBUG = True
 
 DATABASES['default'].update({
     'ENGINE': 'django_tenants.postgresql_backend',
-    'NAME': 'kiwitcms_test_project',
+    'NAME': 'tenant_test_project',
     'USER': 'kiwi',
     'PASSWORD': 'kiwi',
     'HOST': 'localhost',
+    'OPTIONS': {},
 })
 
 DATABASE_ROUTERS = [
     'django_tenants.routers.TenantSyncRouter',
 ]
 
-MIDDLEWARE.insert(0, 'tenant_tutorial.middleware.TenantTutorialMiddleware')
+MIDDLEWARE.insert(0, 'django_tenants.middleware.TenantMiddleware')
 
 TENANT_MODEL = "tcms_tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"
@@ -39,8 +40,8 @@ INSTALLED_APPS.insert(0, 'django_tenants')
 INSTALLED_APPS.insert(1, 'tcms_tenants')
 
 TENANT_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
+#    'django.contrib.admin',
+#    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
@@ -50,18 +51,19 @@ TENANT_APPS = [
     'modernrpc',
     'simple_history',
 
-    'tcms.core',
-    'tcms.kiwi_auth',
+#    'tcms.core',
+#    'tcms.kiwi_auth',
     'tcms.core.contrib.comments.apps.AppConfig',
     'tcms.core.contrib.linkreference',
     'tcms.management',
     'tcms.testcases.apps.AppConfig',
     'tcms.testplans.apps.AppConfig',
     'tcms.testruns.apps.AppConfig',
-    'tcms.xmlrpc',
+#    'tcms.xmlrpc',
 ]
 
-SHARED_APPS = [app for app in INSTALLED_APPS if not app in TENANT_APPS]
+SHARED_APPS = INSTALLED_APPS #[app for app in INSTALLED_APPS if not app in TENANT_APPS]
+#SHARED_APPS.append('django.contrib.contenttypes')
 
 # todo: enable later when we have views
 # ROOT_URLCONF = 'dts_test_project.urls'
