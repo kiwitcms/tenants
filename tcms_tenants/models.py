@@ -21,6 +21,13 @@ class Tenant(TenantMixin):
         return "[%s] %s" % (self.schema_name, self.name)
 
 
+def _authorized_user_str(self):
+    return "%s@%s" % (self.user.username, self.tenant.name)
+
+
+Tenant.authorized_users.through.__str__ = _authorized_user_str
+
+
 class Domain(DomainMixin):
     def __str__(self):
         return "%s for %s" % (self.domain, self.tenant)
