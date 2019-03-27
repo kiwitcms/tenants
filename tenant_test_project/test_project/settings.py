@@ -56,11 +56,8 @@ TENANT_APPS = [
     'tcms.testruns.apps.AppConfig',
 ]
 
-SHARED_APPS = [app for app in INSTALLED_APPS if not app in TENANT_APPS]
-SHARED_APPS.extend([
-    'django.contrib.contenttypes',
-    'django.contrib.sites'
-])
+# because everybody can have access to the main instance
+SHARED_APPS = INSTALLED_APPS
 
 # todo: enable later when we have views
 # ROOT_URLCONF = 'dts_test_project.urls'
