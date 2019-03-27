@@ -15,6 +15,10 @@ class Tenant(TenantMixin):
     paid_until =  models.DateField(null=True, blank=True)
     on_trial = models.BooleanField(default=False)
 
+    def __str__(self):
+        return "[%s] %s" % (self.schema_name, self.name)
+
 
 class Domain(DomainMixin):
-    pass
+    def __str__(self):
+        return "%s for %s" % (self.domain, self.tenant)
