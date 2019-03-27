@@ -40,10 +40,7 @@ INSTALLED_APPS.insert(0, 'django_tenants')
 INSTALLED_APPS.insert(1, 'tcms_tenants')
 
 TENANT_APPS = [
-#    'django.contrib.admin',
-#    'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.sites',
 
     'attachments',
@@ -51,19 +48,19 @@ TENANT_APPS = [
     'modernrpc',
     'simple_history',
 
-#    'tcms.core',
-#    'tcms.kiwi_auth',
     'tcms.core.contrib.comments.apps.AppConfig',
     'tcms.core.contrib.linkreference',
     'tcms.management',
     'tcms.testcases.apps.AppConfig',
     'tcms.testplans.apps.AppConfig',
     'tcms.testruns.apps.AppConfig',
-#    'tcms.xmlrpc',
 ]
 
-SHARED_APPS = INSTALLED_APPS #[app for app in INSTALLED_APPS if not app in TENANT_APPS]
-#SHARED_APPS.append('django.contrib.contenttypes')
+SHARED_APPS = [app for app in INSTALLED_APPS if not app in TENANT_APPS]
+SHARED_APPS.extend([
+    'django.contrib.contenttypes',
+    'django.contrib.sites'
+])
 
 # todo: enable later when we have views
 # ROOT_URLCONF = 'dts_test_project.urls'
