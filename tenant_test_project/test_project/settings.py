@@ -30,7 +30,8 @@ DATABASE_ROUTERS = [
     'django_tenants.routers.TenantSyncRouter',
 ]
 
-MIDDLEWARE.insert(0, 'django_tenants.middleware.TenantMiddleware')
+MIDDLEWARE.insert(0, 'django_tenants.middleware.main.TenantMainMiddleware')
+MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')
 
 TENANT_MODEL = "tcms_tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"

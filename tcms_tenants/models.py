@@ -3,6 +3,7 @@
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
 from django.db import models
+from django.conf import settings
 from django_tenants.models import TenantMixin, DomainMixin
 
 
@@ -14,6 +15,7 @@ class Tenant(TenantMixin):
     created_on = models.DateField(auto_now_add=True)
     paid_until =  models.DateField(null=True, blank=True)
     on_trial = models.BooleanField(default=False)
+    authorized_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL)
 
     def __str__(self):
         return "[%s] %s" % (self.schema_name, self.name)
