@@ -42,6 +42,9 @@ class TenantAdmin(admin.ModelAdmin):
 
 
 class AuthorizedUsersAdmin(admin.ModelAdmin):
+    """
+        Allows administering which users are authorized for tenants!
+    """
     list_display = ('user_username', 'user_full_name', 'tenant_name')
     search_fields = ('user__username', 'tenant__name')
 
@@ -57,6 +60,18 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
     def tenant_name(self, instance):
         return instance.tenant.name
     tenant_name.admin_order_field = 'tenant__name'
+
+    def get_queryset(self, request):
+        """
+            When viewing as non-super-user it will show the users only
+            for your tenant!
+        """
+        qs = super().get_queryset(request)
+
+        if not request.user.is_superuser:
+            qs = qs.filter(tenant=request.tenant)
+
+        return qs
 
 
 admin.site.register(Tenant, TenantAdmin)
