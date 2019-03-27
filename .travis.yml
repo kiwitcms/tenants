@@ -1,0 +1,24 @@
+dist: xenial
+language: python
+python:
+  - "3.6"
+addons:
+  postgresql: 9.5
+services:
+  - postgresql
+install:
+  - pip install -U pip
+  - pip install -r devel.txt
+
+before_script:
+  - psql -c  "CREATE DATABASE kiwitcms_tenant_project ENCODING 'UTF8' LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8';" -U postgres
+
+script: ./run_tests.sh
+
+after_success:
+  - coveralls
+
+notifications:
+  email:
+    on_failure: change
+    on_success: never
