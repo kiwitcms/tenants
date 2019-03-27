@@ -34,7 +34,7 @@ setup(
     url='https://github.com/kiwitcms/tenants/',
     license='GPLv3+',
     install_requires=get_install_requires('requirements.txt'),
-    packages=['tcms.tenants'],
+    packages=['tcms_tenants'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Topic :: Internet',
