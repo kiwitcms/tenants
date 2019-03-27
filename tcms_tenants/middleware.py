@@ -1,6 +1,8 @@
 from django.http import Http404
 from django.utils.deprecation import MiddlewareMixin
 
+from tcms_tenants.perms import can_access
+
 
 class BlockUnauthorizedUserMiddleware(MiddlewareMixin):
     """
@@ -15,9 +17,5 @@ class BlockUnauthorizedUserMiddleware(MiddlewareMixin):
             usually goes at the end
     """
     def process_request(self, request):
-        # everybody can access the public schema
-        if request.tenant.schema_name == 'public':
-            return
-
-        if not request.tenant.authorized_users.filter(pk=request.user.pk).exists():
+        if not can_access(request.user, request.tenant):
             raise Http404('Tenant does not exist!')

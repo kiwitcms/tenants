@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 
 from tcms_tenants.models import Tenant
+from tcms_tenants.perms import owns_tenant
 
 
 class TenantAdmin(admin.ModelAdmin):
@@ -45,6 +46,7 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
     """
         Allows administering which users are authorized for tenants!
     """
+    actions = ['delete_selected']
     list_display = ('user_username', 'user_full_name', 'tenant_name')
     search_fields = ('user__username', 'tenant__name')
 
@@ -63,15 +65,44 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         """
-            When viewing as non-super-user it will show the users only
-            for your tenant!
+            Show only users authorized for the current tenant!
         """
-        qs = super().get_queryset(request)
+        return super().get_queryset(request).filter(tenant=request.tenant)
 
-        if not request.user.is_superuser:
-            qs = qs.filter(tenant=request.tenant)
+#todo: we have to override the add form to allow users to be assigned
+# to the current schema only
+    def has_add_permission(self, request, obj=None):
+        """
+            Allow to add new authorized users.
+        """
+        return owns_tenant(request.user, request.tenant)
 
-        return qs
+    def has_change_permission(self, request, obj=None):
+        """
+            Allow to display the list of of authorized users.
+        """
+        return owns_tenant(request.user, request.tenant)
+
+    def has_delete_permission(self, request, obj=None):
+        """
+            Allow to delete selected users.
+        """
+        return owns_tenant(request.user, request.tenant)
+
+    def has_module_permission(self, request):
+        """
+            Allow this module to be seen in main admin page.
+        """
+        return owns_tenant(request.user, request.tenant)
+
+    def get_model_perms(self, request):
+        """
+            Allow this module to be seen in main admin page.
+        """
+        if request.user.is_superuser:
+            return super().get_model_perms(request)
+
+        return {'view': owns_tenant(request.user, request.tenant)}
 
 
 admin.site.register(Tenant, TenantAdmin)
