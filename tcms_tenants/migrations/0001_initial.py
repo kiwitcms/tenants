@@ -17,9 +17,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('schema_name', models.CharField(unique=True, max_length=63, validators=[django_tenants.postgresql_backend.base._check_schema_name])),
-                ('name', models.CharField(max_length=100)),
+                ('name', models.CharField(max_length=100, db_index=True)),
                 ('created_on', models.DateField(auto_now_add=True)),
-                ('paid_until', models.DateField()),
+                ('paid_until', models.DateField(null=True, blank=True)),
                 ('on_trial', models.BooleanField(default=False)),
             ],
             options={
