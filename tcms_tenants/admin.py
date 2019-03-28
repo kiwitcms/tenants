@@ -1,7 +1,10 @@
 # pylint: disable=no-self-use
 
+from django import forms
 from django.urls import reverse
 from django.contrib import admin
+from django.forms.utils import ErrorList
+from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 
@@ -42,6 +45,37 @@ class TenantAdmin(admin.ModelAdmin):
         return instance.domains.first().domain
 
 
+class AuthorizedUsersChangeForm(forms.ModelForm):
+    """
+        A custom add/change form which will filter the available
+        values of the ``tenant`` field so that only the current
+        tenant is shown!
+    """
+    tenant = forms.models.ModelChoiceField(
+        queryset=Tenant.objects.none(),  # always defauls to none for security reasons
+    )
+    user = forms.models.ModelChoiceField(
+        queryset=get_user_model().objects.all(),  # it is OK to be able to select between all users
+    )
+
+    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None,
+                 initial=None, error_class=ErrorList, label_suffix=None,
+                 empty_permitted=False, instance=None, use_required_attribute=None,
+                 renderer=None):
+        super().__init__(data, files, auto_id, prefix,
+                         initial, error_class, label_suffix,
+                         empty_permitted, instance, use_required_attribute,
+                         renderer)
+        # this is passed by ModelAdmin._chageform_view():L1578
+        # when adding a new object
+        if initial and 'tenant' in initial:
+            self.fields['tenant'].queryset = Tenant.objects.filter(pk=initial['tenant'])
+        # this is passed by ModelAdmin._chageform_view():L1581
+        # when changing an existing object
+        elif instance:
+            self.fields['tenant'].queryset = Tenant.objects.filter(pk=instance.tenant.pk)
+
+
 class AuthorizedUsersAdmin(admin.ModelAdmin):
     """
         Allows administering which users are authorized for tenants!
@@ -49,6 +83,8 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
     actions = ['delete_selected']
     list_display = ('user_username', 'user_full_name', 'tenant_name')
     search_fields = ('user__username', 'tenant__name')
+
+    form = AuthorizedUsersChangeForm
 
     def user_username(self, instance):
         return instance.user.username
@@ -69,8 +105,14 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
         """
         return super().get_queryset(request).filter(tenant=request.tenant)
 
-#todo: we have to override the add form to allow users to be assigned
-# to the current schema only
+    def get_changeform_initial_data(self, request):
+        """
+            Pass the current tenant to AuthorizedUsersChangeForm.__init__()
+            which will filter the available tenants and only show the current
+            one when add/change objects!
+        """
+        return {'tenant': request.tenant.pk}
+
     def has_add_permission(self, request, obj=None):
         """
             Allow to add new authorized users.
