@@ -51,8 +51,15 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
         values of the ``tenant`` field so that only the current
         tenant is shown!
     """
+    ### important notice:
+    # As a security concern we would like to have this queryset set to
+    # Tenant.objects.none() instead of .all(). However ModelChoiceField.to_python()
+    # is trying to self.queryset.get() the currently selected value! When the queryset
+    # is empty this raises ValidationError!
+    # The internal mechanics of this are in BasseForm._clean_fields()::L399(Django 2.1.7)
+    # which calls field.clean(value) before any clean_<field_name>() methods on the form!
     tenant = forms.models.ModelChoiceField(
-        queryset=Tenant.objects.none(),  # always defauls to none for security reasons
+        queryset=Tenant.objects.all(),  # todo: add tests to make sure we are always filtering this !!!
     )
     user = forms.models.ModelChoiceField(
         queryset=get_user_model().objects.all(),  # it is OK to be able to select between all users
