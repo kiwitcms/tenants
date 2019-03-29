@@ -5,6 +5,8 @@
 import os
 import sys
 
+from django.utils.translation import ugettext_lazy as _
+
 from tcms.settings.product import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -59,6 +61,14 @@ TENANT_APPS = [
 
 # because everybody can have access to the main instance
 SHARED_APPS = INSTALLED_APPS
+
+MENU_ITEMS.append(
+    (_('TENANT'), [
+        (_('Create'), '/not-implemented-yet/'),
+        ('-', '-'),
+        (_('Authorized users'), '/admin/tcms_tenants/tenant_authorized_users/'),
+    ]),
+)
 
 # todo: enable later when we have views
 # ROOT_URLCONF = 'dts_test_project.urls'
