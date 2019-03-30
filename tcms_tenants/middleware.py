@@ -2,8 +2,9 @@
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
-from django.http import Http404
+from django.http import HttpResponseForbidden
 from django.utils.deprecation import MiddlewareMixin
+from django.utils.translation import ugettext_lazy as _
 
 from tcms_tenants.utils import can_access
 
@@ -22,4 +23,4 @@ class BlockUnauthorizedUserMiddleware(MiddlewareMixin):
     """
     def process_request(self, request):
         if not can_access(request.user, request.tenant):
-            raise Http404('Tenant does not exist!')
+            return HttpResponseForbidden(_('Unauthorized'))
