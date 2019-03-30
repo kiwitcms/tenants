@@ -8,10 +8,10 @@ set -e
 DATABASE=${DATABASE_HOST:-localhost}
 echo "Database: $DATABASE"
 
-pushd tenant_test_project
+pushd test_project
 
-for executor in standard multiprocessing; do
-    EXECUTOR=$executor python -Wd manage.py test django_tenants.tests
+for executor in standard; do
+    EXECUTOR=$executor python -Wd manage.py test -v2 tcms_tenants.tests
 done
 
 popd

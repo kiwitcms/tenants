@@ -11,7 +11,6 @@ from django.utils.translation import ugettext_lazy as _
 from tcms.settings.product import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-sys.path.insert(0, os.path.abspath(os.path.join(BASE_DIR, os.pardir)))
 sys.path.insert(0, BASE_DIR)
 
 # these are enabled only for testing purposes
