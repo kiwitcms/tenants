@@ -12,9 +12,9 @@ class Tenant(TenantMixin):
     auto_drop_schema = True
 
     name = models.CharField(max_length=100, db_index=True)
-    created_on = models.DateField(auto_now_add=True)
-    paid_until =  models.DateField(null=True, blank=True)
-    on_trial = models.BooleanField(default=False)
+    created_on = models.DateField(auto_now_add=True, db_index=True)
+    paid_until =  models.DateField(null=True, blank=True, db_index=True)
+    on_trial = models.BooleanField(default=True, db_index=True)
     authorized_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL)
 
     def __str__(self):
