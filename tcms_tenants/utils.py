@@ -35,6 +35,7 @@ def schema_name_not_used(name):
         raise ValidationError(_("Schema name already in use"))
 
 
+# warning: doesn't play well when the domain has a port number
 def tenant_domain(schema_name):
     return "%s.%s" % (schema_name, settings.TCMS_TENANTS_DOMAIN)
 

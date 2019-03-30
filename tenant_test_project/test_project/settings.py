@@ -25,6 +25,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 # which is different than the domain for the public tenant.
 # May be used in combination with PUBLIC_SCHEMA_URLCONF
 # https://django-tenants.readthedocs.io/en/latest/install.html#PUBLIC_SCHEMA_URLCONF
+#
+# WARNING: doesn't work well when you have a non-standard port-number
 TCMS_TENANTS_DOMAIN = 'tenants.localdomain'
 
 DATABASES['default'].update({
