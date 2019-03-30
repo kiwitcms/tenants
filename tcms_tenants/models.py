@@ -8,8 +8,8 @@ from django_tenants.models import TenantMixin, DomainMixin
 
 
 class Tenant(TenantMixin):
-    # schema will be automatically created and synced when it is saved
     auto_create_schema = True
+    auto_drop_schema = True
 
     name = models.CharField(max_length=100, db_index=True)
     created_on = models.DateField(auto_now_add=True)
