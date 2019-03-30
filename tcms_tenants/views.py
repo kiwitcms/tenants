@@ -9,7 +9,7 @@ from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
-from tcms_tenants import perms
+from tcms_tenants import utils
 from tcms_tenants.forms import NewTenantForm
 
 @method_decorator(login_required, name='dispatch')
@@ -32,11 +32,11 @@ class NewTenantView(TemplateView):
     def post(self, request, *args, **kwargs):
         form = NewTenantForm(request.POST)
         if form.is_valid():
-            tenant = perms.create_tenant(form.cleaned_data['name'],
+            tenant = utils.create_tenant(form.cleaned_data['name'],
                                          form.cleaned_data['schema_name'],
                                          request.user)
             # all is successfull so redirect to the new tenant
-            return HttpResponseRedirect(perms.tenant_url(request, tenant.schema_name))
+            return HttpResponseRedirect(utils.tenant_url(request, tenant.schema_name))
 
         context_data = {
             'form': form,

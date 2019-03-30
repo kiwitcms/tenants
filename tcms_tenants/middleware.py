@@ -5,7 +5,7 @@
 from django.http import Http404
 from django.utils.deprecation import MiddlewareMixin
 
-from tcms_tenants.perms import can_access
+from tcms_tenants.utils import can_access
 
 
 class BlockUnauthorizedUserMiddleware(MiddlewareMixin):

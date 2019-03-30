@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 
 from tcms_tenants.models import Tenant
-from tcms_tenants.perms import owns_tenant
+from tcms_tenants.utils import owns_tenant
 
 
 class TenantAdmin(admin.ModelAdmin):
