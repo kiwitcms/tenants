@@ -139,7 +139,7 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
         """
             Allow to delete selected users.
         """
-        return owns_tenant(request.user, request.tenant)
+        return request.user.is_superuser or owns_tenant(request.user, request.tenant)
 
     def has_module_permission(self, request):
         """
