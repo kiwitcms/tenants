@@ -16,6 +16,7 @@ sys.path.insert(0, BASE_DIR)
 # these are enabled only for testing purposes
 DEBUG = True
 TEMPLATE_DEBUG = True
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 ##### start multi-tenant settings override
 
@@ -69,6 +70,9 @@ MENU_ITEMS.append(
         (_('Authorized users'), '/admin/tcms_tenants/tenant_authorized_users/'),
     ]),
 )
+
+DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
+MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
 
 # todo: enable later when we have views
 # ROOT_URLCONF = 'dts_test_project.urls'
