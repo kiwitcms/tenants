@@ -17,6 +17,7 @@ sys.path.insert(0, BASE_DIR)
 DEBUG = True
 TEMPLATE_DEBUG = True
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'tcms_tenants', 'locale')]
 
 ##### start multi-tenant settings override
 
