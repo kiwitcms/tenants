@@ -11,6 +11,10 @@ Multi-tenant support for Kiwi TCMS
     :target: https://pyup.io/repos/github/kiwitcms/tenants/
     :alt: Python updates
 
+.. image:: https://d322cqt584bo4o.cloudfront.net/kiwitcms-tenants/localized.svg
+   :target: https://crowdin.com/project/kiwitcms-tenants
+   :alt: Translate
+
 .. image:: https://opencollective.com/kiwitcms/tiers/sponsor/badge.svg?label=sponsors&color=brightgreen
    :target: https://opencollective.com/kiwitcms#contributors
    :alt: Become a sponsor
