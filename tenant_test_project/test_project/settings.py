@@ -5,6 +5,7 @@
 import os
 import sys
 
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from tcms.settings.product import *
@@ -65,7 +66,7 @@ SHARED_APPS = INSTALLED_APPS
 
 MENU_ITEMS.append(
     (_('TENANT'), [
-        (_('Create'), '/not-implemented-yet/'),
+        (_('Create'), reverse_lazy('tcms_tenants:create-tenant')),
         ('-', '-'),
         (_('Authorized users'), '/admin/tcms_tenants/tenant_authorized_users/'),
     ]),
@@ -74,5 +75,6 @@ MENU_ITEMS.append(
 DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
 MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
 
-# todo: enable later when we have views
-# ROOT_URLCONF = 'dts_test_project.urls'
+# override the default ROOT_URLCONF!, see in
+# test_project/urls.py how to extend the patterns coming from Kiwi TCMS
+ROOT_URLCONF = 'test_project.urls'
