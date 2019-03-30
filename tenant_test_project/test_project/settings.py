@@ -21,6 +21,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 ##### start multi-tenant settings override
 
+# Allows serving non-public tenants on a sub-domain
+# which is different than the domain for the public tenant.
+# May be used in combination with PUBLIC_SCHEMA_URLCONF
+# https://django-tenants.readthedocs.io/en/latest/install.html#PUBLIC_SCHEMA_URLCONF
+TCMS_TENANTS_DOMAIN = 'tenants.localdomain'
+
 DATABASES['default'].update({
     'ENGINE': 'django_tenants.postgresql_backend',
     'NAME': 'tenant_test_project',
