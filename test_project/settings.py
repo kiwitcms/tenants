@@ -29,6 +29,9 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'tcms_tenants', 'locale')]
 # WARNING: doesn't work well when you have a non-standard port-number
 TCMS_TENANTS_DOMAIN = 'tenants.localdomain'
 
+# share login session between tenants
+SESSION_COOKIE_DOMAIN = ".%s" % TCMS_TENANTS_DOMAIN
+
 DATABASES['default'].update({
     'ENGINE': 'django_tenants.postgresql_backend',
     'NAME': 'tenant_test_project',
