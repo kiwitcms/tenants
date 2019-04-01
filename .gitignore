@@ -3,3 +3,5 @@
 *egg*/
 dist/
 build/
+.coverage
+apps_dir/
