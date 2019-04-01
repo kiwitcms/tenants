@@ -83,7 +83,7 @@ MENU_ITEMS.append(
     ]),
 )
 
-DEFAULT_FILE_STORAGE = "django_tenants.files.storage.TenantFileSystemStorage"
+DEFAULT_FILE_STORAGE = "tcms_tenants.storage.TenantFileSystemStorage"
 MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
 
 # override the default ROOT_URLCONF!, see in
