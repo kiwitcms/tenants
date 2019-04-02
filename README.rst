@@ -32,10 +32,10 @@ To install::
     pip install kiwitcms-tenants
 
 
-Then configure the following settings::
+Then see
+`test_project/settings.py <https://github.com/kiwitcms/tenants/blob/master/test_project/settings.py>`_
+for more information about configuration options.
 
-
-    # TBA
 
 For more information see:
 

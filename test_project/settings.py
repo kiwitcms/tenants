@@ -19,19 +19,8 @@ TEMPLATE_DEBUG = True
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'tcms_tenants', 'locale')]
 
+
 ##### start multi-tenant settings override
-
-# Allows serving non-public tenants on a sub-domain
-# which is different than the domain for the public tenant.
-# May be used in combination with PUBLIC_SCHEMA_URLCONF
-# https://django-tenants.readthedocs.io/en/latest/install.html#PUBLIC_SCHEMA_URLCONF
-#
-# WARNING: doesn't work well when you have a non-standard port-number
-TCMS_TENANTS_DOMAIN = 'tenants.localdomain'
-
-# share login session between tenants
-SESSION_COOKIE_DOMAIN = ".%s" % TCMS_TENANTS_DOMAIN
-
 DATABASES['default'].update({
     'ENGINE': 'django_tenants.postgresql_backend',
     'NAME': 'tenant_test_project',
@@ -50,7 +39,6 @@ MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')
 
 TENANT_MODEL = "tcms_tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"
-
 
 INSTALLED_APPS.insert(0, 'django_tenants')
 INSTALLED_APPS.insert(1, 'tcms_tenants')
@@ -72,9 +60,17 @@ TENANT_APPS = [
     'tcms.testruns.apps.AppConfig',
 ]
 
-# because everybody can have access to the main instance
+# everybody can access the main instance
 SHARED_APPS = INSTALLED_APPS
 
+# Allows serving non-public tenants on a sub-domain
+# WARNING: doesn't work well when you have a non-standard port-number
+TCMS_TENANTS_DOMAIN = 'tenants.localdomain'
+
+# share login session between tenants
+SESSION_COOKIE_DOMAIN = ".%s" % TCMS_TENANTS_DOMAIN
+
+# main navigation menu
 MENU_ITEMS.append(
     (_('TENANT'), [
         (_('Create'), reverse_lazy('tcms_tenants:create-tenant')),
@@ -83,6 +79,7 @@ MENU_ITEMS.append(
     ]),
 )
 
+# attachments storage
 DEFAULT_FILE_STORAGE = "tcms_tenants.storage.TenantFileSystemStorage"
 MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
 
