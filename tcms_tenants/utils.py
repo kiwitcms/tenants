@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 
 from django_tenants.utils import schema_context, tenant_context
 
@@ -61,6 +62,14 @@ def create_tenant(name, schema_name, owner):
             is_primary=True,
             tenant=tenant,
         )
+
+        # work-around: for some reason the ContentType for tenant-user
+        # relationship model doesn't get automatically created and if
+        # the owner tries to add other authorized users via admin the
+        # action will fail b/c ModelAdmin.log_addition tries to add a
+        # a logging record linking to this content type and fails !
+        ContentType.objects.get_for_model(tenant.authorized_users.through)
+
         # make the owner the first authorized user
         # otherwise they can't login
         tenant.authorized_users.add(owner)
