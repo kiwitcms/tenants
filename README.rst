@@ -41,7 +41,7 @@ IMPORTANT: multi-tenancy is backed by PostgreSQL schemas!
 
 WARNING: current tenant is decided based on the FQDN by which you
 are accessing Kiwi TCMS. This means your web server and DNS must support
-wildcard comains, e.g. ``*.tenants.kiwitcms.org``. How to configure them
+wildcard domains, e.g. ``*.tenants.kiwitcms.org``. How to configure them
 is not currently documented here!
 
 Changelog
