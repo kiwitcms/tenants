@@ -5,6 +5,7 @@
 from django.conf import settings
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.template.loader import select_template
 from django.views.generic.base import TemplateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
@@ -19,15 +20,19 @@ class NewTenantView(TemplateView):
         Depending on additional configuration they may have to pay
         for using them!
     """
-    template_name = 'tcms_tenants/new.html'
+    def get_template_names(self):
+        """
+            Allow downstream installations to override the template. For example
+            to provide a link to SLA or hosting policy! The overriden template
+            can extend the base one if needed.
+        """
+        return ['tcms_tenants/override_new.html', 'tcms_tenants/new.html']
 
-    def get(self, request, *args, **kwargs):
-        context_data = {
+    def get_context_data(self, **kwargs):
+        return {
             'form': NewTenantForm(),
             'tcms_tenants_domain': settings.TCMS_TENANTS_DOMAIN,
         }
-
-        return render(request, self.template_name, context_data)
 
     def post(self, request, *args, **kwargs):
         form = NewTenantForm(request.POST)
@@ -42,4 +47,6 @@ class NewTenantView(TemplateView):
             'form': form,
             'tcms_tenants_domain': settings.TCMS_TENANTS_DOMAIN,
         }
-        return render(request, self.template_name, context_data)
+        # gets the first template which exists
+        template_name = select_template(self.get_template_names()).template.name
+        return render(request, template_name, context_data)

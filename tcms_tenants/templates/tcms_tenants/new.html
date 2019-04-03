@@ -36,7 +36,7 @@
                     {{ form.schema_name.errors }}
                 </div>
             </div>
-
+            {% block extra_contents %}{% endblock %}
             <button type="submit" class="btn btn-default btn-lg">{% trans "Save" %}</button>
         </form>
     </div>
