@@ -26,7 +26,7 @@ def get_install_requires(path):
 
 setup(
     name='kiwitcms-tenants',
-    version='0.1',
+    version='0.1.1',
     description='Multi-tenant support for Kiwi TCMS',
     long_description=get_long_description(),
     author='Kiwi TCMS',
@@ -36,8 +36,10 @@ setup(
     install_requires=get_install_requires('requirements.txt'),
     packages=['tcms_tenants'],
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Topic :: Internet',
+        'Framework :: Django',
+        'Development Status :: 5 - Production/Stable',
+        'Topic :: Software Development :: Quality Assurance',
+        'Topic :: Software Development :: Testing',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',

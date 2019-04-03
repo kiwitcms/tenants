@@ -23,20 +23,37 @@ Multi-tenant support for Kiwi TCMS
 Introduction
 ------------
 
-This package provides multi-tenant support for Kiwi TCMS. You can use it
-to host different organizations on the same application server or host
-multiple product instances owned by the same organization.
+This package provides multi-tenant support for Kiwi TCMS and is a wrapper
+around `django-tenants <https://github.com/tomturner/django-tenants>`_.
+You can use it to host different organizations on the same application server or host
+multiple product instances used by different teams. Each tenant is able to see
+only the information created by themselves.
 
 To install::
 
     pip install kiwitcms-tenants
 
-
 Then see
 `test_project/settings.py <https://github.com/kiwitcms/tenants/blob/master/test_project/settings.py>`_
 for more information about configuration options.
 
+IMPORTANT: multi-tenancy is backed by PostgreSQL schemas!
 
-For more information see:
+WARNING: current tenant is decided based on the FQDN by which you
+are accessing Kiwi TCMS. This means your web server and DNS must support
+wildcard comains, e.g. ``*.tenants.kiwitcms.org``. How to configure them
+is not currently documented here!
 
-- `django-tenants <https://github.com/tomturner/django-tenants>`_
+Changelog
+---------
+
+v0.1.1 (03 April 2019) - initial release
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Support creating of tenants via web interface
+- Support for deleting tenants only by super-user
+- Support for authorizing other users to access the current tenant
+- Middleware which returns 403 Forbidden when non-authorized user
+  tries to access a tenant
+- Support for overriding the ``tcms_tenants/new.html`` template to
+  provide SLA, terms and conditions, etc.
