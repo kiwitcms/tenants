@@ -47,7 +47,7 @@ is not currently documented here!
 Changelog
 ---------
 
-v0.1.1 (03 April 2019) - initial release
+v0.1.2 (04 April 2019) - initial release
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Support creating of tenants via web interface
