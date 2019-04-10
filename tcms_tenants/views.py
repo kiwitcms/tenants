@@ -31,7 +31,7 @@ class NewTenantView(TemplateView):
     def get_context_data(self, **kwargs):
         return {
             'form': NewTenantForm(),
-            'tcms_tenants_domain': settings.TCMS_TENANTS_DOMAIN,
+            'tcms_tenants_domain': settings.KIWI_TENANTS_DOMAIN,
         }
 
     def post(self, request, *args, **kwargs):
@@ -45,7 +45,7 @@ class NewTenantView(TemplateView):
 
         context_data = {
             'form': form,
-            'tcms_tenants_domain': settings.TCMS_TENANTS_DOMAIN,
+            'tcms_tenants_domain': settings.KIWI_TENANTS_DOMAIN,
         }
         # gets the first template which exists
         template_name = select_template(self.get_template_names()).template.name

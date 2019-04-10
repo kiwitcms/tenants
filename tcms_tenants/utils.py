@@ -38,7 +38,7 @@ def schema_name_not_used(name):
 
 # warning: doesn't play well when the domain has a port number
 def tenant_domain(schema_name):
-    return "%s.%s" % (schema_name, settings.TCMS_TENANTS_DOMAIN)
+    return "%s.%s" % (schema_name, settings.KIWI_TENANTS_DOMAIN)
 
 
 def tenant_url(request, schema_name):
