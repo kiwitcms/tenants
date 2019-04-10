@@ -65,10 +65,10 @@ SHARED_APPS = INSTALLED_APPS
 
 # Allows serving non-public tenants on a sub-domain
 # WARNING: doesn't work well when you have a non-standard port-number
-TCMS_TENANTS_DOMAIN = 'tenants.localdomain'
+KIWI_TENANTS_DOMAIN = 'tenants.localdomain'
 
 # share login session between tenants
-SESSION_COOKIE_DOMAIN = ".%s" % TCMS_TENANTS_DOMAIN
+SESSION_COOKIE_DOMAIN = ".%s" % KIWI_TENANTS_DOMAIN
 
 # main navigation menu
 MENU_ITEMS.append(

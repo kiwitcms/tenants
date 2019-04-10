@@ -47,6 +47,12 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.1.3 (10 April 2019)
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Rename setting ``TCMS_TENANTS_DOMAIN`` to ``KIWI_TENANTS_DOMAIN``
+
+
 v0.1.2 (04 April 2019) - initial release
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
