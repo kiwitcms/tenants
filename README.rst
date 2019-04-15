@@ -47,6 +47,11 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.1.4 (15 April 2019)
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Update to django-tenants 2.2.0 for Django 2.2 support
+
 v0.1.3 (10 April 2019)
 ~~~~~~~~~~~~~~~~~~~~~~
 
