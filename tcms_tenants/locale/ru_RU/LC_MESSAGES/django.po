@@ -1,0 +1,54 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: kiwitcms-tenants\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-30 22:33+0000\n"
+"PO-Revision-Date: 2019-04-19 07:16\n"
+"Last-Translator: Alexander Todorov (atodorov)\n"
+"Language-Team: Russian\n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=((n%10==1 && n%100!=11) ? 0 : ((n%10 >= 2 && n%10 <=4 && (n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || (n%10 >= 5 && n%10 <=9)) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3));\n"
+"X-Generator: crowdin.com\n"
+"X-Crowdin-Project: kiwitcms-tenants\n"
+"X-Crowdin-Language: ru\n"
+"X-Crowdin-File: /master/tcms_tenants/locale/en/LC_MESSAGES/django.po\n"
+
+#: tcms_tenants/admin.py:38 tcms_tenants/middleware.py:26
+msgid "Unauthorized"
+msgstr ""
+
+#: tcms_tenants/admin.py:101
+msgid "Username"
+msgstr ""
+
+#: tcms_tenants/admin.py:106
+msgid "Full name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:9
+msgid "New tenant"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:16
+msgid "Name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:19
+msgid "Company, team or project name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:26
+msgid "Schema"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:40
+msgid "Save"
+msgstr ""
+
+#: tcms_tenants/utils.py:35
+msgid "Schema name already in use"
+msgstr ""
+
