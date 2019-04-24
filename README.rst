@@ -47,6 +47,13 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.1.5 (24 April 2019)
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants to 2.2.3
+- New translations for Slovenian
+- Don't ship ``test_project/`` files in wheel package
+
 v0.1.4 (15 April 2019)
 ~~~~~~~~~~~~~~~~~~~~~~
 
