@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: kiwitcms-tenants\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-03-30 22:33+0000\n"
-"PO-Revision-Date: 2019-04-23 12:30\n"
+"PO-Revision-Date: 2019-04-24 12:25\n"
 "Last-Translator: Alexander Todorov (atodorov)\n"
 "Language-Team: Slovenian\n"
 "Language: sl_SI\n"
@@ -18,27 +18,27 @@ msgstr ""
 
 #: tcms_tenants/admin.py:38 tcms_tenants/middleware.py:26
 msgid "Unauthorized"
-msgstr ""
+msgstr "Nimate pooblastil"
 
 #: tcms_tenants/admin.py:101
 msgid "Username"
-msgstr ""
+msgstr "Uporabniško ime"
 
 #: tcms_tenants/admin.py:106
 msgid "Full name"
-msgstr ""
+msgstr "Polno ime"
 
 #: tcms_tenants/templates/tcms_tenants/new.html:9
 msgid "New tenant"
-msgstr ""
+msgstr "Nova instanca"
 
 #: tcms_tenants/templates/tcms_tenants/new.html:16
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #: tcms_tenants/templates/tcms_tenants/new.html:19
 msgid "Company, team or project name"
-msgstr ""
+msgstr "Naziv projekta, podjetja ali ekipe"
 
 #: tcms_tenants/templates/tcms_tenants/new.html:26
 msgid "Schema"
@@ -50,5 +50,5 @@ msgstr "Shrani"
 
 #: tcms_tenants/utils.py:35
 msgid "Schema name already in use"
-msgstr ""
+msgstr "Ime sheme je že v uporabi"
 
