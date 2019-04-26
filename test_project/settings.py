@@ -23,7 +23,7 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'tcms_tenants', 'locale')]
 ##### start multi-tenant settings override
 DATABASES['default'].update({
     'ENGINE': 'django_tenants.postgresql_backend',
-    'NAME': 'tenant_test_project',
+    'NAME': 'test_project',
     'USER': 'kiwi',
     'PASSWORD': 'kiwi',
     'HOST': 'localhost',
