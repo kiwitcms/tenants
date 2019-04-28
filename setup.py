@@ -26,7 +26,7 @@ def get_install_requires(path):
 
 setup(
     name='kiwitcms-tenants',
-    version='0.1.6',
+    version='0.1.7',
     description='Multi-tenant support for Kiwi TCMS',
     long_description=get_long_description(),
     author='Kiwi TCMS',
@@ -34,7 +34,7 @@ setup(
     url='https://github.com/kiwitcms/tenants/',
     license='GPLv3+',
     install_requires=get_install_requires('requirements.txt'),
-    packages=['tcms_tenants'],
+    packages=find_packages(exclude=['test_project*', '*.tests']),
     include_package_data=True,
     classifiers=[
         'Framework :: Django',
