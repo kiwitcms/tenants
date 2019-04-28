@@ -5,7 +5,11 @@ from django.db import migrations, models
 from django.contrib.auth import get_user_model
 
 
-def forwards(apps, schema_editor):
+def create_user_zero(apps, schema_editor):
+    _, _ = get_user_model().objects.get_or_create(pk=0, username='tenant-usr')
+
+
+def assign_superuser_as_owner(apps, schema_editor):
     Tenant = apps.get_model('tcms_tenants', 'Tenant')
     owner = get_user_model().objects.filter(is_superuser=True).first()
 
@@ -21,6 +25,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(create_user_zero),
+
         migrations.AddField(
             model_name='tenant',
             name='owner',
@@ -30,5 +36,5 @@ class Migration(migrations.Migration):
                                     to=settings.AUTH_USER_MODEL),
         ),
 
-        migrations.RunPython(forwards),
+        migrations.RunPython(assign_superuser_as_owner),
     ]
