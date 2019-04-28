@@ -20,7 +20,8 @@ class TenantAdmin(admin.ModelAdmin):
         Allows only super-user to see and delete tenants!
     """
     actions = ['delete_selected']
-    list_display = ('id', 'name', 'schema_name', 'domain_name', 'created_on', 'on_trial', 'paid_until')
+    list_display = ('id', 'name', 'schema_name', 'domain_name', 'created_on', 'on_trial',
+                    'paid_until', 'owner')
     search_fields = ('name', 'schema_name')
     ordering = ['-created_on']
 

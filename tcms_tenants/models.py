@@ -16,6 +16,10 @@ class Tenant(TenantMixin):
     paid_until =  models.DateField(null=True, blank=True, db_index=True)
     on_trial = models.BooleanField(default=True, db_index=True)
     authorized_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              on_delete=models.CASCADE,
+                              related_name='tenant_owner',
+                              default=0)
 
     def __str__(self):
         return "[%s] %s" % (self.schema_name, self.name)

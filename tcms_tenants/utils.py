@@ -56,6 +56,7 @@ def create_tenant(name, schema_name, owner):
             name=name,
             schema_name=schema_name,
             on_trial=True,
+            owner=owner,
         )
         domain = Domain.objects.create(
             domain=tenant_domain(schema_name),
