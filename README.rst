@@ -47,6 +47,12 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.1.6 (28 April 2019)
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Tenant object now has an owner
+
+
 v0.1.5 (24 April 2019)
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -54,10 +60,12 @@ v0.1.5 (24 April 2019)
 - New translations for Slovenian
 - Don't ship ``test_project/`` files in wheel package
 
+
 v0.1.4 (15 April 2019)
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Update to django-tenants 2.2.0 for Django 2.2 support
+
 
 v0.1.3 (10 April 2019)
 ~~~~~~~~~~~~~~~~~~~~~~
