@@ -11,5 +11,5 @@ from tcms_tenants import utils
 class NewTenantForm(forms.Form):
     name = forms.CharField(max_length=100)
     schema_name = forms.CharField(max_length=63,
-                                  validators=[validators._check_schema_name,
+                                  validators=[validators._check_schema_name,  # pylint: disable=protected-access
                                               utils.schema_name_not_used])

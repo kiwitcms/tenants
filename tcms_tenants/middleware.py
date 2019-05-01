@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from tcms_tenants.utils import can_access
 
 
-class BlockUnauthorizedUserMiddleware(MiddlewareMixin):
+class BlockUnauthorizedUserMiddleware(MiddlewareMixin):  # pylint: disable=too-few-public-methods
     """
         Raises 404 if the user making the request is not authorized
         explicitly to access the tenant instance!
@@ -21,6 +21,9 @@ class BlockUnauthorizedUserMiddleware(MiddlewareMixin):
             ``django.contrib.auth.middleware.AuthenticationMiddleware`` -
             usually goes at the end
     """
-    def process_request(self, request):
+    # todo: rewrite this without deprecation MiddlewareMixin
+    def process_request(self, request):  # pylint: disable=no-self-use
         if not can_access(request.user, request.tenant):
             return HttpResponseForbidden(_('Unauthorized'))
+
+        return None
