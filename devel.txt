@@ -1,3 +1,4 @@
 -r requirements.txt
 kiwitcms==6.7
 coveralls==1.7.0
+factory_boy
