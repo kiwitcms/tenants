@@ -45,7 +45,7 @@ class TenantAdmin(admin.ModelAdmin):
 
         return HttpResponseRedirect(reverse('admin:tcms_tenants_tenant_changelist'))
 
-    def domain_name(self, instance):
+    def domain_name(self, instance):  # pylint: disable=no-self-use
         return instance.domains.first().domain
 
 
@@ -63,13 +63,15 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
     # The internal mechanics of this are in BasseForm._clean_fields()::L399(Django 2.1.7)
     # which calls field.clean(value) before any clean_<field_name>() methods on the form!
     tenant = forms.models.ModelChoiceField(
-        queryset=Tenant.objects.all(),  # todo: add tests to make sure we are always filtering this !!!
+        # todo: add tests to make sure we are always filtering this !!!
+        queryset=Tenant.objects.all(),
     )
     user = forms.models.ModelChoiceField(
         queryset=get_user_model().objects.all(),  # it is OK to be able to select between all users
     )
 
-    def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None,
+    def __init__(self,  # pylint: disable=too-many-arguments
+                 data=None, files=None, auto_id='id_%s', prefix=None,
                  initial=None, error_class=ErrorList, label_suffix=None,
                  empty_permitted=False, instance=None, use_required_attribute=None,
                  renderer=None):
@@ -97,16 +99,16 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
 
     form = AuthorizedUsersChangeForm
 
-    def user_username(self, instance):
+    def user_username(self, instance):  # pylint: disable=no-self-use
         return instance.user.username
     user_username.short_description = _('Username')
     user_username.admin_order_field = 'user__username'
 
-    def user_full_name(self, instance):
+    def user_full_name(self, instance):  # pylint: disable=no-self-use
         return instance.user.get_full_name()
     user_full_name.short_description = _('Full name')
 
-    def tenant_name(self, instance):
+    def tenant_name(self, instance):  # pylint: disable=no-self-use
         return instance.tenant.name
     tenant_name.admin_order_field = 'tenant__name'
 

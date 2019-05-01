@@ -18,7 +18,7 @@ class TenantFileSystemStorage(FileSystemStorage):
         https://github.com/tomturner/django-tenants/pull/252 gets merged.
     """
     @cached_property
-    def relative_media_root(self):
+    def relative_media_root(self):  # pylint: disable=no-self-use
         return getattr(settings, 'MULTITENANT_RELATIVE_MEDIA_ROOT', "%s")
 
     @property  # not cached like in parent class

@@ -14,7 +14,6 @@ def get_long_description():
 
 def get_install_requires(path):
     requires = []
-    links = []
 
     with open(path, 'r') as file:
         for line in file:
