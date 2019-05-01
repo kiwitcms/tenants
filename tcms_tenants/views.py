@@ -50,3 +50,26 @@ class NewTenantView(TemplateView):
         # gets the first template which exists
         template_name = select_template(self.get_template_names()).template.name
         return render(request, template_name, context_data)
+
+
+@login_required
+def redirect_to(request, tenant, path):
+    """
+        Will redirect to tenant.domain.domain/path!
+
+        Used together with GitHub logins and the ``tenant_url``
+        template tag!
+
+        When trying to do GitHub login on a tenant sub-domain
+        the HTML href will actually point to
+
+        https://public.tenants.localdomain/login/github?next=/tenants/go/to/tenant/path
+
+        instead of
+
+        http://tenant.tenants.localdomain/login/github?next=path
+
+        This is to prevent redirect_uri mismatch errors!
+    """
+    target_url = '%s/%s/' % (utils.tenant_url(request, tenant), path)
+    return HttpResponseRedirect(target_url)
