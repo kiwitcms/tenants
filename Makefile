@@ -7,7 +7,10 @@ messages:
 .PHONY: test
 test:
 	EXECUTOR=standard PYTHONWARNINGS=d \
-	coverage run --source='tcms_tenants' ./manage.py test tcms_tenants.tests
+	    coverage run --include "tcms_tenants/*.py" \
+	                 --omit "tcms_tenants/tests/*.py" \
+	                 ./manage.py test tcms_tenants.tests
+
 
 .PHONY: pylint
 pylint:
