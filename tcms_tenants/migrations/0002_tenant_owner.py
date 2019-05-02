@@ -2,19 +2,6 @@
 
 from django.conf import settings
 from django.db import migrations, models
-from django.contrib.auth import get_user_model
-
-
-def create_user_zero(apps, schema_editor):
-    _, _ = get_user_model().objects.get_or_create(pk=0, username='tenant-usr')
-
-
-def assign_superuser_as_owner(apps, schema_editor):
-    Tenant = apps.get_model('tcms_tenants', 'Tenant')
-    owner = get_user_model().objects.filter(is_superuser=True).first()
-
-    # set all owners to the first super-user in the system
-    Tenant.objects.filter(owner=0).update(owner=owner)
 
 
 class Migration(migrations.Migration):
@@ -25,16 +12,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_user_zero),
-
         migrations.AddField(
             model_name='tenant',
             name='owner',
-            field=models.ForeignKey(default=0,
-                                    on_delete=models.CASCADE,
+            field=models.ForeignKey(on_delete=models.CASCADE,
                                     related_name='tenant_owner',
                                     to=settings.AUTH_USER_MODEL),
         ),
-
-        migrations.RunPython(assign_superuser_as_owner),
     ]

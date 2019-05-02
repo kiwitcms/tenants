@@ -18,8 +18,7 @@ class Tenant(TenantMixin):
     authorized_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,
-                              related_name='tenant_owner',
-                              default=0)
+                              related_name='tenant_owner')
 
     def __str__(self):
         return "[%s] %s" % (self.schema_name, self.name)
