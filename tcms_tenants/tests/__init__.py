@@ -23,8 +23,15 @@ class UserFactory(DjangoModelFactory):
 
 class LoggedInTestCase(TenantTestCase):
     @classmethod
+    def setup_tenant(cls, tenant):
+        tenant.owner = UserFactory()
+
+    @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
+        # authorize tenant owner
+        cls.tenant.authorized_users.add(cls.tenant.owner)
 
         cls.tester = UserFactory()
         cls.tester.set_password('password')
