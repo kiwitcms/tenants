@@ -10,9 +10,21 @@ from django_tenants import utils
 from django_tenants.test.cases import TenantTestCase
 
 from tcms_tenants.storage import TenantFileSystemStorage
+from tcms_tenants.tests import UserFactory
 
 
 class TenantFileSystemStorageTestCase(TenantTestCase):
+    @classmethod
+    def setup_tenant(cls, tenant):
+        tenant.owner = UserFactory()
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # authorize tenant owner
+        cls.tenant.authorized_users.add(cls.tenant.owner)
+
     @override_settings(MEDIA_ROOT="apps_dir/media",
                        MEDIA_URL="/media/",
                        MULTITENANT_RELATIVE_MEDIA_ROOT="%s")
@@ -20,14 +32,14 @@ class TenantFileSystemStorageTestCase(TenantTestCase):
         storage = TenantFileSystemStorage()
 
         connection.set_schema_to_public()
-        tenant1 = utils.get_tenant_model()(schema_name='tenant1')
+        tenant1 = utils.get_tenant_model()(schema_name='tenant1', owner=UserFactory())
         tenant1.save()
 
         domain1 = utils.get_tenant_domain_model()(tenant=tenant1, domain='something.test.com')
         domain1.save()
 
         connection.set_schema_to_public()
-        tenant2 = utils.get_tenant_model()(schema_name='tenant2')
+        tenant2 = utils.get_tenant_model()(schema_name='tenant2', owner=UserFactory())
         tenant2.save()
 
         domain2 = utils.get_tenant_domain_model()(tenant=tenant2, domain='example.com')

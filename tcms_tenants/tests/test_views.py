@@ -14,15 +14,15 @@ from tcms_tenants.tests import LoggedInTestCase
 class RedirectToTestCase(LoggedInTestCase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
+
         connection.set_schema_to_public()
-        cls.tenant3 = Tenant(schema_name='tenant3')
+        cls.tenant3 = Tenant(schema_name='tenant3', owner=cls.tester)
         cls.tenant3.save()
 
         cls.domain3 = Domain(tenant=cls.tenant3,
                              domain='tenant3.%s' % settings.KIWI_TENANTS_DOMAIN)
         cls.domain3.save()
-
-        super().setUpClass()
 
     def test_redirect_to_tenant_path(self):
         expected_url = 'https://tenant3.%s/plans/search/' % settings.KIWI_TENANTS_DOMAIN
