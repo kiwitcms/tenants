@@ -27,7 +27,15 @@ class RedirectToTestCase(LoggedInTestCase):
     def test_redirect_to_tenant_path(self):
         expected_url = 'https://tenant3.%s/plans/search/' % settings.KIWI_TENANTS_DOMAIN
         response = self.client.get(reverse('tcms_tenants:redirect-to',
-                                           args=[self.tenant3.schema_name, 'plans/search']))
+                                           args=[self.tenant3.schema_name, 'plans/search/']))
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response['Location'], expected_url)
+
+    def test_redirect_to_tenant_root_url(self):
+        expected_url = 'https://tenant3.%s/' % settings.KIWI_TENANTS_DOMAIN
+        response = self.client.get(reverse('tcms_tenants:redirect-to',
+                                           args=[self.tenant3.schema_name, '']))
 
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertEqual(response['Location'], expected_url)

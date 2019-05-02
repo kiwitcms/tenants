@@ -71,5 +71,5 @@ def redirect_to(request, tenant, path):
 
         This is to prevent redirect_uri mismatch errors!
     """
-    target_url = '%s/%s/' % (utils.tenant_url(request, tenant), path)
+    target_url = '%s/%s' % (utils.tenant_url(request, tenant), path)
     return HttpResponseRedirect(target_url)
