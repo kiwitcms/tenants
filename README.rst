@@ -47,6 +47,19 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.1.8 (03 May 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- Fix packaging for missing migrations directory
+- Add view which facilitates GitHub login & redirects.
+  Callers are supposed to perform OAuth login via public tenant and then
+  redirect to this view which will send the browser to the actual tenant!
+  This will resolve problems with ``redirect_uri`` mismatch that we're
+  seeing from GitHub b/c you can only specify one redirect uri
+- pylint fixes
+- Remove unused ``templatetags/`` directory
+
+
 v0.1.6 (28 April 2019)
 ~~~~~~~~~~~~~~~~~~~~~~
 
