@@ -47,6 +47,12 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.1.9 (03 May 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- Fix failing tests
+
+
 v0.1.8 (03 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
