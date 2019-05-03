@@ -47,6 +47,13 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.1.10 (03 May 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- Bring back ``tenant_url`` template tag with optional
+  ``schema_name`` parameter
+
+
 v0.1.9 (03 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
