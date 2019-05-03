@@ -44,7 +44,6 @@ INSTALLED_APPS.insert(0, 'django_tenants')
 INSTALLED_APPS.insert(1, 'tcms_tenants')
 
 TENANT_APPS = [
-    'django.contrib.contenttypes',
     'django.contrib.sites',
 
     'attachments',
