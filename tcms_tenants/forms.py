@@ -13,3 +13,6 @@ class NewTenantForm(forms.Form):
     schema_name = forms.CharField(max_length=63,
                                   validators=[validators._check_schema_name,  # pylint: disable=protected-access
                                               utils.schema_name_not_used])
+    paid_until = forms.DateField(required=False, widget=forms.HiddenInput)
+    on_trial = forms.BooleanField(initial=True, required=False,
+                                  widget=forms.HiddenInput)

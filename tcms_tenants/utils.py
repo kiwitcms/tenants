@@ -53,12 +53,15 @@ def tenant_url(request, schema_name):
 def create_tenant(form_data, owner):
     name = form_data['name']
     schema_name = form_data['schema_name']
+    on_trial = form_data['on_trial']
+    paid_until = form_data['paid_until']
 
     with schema_context('public'):
         tenant = Tenant.objects.create(
             name=name,
             schema_name=schema_name,
-            on_trial=True,
+            paid_until=paid_until,
+            on_trial=on_trial,
             owner=owner,
         )
         domain = Domain.objects.create(
