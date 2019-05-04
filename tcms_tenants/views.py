@@ -37,9 +37,7 @@ class NewTenantView(TemplateView):
     def post(self, request, *args, **kwargs):
         form = NewTenantForm(request.POST)
         if form.is_valid():
-            tenant = utils.create_tenant(form.cleaned_data['name'],
-                                         form.cleaned_data['schema_name'],
-                                         request.user)
+            tenant = utils.create_tenant(form.cleaned_data, request.user)
             # all is successfull so redirect to the new tenant
             return HttpResponseRedirect(utils.tenant_url(request, tenant.schema_name))
 
