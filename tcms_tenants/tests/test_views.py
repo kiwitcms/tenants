@@ -80,7 +80,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             GitHub Marketplace integration.
         """
         expected_url = 'https://subscriber.%s' % settings.KIWI_TENANTS_DOMAIN
-        paid_until = datetime.now() + timedelta(days=30)
+        paid_until = datetime.now().replace(microsecond=0) + timedelta(days=30)
 
         response = self.client.post(
             reverse('tcms_tenants:create-tenant'),
@@ -88,7 +88,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
                 'name': 'Subscriber LLC',
                 'schema_name': 'subscriber',
                 'on_trial': False,
-                'paid_until': paid_until.strftime('%Y-%m-%d'),  # %H:%M:%S'),
+                'paid_until': paid_until.strftime('%Y-%m-%d %H:%M:%S'),
             })
 
         self.assertIsInstance(response, HttpResponseRedirect)
@@ -96,4 +96,4 @@ class NewTenantViewTestCase(LoggedInTestCase):
 
         tenant = Tenant.objects.get(schema_name='subscriber')
         self.assertFalse(tenant.on_trial)
-        self.assertEqual(tenant.paid_until, paid_until.date())
+        self.assertEqual(tenant.paid_until, paid_until)
