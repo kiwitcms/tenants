@@ -50,7 +50,10 @@ def tenant_url(request, schema_name):
     return url
 
 
-def create_tenant(name, schema_name, owner):
+def create_tenant(form_data, owner):
+    name = form_data['name']
+    schema_name = form_data['schema_name']
+
     with schema_context('public'):
         tenant = Tenant.objects.create(
             name=name,
