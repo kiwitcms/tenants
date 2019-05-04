@@ -11,7 +11,7 @@ register = template.Library()
 
 
 @register.simple_tag
-def tenant_url(request, schema_name = None):
+def tenant_url(request, schema_name=None):
     if not schema_name:
         schema_name = connection.schema_name
 
