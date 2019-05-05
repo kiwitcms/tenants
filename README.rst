@@ -47,8 +47,19 @@ is not currently documented here!
 Changelog
 ---------
 
-v0.1.10 (03 May 2019)
+v0.2.0 (05 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
+
+- Remove ``django.contrib.contenttypes`` from ``TENANT_APPS``
+- Make it easier to override ``NewTenantView``
+- Use ``DateTimeField`` instead of ``DateField``
+- Show first primary domain in Admin
+- Massive speed up tests
+- Pylint fixes
+
+
+v0.1.10 (03 May 2019)
+~~~~~~~~~~~~~~~~~~~~~
 
 - Bring back ``tenant_url`` template tag with optional
   ``schema_name`` parameter
