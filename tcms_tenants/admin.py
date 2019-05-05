@@ -46,7 +46,7 @@ class TenantAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('admin:tcms_tenants_tenant_changelist'))
 
     def domain_name(self, instance):  # pylint: disable=no-self-use
-        return instance.domains.first().domain
+        return instance.domains.filter(is_primary=True).first().domain
 
 
 class AuthorizedUsersChangeForm(forms.ModelForm):
