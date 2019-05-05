@@ -6,7 +6,7 @@ messages:
 
 .PHONY: test
 test:
-	EXECUTOR=standard PYTHONWARNINGS=d \
+	EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
 	    coverage run --include "tcms_tenants/*.py" \
 	                 --omit "tcms_tenants/tests/*.py" \
 	                 ./manage.py test -v2 tcms_tenants.tests

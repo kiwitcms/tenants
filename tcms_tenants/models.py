@@ -2,13 +2,15 @@
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
+import os
+
 from django.db import models
 from django.conf import settings
 from django_tenants.models import TenantMixin, DomainMixin
 
 
 class Tenant(TenantMixin):
-    auto_create_schema = True
+    auto_create_schema = bool(os.environ.get('AUTO_CREATE_SCHEMA', True))
     auto_drop_schema = True
 
     name = models.CharField(max_length=100, db_index=True)
