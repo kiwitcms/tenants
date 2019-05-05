@@ -1,42 +1,23 @@
 # Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
-
+# pylint: disable=too-many-ancestors
 from django.db import connection
 from django.core.files.base import ContentFile
 from django.test import override_settings
 
 from django_tenants import utils
-from django_tenants.test.cases import FastTenantTestCase
 
 from tcms_tenants.storage import TenantFileSystemStorage
-from tcms_tenants.tests import UserFactory
+from tcms_tenants.tests import LoggedInTestCase, UserFactory
 
 
-class TenantFileSystemStorageTestCase(FastTenantTestCase):
-    @classmethod
-    def setup_tenant(cls, tenant):
-        tenant.owner = UserFactory()
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        # authorize tenant owner
-        cls.tenant.authorized_users.add(cls.tenant.owner)
-
+class TenantFileSystemStorageTestCase(LoggedInTestCase):
     @override_settings(MEDIA_ROOT="apps_dir/media",
                        MEDIA_URL="/media/",
                        MULTITENANT_RELATIVE_MEDIA_ROOT="%s")
     def test_files_are_saved_under_subdirectories_per_tenant(self):
         storage = TenantFileSystemStorage()
-
-        connection.set_schema_to_public()
-        tenant1 = utils.get_tenant_model()(schema_name='tenant1', owner=UserFactory())
-        tenant1.save()
-
-        domain1 = utils.get_tenant_domain_model()(tenant=tenant1, domain='something.test.com')
-        domain1.save()
 
         connection.set_schema_to_public()
         tenant2 = utils.get_tenant_model()(schema_name='tenant2', owner=UserFactory())
@@ -51,7 +32,7 @@ class TenantFileSystemStorageTestCase(FastTenantTestCase):
         public_url = storage.url(public_file_name)
 
         # switch to tenant1
-        with utils.tenant_context(tenant1):
+        with utils.tenant_context(self.tenant):
             t1_file_name = storage.save('hello_from_1.txt', ContentFile('Hello T1'))
             t1_os_path = storage.path(t1_file_name)
             t1_url = storage.url(t1_file_name)
@@ -64,12 +45,12 @@ class TenantFileSystemStorageTestCase(FastTenantTestCase):
 
         # assert the paths are correct
         self.assertTrue(public_os_path.endswith('apps_dir/media/public/%s' % public_file_name))
-        self.assertTrue(t1_os_path.endswith('apps_dir/media/tenant1/%s' % t1_file_name))
+        self.assertTrue(t1_os_path.endswith('apps_dir/media/test/%s' % t1_file_name))
         self.assertTrue(t2_os_path.endswith('apps_dir/media/tenant2/%s' % t2_file_name))
 
         # assert urls are correct
         self.assertEqual(public_url, '/media/public/%s' % public_file_name)
-        self.assertEqual(t1_url, '/media/tenant1/%s' % t1_file_name)
+        self.assertEqual(t1_url, '/media/test/%s' % t1_file_name)
         self.assertEqual(t2_url, '/media/tenant2/%s' % t2_file_name)
 
         # assert contents are correct
