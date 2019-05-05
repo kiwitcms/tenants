@@ -8,7 +8,7 @@ import factory
 from factory.django import DjangoModelFactory
 
 from django_tenants.test.client import TenantClient
-from django_tenants.test.cases import TenantTestCase
+from django_tenants.test.cases import FastTenantTestCase
 
 
 class UserFactory(DjangoModelFactory):
@@ -21,7 +21,7 @@ class UserFactory(DjangoModelFactory):
     is_staff = True
 
 
-class LoggedInTestCase(TenantTestCase):
+class LoggedInTestCase(FastTenantTestCase):
     @classmethod
     def setup_tenant(cls, tenant):
         tenant.owner = UserFactory()
