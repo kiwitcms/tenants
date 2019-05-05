@@ -5,7 +5,6 @@
 from datetime import datetime, timedelta
 
 from django.urls import reverse
-from django.db import connection
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
@@ -14,30 +13,18 @@ from tcms_tenants.tests import LoggedInTestCase
 
 
 class RedirectToTestCase(LoggedInTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        connection.set_schema_to_public()
-        cls.tenant3 = Tenant(schema_name='tenant3', owner=cls.tester)
-        cls.tenant3.save()
-
-        cls.domain3 = Domain(tenant=cls.tenant3,
-                             domain='tenant3.%s' % settings.KIWI_TENANTS_DOMAIN)
-        cls.domain3.save()
-
     def test_redirect_to_tenant_path(self):
-        expected_url = 'https://tenant3.%s/plans/search/' % settings.KIWI_TENANTS_DOMAIN
+        expected_url = 'https://test.%s/plans/search/' % settings.KIWI_TENANTS_DOMAIN
         response = self.client.get(reverse('tcms_tenants:redirect-to',
-                                           args=[self.tenant3.schema_name, 'plans/search/']))
+                                           args=[self.tenant.schema_name, 'plans/search/']))
 
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertEqual(response['Location'], expected_url)
 
     def test_redirect_to_tenant_root_url(self):
-        expected_url = 'https://tenant3.%s/' % settings.KIWI_TENANTS_DOMAIN
+        expected_url = 'https://test.%s/' % settings.KIWI_TENANTS_DOMAIN
         response = self.client.get(reverse('tcms_tenants:redirect-to',
-                                           args=[self.tenant3.schema_name, '']))
+                                           args=[self.tenant.schema_name, '']))
 
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertEqual(response['Location'], expected_url)
