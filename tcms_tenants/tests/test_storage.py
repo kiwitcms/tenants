@@ -7,13 +7,13 @@ from django.core.files.base import ContentFile
 from django.test import override_settings
 
 from django_tenants import utils
-from django_tenants.test.cases import TenantTestCase
+from django_tenants.test.cases import FastTenantTestCase
 
 from tcms_tenants.storage import TenantFileSystemStorage
 from tcms_tenants.tests import UserFactory
 
 
-class TenantFileSystemStorageTestCase(TenantTestCase):
+class TenantFileSystemStorageTestCase(FastTenantTestCase):
     @classmethod
     def setup_tenant(cls, tenant):
         tenant.owner = UserFactory()
