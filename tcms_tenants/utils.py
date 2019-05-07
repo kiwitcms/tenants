@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
 from django_tenants.utils import schema_context, tenant_context
+from tcms.core.utils.mailto import mailto
 
 from tcms_tenants.models import *
 
@@ -50,7 +51,8 @@ def tenant_url(request, schema_name):
     return url
 
 
-def create_tenant(form_data, owner):
+def create_tenant(form_data, request):
+    owner = request.user
     name = form_data['name']
     schema_name = form_data['schema_name']
     on_trial = form_data['on_trial']
@@ -87,4 +89,12 @@ def create_tenant(form_data, owner):
         site.domain = domain.domain
         site.save()
 
+    mailto(
+        template_name='tcms_tenants/email/new.txt',
+        recipients=[owner.email],
+        subject=str(_('New Kiwi TCMS tenant created')),
+        context={
+            'tenant_url': tenant_url(request, tenant.schema_name),
+        }
+    )
     return tenant

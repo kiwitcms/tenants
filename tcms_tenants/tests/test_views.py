@@ -3,6 +3,7 @@
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
 from datetime import datetime, timedelta
+from mock import patch
 
 from django.urls import reverse
 from django.conf import settings
@@ -84,3 +85,19 @@ class NewTenantViewTestCase(LoggedInTestCase):
         tenant = Tenant.objects.get(schema_name='subscriber')
         self.assertFalse(tenant.on_trial)
         self.assertEqual(tenant.paid_until, paid_until)
+
+    @patch('tcms.core.utils.mailto.send_mail')
+    def test_creating_tenant_sends_email(self, send_mail):
+        response = self.client.post(
+            reverse('tcms_tenants:create-tenant'),
+            {
+                'name': 'Email Ltd',
+                'schema_name': 'email',
+                'on_trial': True,
+                'paid_until': '',
+            })
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+
+        self.assertTrue(send_mail.called)
+        self.assertEqual(send_mail.call_count, 1)
