@@ -53,10 +53,14 @@ class BlockUnpaidTenantMiddleware:
             return HttpResponseForbidden(_('Unpaid'))
 
         if request.tenant.paid_until <= datetime.now() + timedelta(days=7):
-            # todo: can we avoid adding message if it already exists ???
-            messages.add_message(request,
-                                 messages.WARNING,
-                                 _('Tenant expires in less than 7 days'),
-                                 fail_silently=True)
+            for msg in messages.get_messages(request):
+                if msg.level_tag == 'warning':
+                    break
+            else:
+                # will be shown only if no other warnings are present
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     _('Tenant expires in less than 7 days'),
+                                     fail_silently=True)
 
         return self.get_response(request)
