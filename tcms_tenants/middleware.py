@@ -6,13 +6,12 @@ from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext_lazy as _
 
 from tcms_tenants.utils import can_access
 
 
-class BlockUnauthorizedUserMiddleware(MiddlewareMixin):
+class BlockUnauthorizedUserMiddleware:
     """
         Raises 404 if the user making the request is not authorized
         explicitly to access the tenant instance!
@@ -24,12 +23,14 @@ class BlockUnauthorizedUserMiddleware(MiddlewareMixin):
             ``django.contrib.auth.middleware.AuthenticationMiddleware`` -
             usually goes at the end
     """
-    # todo: rewrite this without deprecation MiddlewareMixin
-    def process_request(self, request):  # pylint: disable=no-self-use
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):  # pylint: disable=no-self-use
         if not can_access(request.user, request.tenant):
             return HttpResponseForbidden(_('Unauthorized'))
 
-        return None
+        return self.get_response(request)
 
 
 class BlockUnpaidTenantMiddleware:
