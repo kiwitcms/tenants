@@ -48,11 +48,11 @@ class BlockUnpaidTenantMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if (request.tenant.paid_util is None) or \
-            (request.tenant.paid_util <= datetime.now()):
+        if (request.tenant.paid_until is None) or \
+            (request.tenant.paid_until <= datetime.now()):
             return HttpResponseForbidden(_('Unpaid'))
 
-        if request.tenant.paid_util <= datetime.now() + timedelta(days=7):
+        if request.tenant.paid_until <= datetime.now() + timedelta(days=7):
             # todo: can we avoid adding message if it already exists ???
             messages.add_message(request,
                                  messages.WARNING,
