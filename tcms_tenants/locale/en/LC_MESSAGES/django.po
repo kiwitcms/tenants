@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-07 20:52+0000\n"
+"POT-Creation-Date: 2019-05-07 21:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: tcms_tenants/admin.py:39 tcms_tenants/middleware.py:27
+#: tcms_tenants/admin.py:39 tcms_tenants/middleware.py:30
+#: tcms_tenants/middleware.py:51
 msgid "Unauthorized"
 msgstr ""
 
@@ -28,6 +29,14 @@ msgstr ""
 
 #: tcms_tenants/admin.py:109
 msgid "Full name"
+msgstr ""
+
+#: tcms_tenants/middleware.py:54
+msgid "Unpaid"
+msgstr ""
+
+#: tcms_tenants/middleware.py:60
+msgid "Tenant expires in less than 7 days"
 msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/email/new.txt:1
