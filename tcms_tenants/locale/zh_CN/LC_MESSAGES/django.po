@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwitcms-tenants\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-30 22:33+0000\n"
+"POT-Creation-Date: 2019-05-07 20:52+0000\n"
 "PO-Revision-Date: 2019-04-19 07:16\n"
 "Last-Translator: Alexander Todorov (atodorov)\n"
 "Language-Team: Chinese Simplified\n"
@@ -16,16 +16,25 @@ msgstr ""
 "X-Crowdin-Language: zh-CN\n"
 "X-Crowdin-File: /master/tcms_tenants/locale/en/LC_MESSAGES/django.po\n"
 
-#: tcms_tenants/admin.py:38 tcms_tenants/middleware.py:26
+#: tcms_tenants/admin.py:39 tcms_tenants/middleware.py:27
 msgid "Unauthorized"
 msgstr ""
 
-#: tcms_tenants/admin.py:101
+#: tcms_tenants/admin.py:104
 msgid "Username"
 msgstr ""
 
-#: tcms_tenants/admin.py:106
+#: tcms_tenants/admin.py:109
 msgid "Full name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/email/new.txt:1
+#, python-format
+msgid ""
+"Your Kiwi TCMS tenant was created at:\n"
+"%(tenant_url)s\n"
+"\n"
+"If you have troubles please contact support!\n"
 msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/new.html:9
@@ -44,11 +53,14 @@ msgstr ""
 msgid "Schema"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:40
+#: tcms_tenants/templates/tcms_tenants/new.html:43
 msgid "Save"
 msgstr ""
 
-#: tcms_tenants/utils.py:35
+#: tcms_tenants/utils.py:37
 msgid "Schema name already in use"
 msgstr ""
 
+#: tcms_tenants/utils.py:95
+msgid "New Kiwi TCMS tenant created"
+msgstr ""
