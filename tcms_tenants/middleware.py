@@ -48,10 +48,8 @@ class BlockUnpaidTenantMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.tenant.paid_util is None:
-            return HttpResponseForbidden(_('Unauthorized'))
-
-        if request.tenant.paid_util <= datetime.now():
+        if (request.tenant.paid_util is None) or \
+            (request.tenant.paid_util <= datetime.now()):
             return HttpResponseForbidden(_('Unpaid'))
 
         if request.tenant.paid_util <= datetime.now() + timedelta(days=7):
