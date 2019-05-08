@@ -47,6 +47,15 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.3.0 (08 May 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- Send email when a new tenant is created
+- Add middleware which can be used to block unpaid tenants
+- Rewrite middleware without deprecated ``MiddlewareMixin``, Refers to
+  `Issue #17 <https://github.com/kiwitcms/tenants/issues/17>`_
+- Add more tests
+
 v0.2.0 (05 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
