@@ -47,6 +47,14 @@ is not currently documented here!
 Changelog
 ---------
 
+
+v0.4.0 (12 May 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- Allow overriding create tenant form URL via additional
+  context variable named ``form_action_url``
+
+
 v0.3.0 (08 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
