@@ -9,9 +9,12 @@
     {% trans "New tenant" %}
 {% endblock %}
 
+
 {% block contents %}
+    {% url 'tcms_tenants:create-tenant' as form_url %}
+
     <div class="container-fluid container-cards-pf">
-        <form class="form-horizontal" action="{% url 'tcms_tenants:create-tenant' %}" method="post">
+        <form class="form-horizontal" action="{{ form_action_url|default:form_url }}" method="post">
             <div class="form-group">
                 <label class="col-md-1 col-lg-1" for="id_name">{% trans "Name" %}</label>
                 <div class="col-sm-11 col-md-8 col-lg-5 {% if form.name.errors %}has-error{% endif %}">
