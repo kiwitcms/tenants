@@ -65,6 +65,7 @@ def create_tenant(form_data, request):
             paid_until=paid_until,
             on_trial=on_trial,
             owner=owner,
+            organization=form_data['organization'],
         )
         domain = Domain.objects.create(
             domain=tenant_domain(schema_name),

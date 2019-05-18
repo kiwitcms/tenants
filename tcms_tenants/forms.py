@@ -16,3 +16,5 @@ class NewTenantForm(forms.Form):
     paid_until = forms.DateTimeField(required=False, widget=forms.HiddenInput)
     on_trial = forms.BooleanField(initial=True, required=False,
                                   widget=forms.HiddenInput)
+    organization = forms.CharField(max_length=64, required=False,
+                                   widget=forms.HiddenInput)
