@@ -48,10 +48,11 @@ Changelog
 ---------
 
 
-v0.4.2 (18 May 2019)
+v0.4.3 (18 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Add ``Tenant.organization`` field
+- When creating tenant set site.name to tenant.domain.domain
 
 
 v0.4.0 (12 May 2019)
