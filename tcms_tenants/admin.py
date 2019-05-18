@@ -21,8 +21,8 @@ class TenantAdmin(admin.ModelAdmin):
     """
     actions = ['delete_selected']
     list_display = ('id', 'name', 'schema_name', 'domain_name', 'created_on', 'on_trial',
-                    'paid_until', 'owner')
-    search_fields = ('name', 'schema_name')
+                    'paid_until', 'owner', 'organization')
+    search_fields = ('name', 'schema_name', 'organization')
     ordering = ['-created_on']
 
     def add_view(self, request, form_url='', extra_context=None):
