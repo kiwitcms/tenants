@@ -88,6 +88,7 @@ def create_tenant(form_data, request):
         # this is used to build full URLs for things like emails
         site = Site.objects.get(pk=settings.SITE_ID)
         site.domain = domain.domain
+        site.name = domain.domain
         site.save()
 
     mailto(
