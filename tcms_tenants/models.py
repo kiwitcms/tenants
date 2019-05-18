@@ -21,6 +21,7 @@ class Tenant(TenantMixin):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,
                               related_name='tenant_owner')
+    organization = models.CharField(max_length=64, null=True, blank=True, db_index=True)
 
     def __str__(self):
         return "[%s] %s" % (self.schema_name, self.name)
