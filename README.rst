@@ -48,7 +48,7 @@ Changelog
 ---------
 
 
-v0.4.1 (18 May 2019)
+v0.4.2 (18 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Add ``Tenant.organization`` field
