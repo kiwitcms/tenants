@@ -1,0 +1,73 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: kiwitcms-tenants\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-07 21:44+0000\n"
+"PO-Revision-Date: 2019-08-30 21:50\n"
+"Last-Translator: Alexander Todorov (atodorov)\n"
+"Language-Team: Portuguese\n"
+"Language: pt_PT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: crowdin.com\n"
+"X-Crowdin-Project: kiwitcms-tenants\n"
+"X-Crowdin-Language: pt-PT\n"
+"X-Crowdin-File: /master/tcms_tenants/locale/en/LC_MESSAGES/django.po\n"
+
+#: tcms_tenants/admin.py:39 tcms_tenants/middleware.py:31
+msgid "Unauthorized"
+msgstr ""
+
+#: tcms_tenants/admin.py:104
+msgid "Username"
+msgstr ""
+
+#: tcms_tenants/admin.py:109
+msgid "Full name"
+msgstr ""
+
+#: tcms_tenants/middleware.py:53
+msgid "Unpaid"
+msgstr ""
+
+#: tcms_tenants/middleware.py:59
+msgid "Tenant expires in less than 7 days"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/email/new.txt:1
+#, python-format
+msgid "Your Kiwi TCMS tenant was created at:\n"
+"%(tenant_url)s\n\n"
+"If you have troubles please contact support!\n"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:9
+msgid "New tenant"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:16
+msgid "Name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:19
+msgid "Company, team or project name"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:26
+msgid "Schema"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:43
+msgid "Save"
+msgstr ""
+
+#: tcms_tenants/utils.py:37
+msgid "Schema name already in use"
+msgstr ""
+
+#: tcms_tenants/utils.py:95
+msgid "New Kiwi TCMS tenant created"
+msgstr ""
+
