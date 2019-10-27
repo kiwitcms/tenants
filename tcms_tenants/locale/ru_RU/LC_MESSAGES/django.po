@@ -3,16 +3,14 @@ msgstr ""
 "Project-Id-Version: kiwitcms-tenants\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-05-07 21:44+0000\n"
-"PO-Revision-Date: 2019-04-19 07:16\n"
+"PO-Revision-Date: 2019-10-27 19:16\n"
 "Last-Translator: Alexander Todorov (atodorov)\n"
 "Language-Team: Russian\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=((n%10==1 && n%100!=11) ? 0 : ((n%10 >= 2 "
-"&& n%10 <=4 && (n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || (n%10 >= 5 "
-"&& n%10 <=9)) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3));\n"
+"Plural-Forms: nplurals=4; plural=((n%10==1 && n%100!=11) ? 0 : ((n%10 >= 2 && n%10 <=4 && (n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || (n%10 >= 5 && n%10 <=9)) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3));\n"
 "X-Generator: crowdin.com\n"
 "X-Crowdin-Project: kiwitcms-tenants\n"
 "X-Crowdin-Language: ru\n"
@@ -40,10 +38,8 @@ msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/email/new.txt:1
 #, python-format
-msgid ""
-"Your Kiwi TCMS tenant was created at:\n"
-"%(tenant_url)s\n"
-"\n"
+msgid "Your Kiwi TCMS tenant was created at:\n"
+"%(tenant_url)s\n\n"
 "If you have troubles please contact support!\n"
 msgstr ""
 
@@ -61,16 +57,17 @@ msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/new.html:26
 msgid "Schema"
-msgstr ""
+msgstr "Схема"
 
 #: tcms_tenants/templates/tcms_tenants/new.html:43
 msgid "Save"
-msgstr ""
+msgstr "Сохранить"
 
 #: tcms_tenants/utils.py:37
 msgid "Schema name already in use"
-msgstr ""
+msgstr "Такая схема уже используется"
 
 #: tcms_tenants/utils.py:95
 msgid "New Kiwi TCMS tenant created"
 msgstr ""
+
