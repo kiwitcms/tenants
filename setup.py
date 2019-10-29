@@ -25,7 +25,7 @@ def get_install_requires(path):
 
 setup(
     name='kiwitcms-tenants',
-    version='0.4.3',
+    version='0.4.4',
     description='Multi-tenant support for Kiwi TCMS',
     long_description=get_long_description(),
     author='Kiwi TCMS',
