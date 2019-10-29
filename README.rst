@@ -47,6 +47,11 @@ is not currently documented here!
 Changelog
 ---------
 
+v0.4.4 (29 Oct 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- New translations for Russian
+
 
 v0.4.3 (18 May 2019)
 ~~~~~~~~~~~~~~~~~~~~
