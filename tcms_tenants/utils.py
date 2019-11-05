@@ -2,8 +2,11 @@
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
+import datetime
+
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
@@ -100,3 +103,28 @@ def create_tenant(form_data, request):
         }
     )
     return tenant
+
+
+def create_oss_tenant(owner, name, schema_name, organization):
+    """
+        Used to create tenants for our OSS program. Executed by the
+        instance administrator!
+    """
+    class FakeRequest:
+        is_secure = True
+        user = None
+
+        def __init__(self, username):
+            self.user = get_user_model().objects.get(username=username)
+
+    data = {
+        'name': name,
+        'schema_name': schema_name,
+        'organization': organization,
+        'on_trial': False,
+        'paid_until': datetime.datetime(2999, 12, 31),
+    }
+
+    request = FakeRequest(owner)
+
+    return create_oss_tenant(data, request)
