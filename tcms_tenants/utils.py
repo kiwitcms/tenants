@@ -127,4 +127,4 @@ def create_oss_tenant(owner, name, schema_name, organization):
 
     request = FakeRequest(owner)
 
-    return create_oss_tenant(data, request)
+    return create_tenant(data, request)
