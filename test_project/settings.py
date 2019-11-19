@@ -51,6 +51,7 @@ TENANT_APPS = [
     'modernrpc',
     'simple_history',
 
+    'tcms.bugs',
     'tcms.core.contrib.comments.apps.AppConfig',
     'tcms.core.contrib.linkreference',
     'tcms.management',
