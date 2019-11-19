@@ -137,6 +137,16 @@ tools like ``dig`` and ``nslookup``::
 All sub-domains should resolve to the same IP address!
 
 
+Migrating Single-Tenant to Multi-Tenant
+---------------------------------------
+
+See `Migrating Single-Tenant to Multi-Tenant
+<https://django-tenants.readthedocs.io/en/latest/use.html#migrating-single-tenant-to-multi-tenant>`_
+section in the official django-tenants documentation! It has been contributed by the Kiwi TCMS
+team and that was the procedure we've used to migrate the previous demo website (ST) to
+its new MT version!
+
+
 Changelog
 ---------
 
