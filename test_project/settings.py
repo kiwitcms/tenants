@@ -52,7 +52,6 @@ TENANT_APPS = [
     'simple_history',
 
     'tcms.bugs',
-    'tcms.core.contrib.comments.apps.AppConfig',
     'tcms.core.contrib.linkreference',
     'tcms.management',
     'tcms.testcases.apps.AppConfig',
