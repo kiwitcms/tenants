@@ -150,6 +150,16 @@ its new MT version!
 Changelog
 ---------
 
+
+v0.4.5 (24 Nov 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- Document how to configure multi-tenancy
+- Document ST to MT migration
+- Add helper method ``create_oss_tenant()``
+- INternal updates to ``TENANT_APPS`` while testing
+
+
 v0.4.4 (29 Oct 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
