@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from tcms_tenants.utils import can_access
 
