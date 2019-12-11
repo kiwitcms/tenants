@@ -11,6 +11,10 @@ test:
 	                 --omit "tcms_tenants/tests/*.py" \
 	                 ./manage.py test -v2 tcms_tenants.tests
 
+.PHONY: test_for_missing_migrations
+test_for_missing_migrations:
+	./manage.py migrate
+	./manage.py makemigrations --check
 
 .PHONY: pylint
 pylint:
@@ -18,4 +22,4 @@ pylint:
 	    -d wildcard-import -d unused-wildcard-import *.py tcms_tenants/ test_project/
 
 .PHONY: check
-check: pylint test
+check: pylint test_for_missing_migrations test
