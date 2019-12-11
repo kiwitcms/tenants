@@ -150,6 +150,12 @@ its new MT version!
 Changelog
 ---------
 
+v0.4.7 (11 Dec 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- Set ``tcms_tenants.tests.LoggedInTestCase.tenant.owner.password`` to
+  "password" so it can be reused by downstream tests
+
 
 v0.4.6 (11 Dec 2019)
 ~~~~~~~~~~~~~~~~~~~~
