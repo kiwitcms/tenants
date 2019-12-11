@@ -2,6 +2,7 @@ include README.rst LICENSE requirements.txt
 
 graft tcms_tenants/locale
 graft tcms_tenants/templates
+graft tcms_tenants/tests
 
 recursive-exclude test_project/ *
-recursive-exclude tcms_tenants/tests/ *
+recursive-exclude tcms_tenants/tests/ test_*
