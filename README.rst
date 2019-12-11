@@ -151,13 +151,23 @@ Changelog
 ---------
 
 
+v0.4.6 (11 Dec 2019)
+~~~~~~~~~~~~~~~~~~~~
+
+- New translations for Slovenian
+- Replace ugettext_lazy with gettext_lazy for Django 3.0
+- Start shipping ``tcms_tenants.tests`` to be used by other multi-tenant
+  add-on packages
+- Confirmed working against Kiwi TCMS v7.2
+
+
 v0.4.5 (24 Nov 2019)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Document how to configure multi-tenancy
 - Document ST to MT migration
 - Add helper method ``create_oss_tenant()``
-- INternal updates to ``TENANT_APPS`` while testing
+- Internal updates to ``TENANT_APPS`` while testing
 
 
 v0.4.4 (29 Oct 2019)
