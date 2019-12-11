@@ -26,6 +26,8 @@ class LoggedInTestCase(FastTenantTestCase):
     @classmethod
     def setup_tenant(cls, tenant):
         tenant.owner = UserFactory()
+        tenant.owner.set_password('password')
+        tenant.owner.save()
 
     @classmethod
     def setUpClass(cls):
