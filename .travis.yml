@@ -14,6 +14,8 @@ services:
 install:
   - pip install -U pip
   - pip install -r devel.txt
+  # workaround for https://github.com/tomturner/django-tenants/issues/336
+  - pip install psycopg2
 
 before_script:
   - psql -c "CREATE USER kiwi WITH PASSWORD 'kiwi' CREATEDB;" -U postgres
