@@ -100,6 +100,26 @@ Check
 and `test_project/urls.py <https://github.com/kiwitcms/tenants/blob/master/test_project/urls.py>`_
 for more examples.
 
+When starting your multi-tenant Kiwi TCMS instance for the first time you also
+need to create information about the so called public tenant. That is the
+default tenant on which your application runs::
+
+
+    ./manage.py create_tenant --schema_name public
+                              --name "Public tenant"
+                              --paid_until 2050-12-31
+                              --on_trial False
+                              --owner_id 1
+                              --organization "Testing department"
+                              --domain-domain public.tenants.example.org
+                              --domain-is_primary True
+
+**WARNING:** schema_name `public` is special, the rest is up to you.
+`owner_id` is usually the ID of the first superuser in the database.
+
+You can use `create_tenant` afterwards to create other tenants for various teams
+or projects. Non-public tenants can also be created via the web interface as well.
+
 
 DNS configuration
 -----------------
