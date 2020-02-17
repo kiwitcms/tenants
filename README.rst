@@ -179,6 +179,13 @@ Changelog
 ---------
 
 
+v0.5.1 (17 Feb 2020)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.0.0 to 3.0.1. Fixes
+  `Issue #60 <https://github.com/kiwitcms/tenants/issues/60>`_
+
+
 v0.5 (16 Jan 2020)
 ~~~~~~~~~~~~~~~~~~
 
