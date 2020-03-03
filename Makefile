@@ -19,7 +19,7 @@ test_for_missing_migrations:
 .PHONY: pylint
 pylint:
 	pylint --load-plugins=pylint_django -d missing-docstring -d duplicate-code \
-	    -d wildcard-import -d unused-wildcard-import *.py tcms_tenants/ test_project/
+	    *.py tcms_tenants/ test_project/
 
 .PHONY: flake8
 flake8:
