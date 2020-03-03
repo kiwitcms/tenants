@@ -49,7 +49,7 @@ class BlockUnpaidTenantMiddleware:
 
     def __call__(self, request):
         if (request.tenant.paid_until is None) or \
-            (request.tenant.paid_until <= datetime.now()):
+                (request.tenant.paid_until <= datetime.now()):
             return HttpResponseForbidden(_('Unpaid'))
 
         if request.tenant.paid_until <= datetime.now() + timedelta(days=7):

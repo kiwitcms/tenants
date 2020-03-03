@@ -55,7 +55,7 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
         values of the ``tenant`` field so that only the current
         tenant is shown!
     """
-    ### important notice:
+    # IMPORTANT NOTICE:
     # As a security concern we would like to have this queryset set to
     # Tenant.objects.none() instead of .all(). However ModelChoiceField.to_python()
     # is trying to self.queryset.get() the currently selected value! When the queryset

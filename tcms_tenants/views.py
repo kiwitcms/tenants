@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from tcms_tenants import utils
 from tcms_tenants.forms import NewTenantForm
 
+
 @method_decorator(login_required, name='dispatch')
 class NewTenantView(TemplateView):
     """
