@@ -22,7 +22,7 @@ class TenantFileSystemStorage(FileSystemStorage):
         return getattr(settings, 'MULTITENANT_RELATIVE_MEDIA_ROOT', "%s")
 
     @property  # not cached like in parent class
-    def base_url(self):
+    def base_url(self):  # pylint: disable=invalid-overridden-method
         _url = super().base_url
         _url = os.path.join(_url,
                             utils.parse_tenant_config_path(self.relative_media_root))
@@ -31,7 +31,7 @@ class TenantFileSystemStorage(FileSystemStorage):
         return _url
 
     @property  # not cached like in parent class
-    def location(self):
+    def location(self):  # pylint: disable=invalid-overridden-method
         _location = os.path.join(super().location,
                                  utils.parse_tenant_config_path(self.relative_media_root))
         return os.path.abspath(_location)
