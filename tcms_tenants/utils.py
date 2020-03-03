@@ -14,7 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django_tenants.utils import schema_context, tenant_context
 from tcms.core.utils.mailto import mailto
 
-from tcms_tenants.models import *
+from tcms_tenants.models import Domain, Tenant
 
 
 def can_access(user, tenant):
