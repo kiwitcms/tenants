@@ -110,7 +110,7 @@ def create_oss_tenant(owner, name, schema_name, organization):
         Used to create tenants for our OSS program. Executed by the
         instance administrator!
     """
-    class FakeRequest:
+    class FakeRequest:  # pylint: disable=too-few-public-methods
         is_secure = True
         user = None
 
