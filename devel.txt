@@ -1,4 +1,5 @@
 -r requirements.txt
+flake8
 kiwitcms==8.0
 coveralls==1.11.1
 factory_boy==2.12.0

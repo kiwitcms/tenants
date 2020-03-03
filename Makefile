@@ -21,5 +21,9 @@ pylint:
 	pylint --load-plugins=pylint_django -d missing-docstring -d duplicate-code \
 	    -d wildcard-import -d unused-wildcard-import *.py tcms_tenants/ test_project/
 
+.PHONY: flake8
+flake8:
+	flake8 *.py tcms_tenants/ test_project/
+
 .PHONY: check
-check: pylint test_for_missing_migrations test
+check: flake8 pylint test_for_missing_migrations test
