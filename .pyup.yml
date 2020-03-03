@@ -4,4 +4,4 @@ requirements:
       pin: True
   - devel.txt:
       update: all
-      pin: True
+      pin: False
