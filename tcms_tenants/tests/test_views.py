@@ -8,6 +8,7 @@ from mock import patch
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect
 
 from tcms_tenants.models import Tenant
@@ -33,6 +34,15 @@ class RedirectToTestCase(LoggedInTestCase):
 
 
 class NewTenantViewTestCase(LoggedInTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        add_tenant = Permission.objects.get(
+            content_type__app_label='tcms_tenants',
+            codename='add_tenant')
+        cls.tester.user_permissions.add(add_tenant)
+
     def test_create_tenant_shows_defaults_for_trial_and_paid_until(self):
         response = self.client.get(reverse('tcms_tenants:create-tenant'))
         # assert hidden fields are shown with defaults b/c the tests below
