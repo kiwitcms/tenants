@@ -23,9 +23,7 @@ before_script:
 
 
 script:
-  - make flake8
-  - make test_for_missing_migrations
-  - make test
+  - make check
 
 after_success:
   - coveralls
