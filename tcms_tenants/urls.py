@@ -9,5 +9,5 @@ app_name = 'tcms_tenants'
 
 urlpatterns = [
     url(r'^create/$', views.NewTenantView.as_view(), name='create-tenant'),
-    url(r'^go/to/(?P<tenant>\w+)/(?P<path>.*)$', views.redirect_to, name='redirect-to'),
+    url(r'^go/to/(?P<tenant>\w+)/(?P<path>.*)$', views.RedirectTo.as_view(), name='redirect-to'),
 ]
