@@ -4,6 +4,7 @@
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
+from django.views.generic.base import RedirectView
 from django.views.generic.edit import FormView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
@@ -40,8 +41,8 @@ class NewTenantView(FormView):
         return HttpResponseRedirect(utils.tenant_url(self.request, tenant.schema_name))
 
 
-@login_required
-def redirect_to(request, tenant, path):
+@method_decorator(login_required, name='dispatch')  # pylint: disable=missing-permission-required
+class RedirectTo(RedirectView):
     """
         Will redirect to tenant.domain.domain/path!
 
@@ -59,5 +60,7 @@ def redirect_to(request, tenant, path):
 
         This is to prevent redirect_uri mismatch errors!
     """
-    target_url = '%s/%s' % (utils.tenant_url(request, tenant), path)
-    return HttpResponseRedirect(target_url)
+    def get_redirect_url(self, *args, **kwargs):
+        tenant = kwargs['tenant']
+        path = kwargs['path']
+        return '%s/%s' % (utils.tenant_url(self.request, tenant), path)
