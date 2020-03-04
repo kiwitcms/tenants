@@ -22,7 +22,7 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'tcms_tenants', 'locale')]
 
 
 # start multi-tenant settings override
-DATABASES['default'].update({  # noqa: F405
+DATABASES['default'].update({  # noqa: F405 pylint: disable=objects-update-used
     'ENGINE': 'django_tenants.postgresql_backend',
     'NAME': 'test_project',
     'USER': 'kiwi',
