@@ -16,9 +16,17 @@ test_for_missing_migrations:
 	./manage.py migrate
 	./manage.py makemigrations --check
 
+KIWI_LINT_INCLUDE_PATH="../Kiwi/"
+
 .PHONY: pylint
 pylint:
-	pylint --load-plugins=pylint_django -d missing-docstring -d duplicate-code \
+	if [ ! -d "$(KIWI_LINT_INCLUDE_PATH)/kiwi_lint" ]; then \
+	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_LINT_INCLUDE_PATH); \
+	fi
+	
+	PYTHONPATH=.:$(KIWI_LINT_INCLUDE_PATH) DJANGO_SETTINGS_MODULE="test_project.settings" \
+	pylint --load-plugins=pylint_django --load-plugins=kiwi_lint \
+	    -d missing-docstring -d duplicate-code -d module-in-directory-without-init \
 	    *.py tcms_tenants/ test_project/
 
 .PHONY: flake8
