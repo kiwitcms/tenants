@@ -8,12 +8,13 @@ from django.views.generic.base import RedirectView
 from django.views.generic.edit import FormView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 
 from tcms_tenants import utils
 from tcms_tenants.forms import NewTenantForm
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('tcms_tenants.add_tenant'), name='dispatch')
 class NewTenantView(FormView):
     """
         Everybody is allowed to create new tenants.
