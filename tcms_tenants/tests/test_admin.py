@@ -5,6 +5,7 @@
 from http import HTTPStatus
 
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from tcms_tenants.tests import LoggedInTestCase
 
@@ -49,3 +50,18 @@ class TenantAdminTestCase(LoggedInTestCase):
         self.assertContains(response, 'Domain name')
         self.assertContains(response, self.tenant.schema_name)
         self.assertContains(response, self.tenant.domains.filter(is_primary=True).first().domain)
+
+    def test_superuser_can_delete_tenant(self):
+        self.tester.is_superuser = True
+        self.tester.save()
+
+        url = reverse('admin:tcms_tenants_tenant_delete', args=[self.tenant.pk])
+        response = self.client.get(url)
+
+        # verify there's the Yes, I'm certain button
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, _("Yes, I'm sure"))
+
+        # not simulating actual deletion b/c we don't seem to be able to switch
+        # to tenant schema or to public schema witin the tests and the deletion
+        # operation fails b/c current active schema is 'test'
