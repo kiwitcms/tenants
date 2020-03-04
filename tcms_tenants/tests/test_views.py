@@ -2,10 +2,11 @@
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
-from datetime import datetime, timedelta
+from datetime import timedelta
 from mock import patch
 
 from django.urls import reverse
+from django.utils import timezone
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
@@ -68,7 +69,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             GitHub Marketplace integration.
         """
         expected_url = 'https://subscriber.%s' % settings.KIWI_TENANTS_DOMAIN
-        paid_until = datetime.now().replace(microsecond=0) + timedelta(days=30)
+        paid_until = timezone.now().replace(microsecond=0) + timedelta(days=30)
 
         response = self.client.post(
             reverse('tcms_tenants:create-tenant'),

@@ -1,11 +1,12 @@
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-few-public-methods
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from tcms_tenants.utils import can_access
@@ -49,10 +50,10 @@ class BlockUnpaidTenantMiddleware:
 
     def __call__(self, request):
         if (request.tenant.paid_until is None) or \
-                (request.tenant.paid_until <= datetime.now()):
+                (request.tenant.paid_until <= timezone.now()):
             return HttpResponseForbidden(_('Unpaid'))
 
-        if request.tenant.paid_until <= datetime.now() + timedelta(days=7):
+        if request.tenant.paid_until <= timezone.now() + timedelta(days=7):
             for msg in messages.get_messages(request):
                 if msg.level_tag == 'warning':
                     break
