@@ -7,6 +7,7 @@ from http import HTTPStatus
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from django_tenants import utils
 from tcms_tenants.tests import LoggedInTestCase
 
 
@@ -65,3 +66,60 @@ class TenantAdminTestCase(LoggedInTestCase):
         # not simulating actual deletion b/c we don't seem to be able to switch
         # to tenant schema or to public schema witin the tests and the deletion
         # operation fails b/c current active schema is 'test'
+
+
+class AuthorizedUsersAdminTestCase(LoggedInTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # reset owner for cls.tenant b/c we'd like for testing all tenants
+        # to be owned by the same user
+        cls.tenant.owner = cls.tester
+        cls.tenant.name = 'For testing purposes'
+        cls.tenant.save()
+
+        with utils.schema_context('public'):
+            cls.tenant2 = utils.get_tenant_model()(schema_name='my_other_tenant',
+                                                   owner=cls.tester)
+            cls.tenant2.save()
+
+            cls.domain2 = utils.get_tenant_domain_model()(tenant=cls.tenant2,
+                                                          domain='other.example.com')
+            cls.domain2.save()
+
+    def test_can_access_changelist(self):
+        response = self.client.get(reverse('admin:tcms_tenants_tenant_authorized_users_changelist'))
+
+        self.assertContains(response, 'Username')
+        self.assertContains(response, 'Full name')
+        self.assertContains(response, 'Tenant name')
+        self.assertContains(response, self.tester.username)
+        self.assertContains(response, self.tester.get_full_name())
+        self.assertContains(response, self.tenant.name)
+
+    def test_add_displays_only_current_tenant(self):
+        self.assertGreater(utils.get_tenant_model().objects.filter(owner=self.tester).count(), 1)
+
+        response = self.client.get(reverse('admin:tcms_tenants_tenant_authorized_users_add'))
+
+        self.assertContains(response, "<option value=''>---------</option>", html=True)
+        self.assertContains(response,
+                            "<option value='%d' selected>%s</option>" % (self.tenant.pk,
+                                                                         self.tenant),
+                            html=True)
+        self.assertNotContains(response, self.tenant2)
+
+    def test_change_displays_only_current_tenant(self):
+        self.assertGreater(utils.get_tenant_model().objects.filter(owner=self.tester).count(), 1)
+
+        first_user = self.tenant.authorized_users.first()
+        response = self.client.get(
+            reverse('admin:tcms_tenants_tenant_authorized_users_change', args=[first_user.pk]))
+
+        self.assertContains(response, "<option value=''>---------</option>", html=True)
+        self.assertContains(response,
+                            "<option value='%d' selected>%s</option>" % (self.tenant.pk,
+                                                                         self.tenant),
+                            html=True)
+        self.assertNotContains(response, self.tenant2)

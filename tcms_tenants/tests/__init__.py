@@ -16,6 +16,8 @@ class UserFactory(DjangoModelFactory):
         model = settings.AUTH_USER_MODEL
 
     username = factory.Sequence(lambda n: 'User%d' % n)
+    first_name = factory.Sequence(lambda n: 'First%d' % n)
+    last_name = factory.Sequence(lambda n: 'Last%d-ov' % n)
     email = factory.LazyAttribute(lambda user: '%s@kiwitcms.org' % user.username)
     is_active = True
     is_staff = True

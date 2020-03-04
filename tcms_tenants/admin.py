@@ -63,7 +63,6 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
     # The internal mechanics of this are in BasseForm._clean_fields()::L399(Django 2.1.7)
     # which calls field.clean(value) before any clean_<field_name>() methods on the form!
     tenant = forms.models.ModelChoiceField(
-        # todo: add tests to make sure we are always filtering this !!!
         queryset=Tenant.objects.all(),
     )
     user = forms.models.ModelChoiceField(
