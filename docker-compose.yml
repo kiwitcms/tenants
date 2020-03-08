@@ -7,7 +7,11 @@ services:
         restart: always
         ports:
             - 5432:5432
+        volumes:
+            - postgresql_database_data:/var/lib/pgsql/data
         environment:
             POSTGRESQL_DATABASE: test_project
             POSTGRESQL_USER: kiwi
             POSTGRESQL_PASSWORD: kiwi
+volumes:
+    postgresql_database_data:
