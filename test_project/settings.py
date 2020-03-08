@@ -2,17 +2,24 @@
 # Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
-
+# pylint: disable=invalid-name, protected-access, wrong-import-position
 import os
 import sys
+import pkg_resources
 
-from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
+# pretend this is a plugin during testing & development
+# IT NEEDS TO BE BEFORE the wildcard import below !!!
+dist = pkg_resources.Distribution(__file__)
+entry_point = pkg_resources.EntryPoint.parse('kiwitcms_tenants_devel = tcms_tenants',
+                                             dist=dist)
+dist._ep_map = {'kiwitcms.plugins': {'kiwitcms_tenants_devel': entry_point}}
+pkg_resources.working_set.add(dist)
 
 from tcms.settings.product import *  # noqa: F403
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, BASE_DIR)
+
 
 # these are enabled only for testing purposes
 DEBUG = True
@@ -41,8 +48,8 @@ MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')  # 
 TENANT_MODEL = "tcms_tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"
 
+# this always needs to be the first app
 INSTALLED_APPS.insert(0, 'django_tenants')  # noqa: F405
-INSTALLED_APPS.insert(1, 'tcms_tenants')    # noqa: F405
 
 TENANT_APPS = [
     'django.contrib.sites',
@@ -70,19 +77,6 @@ KIWI_TENANTS_DOMAIN = 'tenants.localdomain'
 # share login session between tenants
 SESSION_COOKIE_DOMAIN = ".%s" % KIWI_TENANTS_DOMAIN
 
-# main navigation menu
-MENU_ITEMS.append(  # noqa: F405
-    (_('TENANT'), [
-        (_('Create'), reverse_lazy('tcms_tenants:create-tenant')),
-        ('-', '-'),
-        (_('Authorized users'), '/admin/tcms_tenants/tenant_authorized_users/'),
-    ]),
-)
-
 # attachments storage
 DEFAULT_FILE_STORAGE = "tcms_tenants.storage.TenantFileSystemStorage"
 MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
-
-# override the default ROOT_URLCONF!, see in
-# test_project/urls.py how to extend the patterns coming from Kiwi TCMS
-ROOT_URLCONF = 'test_project.urls'

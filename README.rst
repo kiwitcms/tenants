@@ -64,9 +64,8 @@ Then make sure the following settings are configured::
     TENANT_MODEL = "tcms_tenants.Tenant"
     TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"
 
-    # django_tenants & tcms_tenants must be the first in the list
+    # django_tenants must be the first in INSTALLED_APPS
     INSTALLED_APPS.insert(0, 'django_tenants')
-    INSTALLED_APPS.insert(1, 'tcms_tenants')
 
     # list INSTALLED_APPS which will have their own copy for different tenants
     TENANT_APPS = [ ... ]
@@ -83,21 +82,8 @@ Then make sure the following settings are configured::
     DEFAULT_FILE_STORAGE = "tcms_tenants.storage.TenantFileSystemStorage"
     MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
 
-    # override the default ROOT_URLCONF!
-    ROOT_URLCONF = 'test_project.urls'
-
-    # (optional) create new item in navigation menu
-    MENU_ITEMS.append(
-        (_('TENANT'), [
-            (_('Create'), reverse_lazy('tcms_tenants:create-tenant')),
-            ('-', '-'),
-            (_('Authorized users'), '/admin/tcms_tenants/tenant_authorized_users/'),
-        ]),
-    )
-
 Check
 `test_project/settings.py <https://github.com/kiwitcms/tenants/blob/master/test_project/settings.py>`_
-and `test_project/urls.py <https://github.com/kiwitcms/tenants/blob/master/test_project/urls.py>`_
 for more examples.
 
 When starting your multi-tenant Kiwi TCMS instance for the first time you also

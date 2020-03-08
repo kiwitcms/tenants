@@ -35,6 +35,7 @@ setup(
     install_requires=get_install_requires('requirements.txt'),
     packages=find_packages(exclude=['test_project*', '*.tests']),
     include_package_data=True,
+    entry_points={"kiwitcms.plugins": ["kiwitcms_tenants = tcms_tenants"]},
     classifiers=[
         'Framework :: Django',
         'Development Status :: 5 - Production/Stable',
