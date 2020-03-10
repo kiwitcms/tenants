@@ -52,39 +52,13 @@ your Python virtualenv where the main Kiwi TCMS instance is hosted::
 
     pip install kiwitcms-tenants
 
-Then make sure the following settings are configured::
+then make sure ``KIWI_TENANTS_DOMAIN`` ENV variable is specified !!!
+The rest of the settings are installed into ``tcms_settings_dir/multi_tenant.py``
+and Kiwi TCMS will pick them up automatically!
 
-    DATABASES['default']['ENGINE'] = 'django_tenants.postgresql_backend'
-    DATABASE_ROUTERS = ['django_tenants.routers.TenantSyncRouter']
 
-    # TenantMainMiddleware must be the first in the list
-    MIDDLEWARE.insert(0, 'django_tenants.middleware.main.TenantMainMiddleware')
-    MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')
-
-    TENANT_MODEL = "tcms_tenants.Tenant"
-    TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"
-
-    # django_tenants must be the first in INSTALLED_APPS
-    INSTALLED_APPS.insert(0, 'django_tenants')
-
-    # list INSTALLED_APPS which will have their own copy for different tenants
-    TENANT_APPS = [ ... ]
-
-    SHARED_APPS = INSTALLED_APPS
-
-    # public tenant will be at https://public.tenants.example.org
-    # Wild card DNS must be configured
-    KIWI_TENANTS_DOMAIN = 'tenants.example.org'
-
-    SESSION_COOKIE_DOMAIN = ".%s" % KIWI_TENANTS_DOMAIN
-
-    # attachments storage
-    DEFAULT_FILE_STORAGE = "tcms_tenants.storage.TenantFileSystemStorage"
-    MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
-
-Check
-`test_project/settings.py <https://github.com/kiwitcms/tenants/blob/master/test_project/settings.py>`_
-for more examples.
+First boot configuration
+------------------------
 
 When starting your multi-tenant Kiwi TCMS instance for the first time you also
 need to create information about the so called public tenant. That is the
@@ -101,7 +75,8 @@ default tenant on which your application runs::
                               --domain-is_primary True
 
 **WARNING:** schema_name `public` is special, the rest is up to you.
-`owner_id` is usually the ID of the first superuser in the database.
+`owner_id` is usually the ID of the first superuser in the database which means
+you must have executed ``createsuperuser`` first!
 
 You can use `create_tenant` afterwards to create other tenants for various teams
 or projects. Non-public tenants can also be created via the web interface as well.
