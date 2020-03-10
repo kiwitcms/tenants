@@ -33,8 +33,9 @@ setup(
     url='https://github.com/kiwitcms/tenants/',
     license='GPLv3+',
     install_requires=get_install_requires('requirements.txt'),
-    packages=find_packages(exclude=['test_project*', '*.tests']),
     include_package_data=True,
+    packages=find_packages(exclude=['test_project*', '*.tests']),
+    zip_safe=False,
     entry_points={"kiwitcms.plugins": ["kiwitcms_tenants = tcms_tenants"]},
     classifiers=[
         'Framework :: Django',

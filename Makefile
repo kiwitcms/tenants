@@ -27,11 +27,11 @@ pylint:
 	PYTHONPATH=.:$(KIWI_LINT_INCLUDE_PATH) DJANGO_SETTINGS_MODULE="test_project.settings" \
 	pylint --load-plugins=pylint_django --load-plugins=kiwi_lint \
 	    -d missing-docstring -d duplicate-code -d module-in-directory-without-init \
-	    *.py tcms_tenants/ test_project/
+	    *.py tcms_settings_dir/ tcms_tenants/ test_project/
 
 .PHONY: flake8
 flake8:
-	flake8 *.py tcms_tenants/ test_project/
+	flake8 *.py tcms_settings_dir/ tcms_tenants/ test_project/
 
 .PHONY: check
 check: flake8 pylint test_for_missing_migrations test
