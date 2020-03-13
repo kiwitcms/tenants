@@ -16,14 +16,19 @@ MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
 
 
 # this always needs to be the first app
-INSTALLED_APPS.insert(0, 'django_tenants')  # noqa: F821
+if 'django_tenants' not in INSTALLED_APPS:      # noqa: F821
+    INSTALLED_APPS.insert(0, 'django_tenants')  # noqa: F821
 
 
 KIWI_TENANTS_DOMAIN = os.environ.get('KIWI_TENANTS_DOMAIN')
 
 
-MIDDLEWARE.insert(0, 'django_tenants.middleware.main.TenantMainMiddleware')   # noqa: F821
-MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')  # noqa: F821
+# TenantMainMiddleware always needs to be first
+if 'django_tenants.middleware.main.TenantMainMiddleware' not in MIDDLEWARE:      # noqa: F821
+    MIDDLEWARE.insert(0, 'django_tenants.middleware.main.TenantMainMiddleware')  # noqa: F821
+
+if 'tcms_tenants.middleware.BlockUnauthorizedUserMiddleware' not in MIDDLEWARE:   # noqa: F821
+    MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')  # noqa: F821
 
 
 TENANT_APPS = [
