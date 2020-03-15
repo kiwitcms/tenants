@@ -140,6 +140,26 @@ Changelog
 ---------
 
 
+v1.0 (15 Mar 2020)
+~~~~~~~~~~~~~~~~~~
+
+- Turn into proper Kiwi TCMS plugin and install settings overrides under
+  ``tcms_settings_dir/`` (compatible with Kiwi TCMS v8.2 or later)
+  - does not need ``MENU_ITEMS`` and ``ROOT_URLCONF`` override anymore
+  - does not need to load ``tcms_tenants`` in ``INSTALLED_APPS`` manually
+  - only need to specify ``KIWI_TENANTS_DOMAIN`` env variable!
+- Require ``tcms_tenants.add_tenant`` permission for ``NewTenantView``
+- Reimplement ``NewTenantView`` as ``FormView``
+- Refactor ``redirect_to()`` to class based view
+- Add tests for admin.py. Closes #5
+  `Issue #5 <https://github.com/kiwitcms/tenants/issues/5>`_
+- Replace ``datetime.now`` with ``timezone.now`` for better support of
+  installations with enabled timezone config
+- Enable pylint. Closes
+  `Issue #17 <https://github.com/kiwitcms/tenants/issues/17>`_
+- Enable flake8
+
+
 v0.5.1 (17 Feb 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
