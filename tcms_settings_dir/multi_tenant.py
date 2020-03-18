@@ -12,7 +12,7 @@ DATABASE_ROUTERS = ['django_tenants.routers.TenantSyncRouter', ]
 
 # attachments storage
 DEFAULT_FILE_STORAGE = "tcms_tenants.storage.TenantFileSystemStorage"
-MULTITENANT_RELATIVE_MEDIA_ROOT = "tenants/%s"
+MULTITENANT_RELATIVE_MEDIA_ROOT = "tenant/%s"
 
 
 # this always needs to be the first app
