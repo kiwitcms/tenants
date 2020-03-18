@@ -139,6 +139,14 @@ its new MT version!
 Changelog
 ---------
 
+v1.0.1 (18 Mar 2020)
+~~~~~~~~~~~~~~~~~~~~
+
+- Slightly adjust default values for settings ``TENANT_APPS`` and
+  ``MULTITENANT_RELATIVE_MEDIA_ROOT`` to match Kiwi TCMS and installations
+  prior to turning this package into a plugin. This will avoid dusrupting
+  existing deployments!
+
 
 v1.0 (15 Mar 2020)
 ~~~~~~~~~~~~~~~~~~
