@@ -3,4 +3,4 @@ flake8
 kiwitcms==8.2
 coveralls==2.0.0
 factory_boy==2.12.0
-pylint-django==2.0.14
+pylint-django==2.0.15
