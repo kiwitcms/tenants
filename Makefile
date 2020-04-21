@@ -1,6 +1,6 @@
 .PHONY: messages
 messages:
-	./manage.py makemessages --no-obsolete --no-vinaigrette --ignore "test*.py"
+	./manage.py makemessages --locale en --no-obsolete --no-vinaigrette --ignore "test*.py"
 	ls tcms_tenants/locale/*/LC_MESSAGES/*.po | xargs -n 1 -I @ msgattrib -o @ --no-fuzzy @
 
 
