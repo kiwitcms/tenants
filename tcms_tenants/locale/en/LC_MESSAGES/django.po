@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-07 21:44+0000\n"
+"POT-Creation-Date: 2020-04-21 18:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,23 +18,35 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: tcms_tenants/admin.py:39 tcms_tenants/middleware.py:31
+#: tcms_tenants/admin.py:39 tcms_tenants/middleware.py:32
 msgid "Unauthorized"
 msgstr ""
 
-#: tcms_tenants/admin.py:104
+#: tcms_tenants/admin.py:103
 msgid "Username"
 msgstr ""
 
-#: tcms_tenants/admin.py:109
+#: tcms_tenants/admin.py:108
 msgid "Full name"
 msgstr ""
 
-#: tcms_tenants/middleware.py:53
+#: tcms_tenants/menu.py:11
+msgid "Tenant"
+msgstr ""
+
+#: tcms_tenants/menu.py:12
+msgid "Create"
+msgstr ""
+
+#: tcms_tenants/menu.py:14
+msgid "Authorized users"
+msgstr ""
+
+#: tcms_tenants/middleware.py:54
 msgid "Unpaid"
 msgstr ""
 
-#: tcms_tenants/middleware.py:59
+#: tcms_tenants/middleware.py:64
 msgid "Tenant expires in less than 7 days"
 msgstr ""
 
@@ -51,26 +63,26 @@ msgstr ""
 msgid "New tenant"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:16
+#: tcms_tenants/templates/tcms_tenants/new.html:19
 msgid "Name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:19
+#: tcms_tenants/templates/tcms_tenants/new.html:22
 msgid "Company, team or project name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:26
+#: tcms_tenants/templates/tcms_tenants/new.html:29
 msgid "Schema"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:43
+#: tcms_tenants/templates/tcms_tenants/new.html:46
 msgid "Save"
 msgstr ""
 
-#: tcms_tenants/utils.py:37
+#: tcms_tenants/utils.py:40
 msgid "Schema name already in use"
 msgstr ""
 
-#: tcms_tenants/utils.py:95
+#: tcms_tenants/utils.py:100
 msgid "New Kiwi TCMS tenant created"
 msgstr ""
