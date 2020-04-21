@@ -1,3 +1,0 @@
-files:
-  - source: /tcms_tenants/locale/en/LC_MESSAGES/django.po
-    translation: /tcms_tenants/locale/%locale_with_underscore%/LC_MESSAGES/django.po
