@@ -1,5 +1,4 @@
 {% load i18n %}{% blocktrans %}Your Kiwi TCMS tenant was created at:
 {{ tenant_url }}
 
-If you have troubles please contact support!
-{% endblocktrans %}
+If you have troubles please contact support!{% endblocktrans %}
