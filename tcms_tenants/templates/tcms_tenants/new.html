@@ -37,7 +37,7 @@
                     </div>
                     {{ form.schema_name.errors }}
                     <p class="help-block">
-                        {% trans "Valid schema_name pattern" %}: ^[a-z0-9]{1,63}$
+                        {% trans "Validation pattern" %}: {{ validation_pattern }}
                     </p>
                 </div>
             </div>

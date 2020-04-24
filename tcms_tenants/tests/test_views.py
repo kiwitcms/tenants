@@ -12,6 +12,7 @@ from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect
 
 from tcms_tenants.models import Tenant
+from tcms_tenants.forms import VALIDATION_RE
 from tcms_tenants.tests import LoggedInTestCase
 
 
@@ -53,7 +54,8 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertContains(response,
                             '<input id="id_paid_until" name="paid_until" type="hidden">',
                             html=True)
-        self.assertContains(response, 'Valid schema_name pattern: ^[a-z0-9]{1,63}$')
+        self.assertContains(response,
+                            "Validation pattern: %s" % VALIDATION_RE.pattern)
 
     def test_invalid_schema_name_shows_errors(self):
         response = self.client.post(
@@ -66,9 +68,40 @@ class NewTenantViewTestCase(LoggedInTestCase):
             })
 
         self.assertContains(response, 'Invalid string used for the schema name.')
-        self.assertContains(response, 'Valid schema_name pattern: ^[a-z0-9]{1,63}$')
+        self.assertContains(response,
+                            "Validation pattern: %s" % VALIDATION_RE.pattern)
         self.assertFalse(
             Tenant.objects.filter(schema_name='kiwi-tcms').exists())
+
+    def test_invalid_domain_name_shows_errors(self):
+        response = self.client.post(
+            reverse('tcms_tenants:create-tenant'),
+            {
+                'name': 'Underscore is allowed in Postres but not in domains',
+                'schema_name': 'kiwi_tcms',
+                'on_trial': True,
+                'paid_until': '',
+            })
+
+        self.assertContains(response, 'Invalid string')
+        self.assertContains(response,
+                            "Validation pattern: %s" % VALIDATION_RE.pattern)
+        self.assertFalse(
+            Tenant.objects.filter(schema_name='kiwi_tcms').exists())
+
+    def test_existing_schema_name_is_invalid(self):
+        response = self.client.post(
+            reverse('tcms_tenants:create-tenant'),
+            {
+                'name': 'Use an existing schema name',
+                'schema_name': self.tenant.schema_name,
+                'on_trial': True,
+                'paid_until': '',
+            })
+
+        self.assertContains(response, 'Schema name already in use')
+        self.assertContains(response,
+                            "Validation pattern: %s" % VALIDATION_RE.pattern)
 
     def test_create_tenant_with_name_schema_only(self):
         expected_url = 'https://tinc.%s' % settings.KIWI_TENANTS_DOMAIN
