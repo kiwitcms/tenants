@@ -57,7 +57,7 @@ def tenant_url(request, schema_name):
 def create_tenant(form_data, request):
     owner = request.user
     name = form_data['name']
-    schema_name = form_data['schema_name']
+    schema_name = form_data['schema_name'].lower()
     on_trial = form_data['on_trial']
     paid_until = form_data['paid_until']
 
@@ -119,7 +119,7 @@ def create_oss_tenant(owner, name, schema_name, organization):
 
     data = {
         'name': name,
-        'schema_name': schema_name,
+        'schema_name': schema_name.lower(),
         'organization': organization,
         'on_trial': False,
         'paid_until': datetime.datetime(2999, 12, 31),

@@ -89,6 +89,24 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertTrue(tenant.on_trial)
         self.assertIsNone(tenant.paid_until)
 
+    def test_create_tenant_always_uses_lowercase_schema_name(self):
+        expected_url = 'https://lowercase.%s' % settings.KIWI_TENANTS_DOMAIN
+        response = self.client.post(
+            reverse('tcms_tenants:create-tenant'),
+            {
+                'name': 'Low Case LLC.',
+                'schema_name': 'LowerCase',
+                # this is what the default form view sends
+                'on_trial': True,
+                'paid_until': '',
+            })
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response['Location'], expected_url)
+
+        self.assertTrue(
+            Tenant.objects.filter(schema_name='lowercase').exists())
+
     def test_create_tenant_with_name_schema_on_trial_payment_date(self):
         """
             Similar invocation will be used via inherited view in
