@@ -54,6 +54,20 @@ class NewTenantViewTestCase(LoggedInTestCase):
                             '<input id="id_paid_until" name="paid_until" type="hidden">',
                             html=True)
 
+    def test_invalid_schema_name_shows_errors(self):
+        response = self.client.post(
+            reverse('tcms_tenants:create-tenant'),
+            {
+                'name': 'Dash Is Not Allowed',
+                'schema_name': 'kiwi-tcms',
+                'on_trial': True,
+                'paid_until': '',
+            })
+
+        self.assertContains(response, 'Invalid string used for the schema name.')
+        self.assertFalse(
+            Tenant.objects.filter(schema_name='kiwi-tcms').exists())
+
     def test_create_tenant_with_name_schema_only(self):
         expected_url = 'https://tinc.%s' % settings.KIWI_TENANTS_DOMAIN
         response = self.client.post(
