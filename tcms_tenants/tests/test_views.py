@@ -53,6 +53,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertContains(response,
                             '<input id="id_paid_until" name="paid_until" type="hidden">',
                             html=True)
+        self.assertContains(response, 'Valid schema_name pattern: ^[a-z0-9]{1,63}$')
 
     def test_invalid_schema_name_shows_errors(self):
         response = self.client.post(
@@ -65,6 +66,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             })
 
         self.assertContains(response, 'Invalid string used for the schema name.')
+        self.assertContains(response, 'Valid schema_name pattern: ^[a-z0-9]{1,63}$')
         self.assertFalse(
             Tenant.objects.filter(schema_name='kiwi-tcms').exists())
 
