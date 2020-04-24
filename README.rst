@@ -139,6 +139,14 @@ its new MT version!
 Changelog
 ---------
 
+v1.0.2 (24 Apr 2020)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.0.1 to 3.0.3
+- Show valid schema_name pattern as help text in UI
+- Remove schema_name placeholder text because it was misleading
+
+
 v1.0.1 (18 Mar 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
