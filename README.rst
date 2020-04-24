@@ -139,6 +139,13 @@ its new MT version!
 Changelog
 ---------
 
+v1.0.3 (24 Apr 2020)
+~~~~~~~~~~~~~~~~~~~~
+
+- Always lower case schema_name to make sure it can actually be
+  useed as a valid hostname
+
+
 v1.0.2 (24 Apr 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
