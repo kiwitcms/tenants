@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 
 from tcms_tenants import utils
-from tcms_tenants.forms import NewTenantForm
+from tcms_tenants.forms import NewTenantForm, VALIDATION_RE
 
 
 @method_decorator(permission_required('tcms_tenants.add_tenant'), name='dispatch')
@@ -34,6 +34,7 @@ class NewTenantView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['tcms_tenants_domain'] = settings.KIWI_TENANTS_DOMAIN
+        context['validation_pattern'] = VALIDATION_RE.pattern
         return context
 
     def form_valid(self, form):
