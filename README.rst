@@ -139,11 +139,18 @@ its new MT version!
 Changelog
 ---------
 
+v1.1 (25 Apr 2020)
+~~~~~~~~~~~~~~~~~~
+
+- Bring back an improved HTML placeholder for schema_name
+- Properly validate input values for schema/domain names
+
+
 v1.0.3 (24 Apr 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Always lower case schema_name to make sure it can actually be
-  useed as a valid hostname
+  used as a valid hostname
 
 
 v1.0.2 (24 Apr 2020)
