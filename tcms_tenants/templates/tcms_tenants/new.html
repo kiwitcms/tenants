@@ -31,6 +31,7 @@
                     <div class="input-group">
                         <span class="input-group-addon">https://</span>
                         <input type="text" id="id_schema" maxlength="{{ form.fields.schema_name.max_length }}"
+                               placeholder="commodore64"
                                name="schema_name" value="{{ form.schema_name.value|default:'' }}"
                                class="form-control" required>
                         <span class="input-group-addon">.{{ tcms_tenants_domain }}</span>
