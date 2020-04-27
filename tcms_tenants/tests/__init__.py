@@ -30,6 +30,10 @@ class LoggedInTestCase(FastTenantTestCase):
         return 'fast'
 
     @classmethod
+    def get_test_tenant_domain(cls):
+        return 'tenant.fast-test.com'
+
+    @classmethod
     def setup_tenant(cls, tenant):
         tenant.owner = UserFactory()
         tenant.owner.set_password('password')
