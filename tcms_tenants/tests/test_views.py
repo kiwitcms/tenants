@@ -18,7 +18,8 @@ from tcms_tenants.tests import LoggedInTestCase
 
 class RedirectToTestCase(LoggedInTestCase):
     def test_redirect_to_tenant_path(self):
-        expected_url = 'https://test.%s/plans/search/' % settings.KIWI_TENANTS_DOMAIN
+        expected_url = 'https://%s.%s/plans/search/' % (self.get_test_schema_name(),
+                                                        settings.KIWI_TENANTS_DOMAIN)
         response = self.client.get(reverse('tcms_tenants:redirect-to',
                                            args=[self.tenant.schema_name, 'plans/search/']))
 
@@ -26,7 +27,8 @@ class RedirectToTestCase(LoggedInTestCase):
         self.assertEqual(response['Location'], expected_url)
 
     def test_redirect_to_tenant_root_url(self):
-        expected_url = 'https://test.%s/' % settings.KIWI_TENANTS_DOMAIN
+        expected_url = 'https://%s.%s/' % (self.get_test_schema_name(),
+                                           settings.KIWI_TENANTS_DOMAIN)
         response = self.client.get(reverse('tcms_tenants:redirect-to',
                                            args=[self.tenant.schema_name, '']))
 
