@@ -31,21 +31,6 @@ if 'tcms_tenants.middleware.BlockUnauthorizedUserMiddleware' not in MIDDLEWARE: 
     MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')  # noqa: F821
 
 
-TENANT_APPS = [
-    'django.contrib.sites',
-
-    'attachments',
-    'django_comments',
-    'modernrpc',
-    'simple_history',
-
-    'tcms.bugs.apps.AppConfig',
-    'tcms.core.contrib.linkreference',
-    'tcms.management',
-    'tcms.testcases.apps.AppConfig',
-    'tcms.testplans.apps.AppConfig',
-    'tcms.testruns.apps.AppConfig',
-]
 TENANT_MODEL = "tcms_tenants.Tenant"
 TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"
 
