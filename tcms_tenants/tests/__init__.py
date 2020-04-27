@@ -26,6 +26,10 @@ class UserFactory(DjangoModelFactory):
 
 class LoggedInTestCase(FastTenantTestCase):
     @classmethod
+    def get_test_schema_name(cls):
+        return 'fast'
+
+    @classmethod
     def setup_tenant(cls, tenant):
         tenant.owner = UserFactory()
         tenant.owner.set_password('password')
