@@ -45,12 +45,12 @@ class TenantFileSystemStorageTestCase(LoggedInTestCase):
 
         # assert the paths are correct
         self.assertTrue(public_os_path.endswith('apps_dir/media/public/%s' % public_file_name))
-        self.assertTrue(t1_os_path.endswith('apps_dir/media/test/%s' % t1_file_name))
+        self.assertTrue(t1_os_path.endswith('apps_dir/media/fast/%s' % t1_file_name))
         self.assertTrue(t2_os_path.endswith('apps_dir/media/tenant2/%s' % t2_file_name))
 
         # assert urls are correct
         self.assertEqual(public_url, '/media/public/%s' % public_file_name)
-        self.assertEqual(t1_url, '/media/test/%s' % t1_file_name)
+        self.assertEqual(t1_url, '/media/fast/%s' % t1_file_name)
         self.assertEqual(t2_url, '/media/tenant2/%s' % t2_file_name)
 
         # assert contents are correct
