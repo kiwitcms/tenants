@@ -139,6 +139,12 @@ its new MT version!
 Changelog
 ---------
 
+v1.1.1 (27 Apr 2020)
+~~~~~~~~~~~~~~~~~~~~
+
+- Do not ship ``TENANT_APPS`` b/c it is distributed with Kiwi TCMS v8.3
+
+
 v1.1 (25 Apr 2020)
 ~~~~~~~~~~~~~~~~~~
 
