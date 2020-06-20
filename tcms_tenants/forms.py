@@ -25,7 +25,7 @@ def _check_domain_name(name):
         raise ValidationError(_('Invalid string'))
 
 
-class NewTenantForm(forms.Form):
+class NewTenantForm(forms.Form):  # pylint: disable=must-inherit-from-model-form
     name = forms.CharField(max_length=100)
     schema_name = forms.CharField(max_length=63,
                                   # pylint: disable=protected-access
