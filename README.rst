@@ -139,6 +139,14 @@ its new MT version!
 Changelog
 ---------
 
+v1.2 (20 Jun 2020)
+~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.0.3 to 3.1.0
+- Improvements in tests and minor updates to make linters happy
+- Tested with Kiwi TCMS v8.4
+
+
 v1.1.1 (27 Apr 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
