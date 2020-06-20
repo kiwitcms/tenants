@@ -16,7 +16,7 @@ entry_point = pkg_resources.EntryPoint.parse('kiwitcms_tenants_devel = tcms_tena
 dist._ep_map = {'kiwitcms.plugins': {'kiwitcms_tenants_devel': entry_point}}
 pkg_resources.working_set.add(dist)
 
-from tcms.settings.product import *  # noqa: F403
+from tcms.settings.product import *  # noqa: E402, F403
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, BASE_DIR)
