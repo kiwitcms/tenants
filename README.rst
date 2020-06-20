@@ -11,10 +11,6 @@ Multi-tenant support for Kiwi TCMS
     :target: https://pyup.io/repos/github/kiwitcms/tenants/
     :alt: Python updates
 
-.. image:: https://d322cqt584bo4o.cloudfront.net/kiwitcms-tenants/localized.svg
-   :target: https://crowdin.com/project/kiwitcms-tenants
-   :alt: Translate
-
 .. image:: https://tidelift.com/badges/package/pypi/kiwitcms-tenants
     :target: https://tidelift.com/subscription/pkg/pypi-kiwitcms-tenants?utm_source=pypi-kiwitcms-tenants&utm_medium=github&utm_campaign=readme
     :alt: Tidelift
