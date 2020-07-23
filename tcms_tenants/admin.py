@@ -60,7 +60,7 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
     # Tenant.objects.none() instead of .all(). However ModelChoiceField.to_python()
     # is trying to self.queryset.get() the currently selected value! When the queryset
     # is empty this raises ValidationError!
-    # The internal mechanics of this are in BasseForm._clean_fields()::L399(Django 2.1.7)
+    # The internal mechanics of this are in BaseForm._clean_fields()::L399(Django 2.1.7)
     # which calls field.clean(value) before any clean_<field_name>() methods on the form!
     tenant = forms.models.ModelChoiceField(
         queryset=Tenant.objects.all(),
@@ -116,6 +116,15 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
             Show only users authorized for the current tenant!
         """
         return super().get_queryset(request).filter(tenant=request.tenant)
+
+    # pylint: disable=too-many-arguments
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        context[
+            'adminform'
+        ].form.fields['tenant'].queryset = Tenant.objects.filter(pk=request.tenant.pk)
+
+        return super().render_change_form(
+            request, context, add=add, change=change, form_url=form_url, obj=obj)
 
     def get_changeform_initial_data(self, request):
         """
