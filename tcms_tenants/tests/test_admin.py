@@ -8,7 +8,9 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from django_tenants import utils
+
 from tcms_tenants.tests import LoggedInTestCase
+from tcms_tenants.tests import UserFactory
 
 
 class TenantAdminTestCase(LoggedInTestCase):
@@ -79,6 +81,9 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
         cls.tenant.name = 'For testing purposes'
         cls.tenant.save()
 
+        # we give this 2nd user access to the tenant
+        cls.tester2 = UserFactory()
+
         with utils.schema_context('public'):
             cls.tenant2 = utils.get_tenant_model()(schema_name='my_other_tenant',
                                                    owner=cls.tester)
@@ -109,6 +114,30 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
                                                                          self.tenant),
                             html=True)
         self.assertNotContains(response, self.tenant2)
+
+    def test_on_error_display_only_current_tenant(self):
+        self.assertGreater(utils.get_tenant_model().objects.filter(owner=self.tester).count(), 1)
+
+        response = self.client.post(
+            reverse('admin:tcms_tenants_tenant_authorized_users_add'), {
+                # NOTE: No tenant field specified
+                'user': self.tester2.pk,
+                '_save': 'Save',
+            })
+
+        self.assertContains(response, "<ul class='errorlist'>", html=True)
+        self.assertContains(response, "This field is required")
+        self.assertContains(response, "<option value=''>---------</option>", html=True)
+        self.assertContains(response,
+                            "<option value='%d'>%s</option>" % (self.tenant.pk,
+                                                                self.tenant),
+                            html=True)
+        self.assertNotContains(response, self.tenant2)
+
+        self.assertContains(response,
+                            "<option value='%d' selected>%s</option>" % (self.tester2.pk,
+                                                                         self.tester2.username),
+                            html=True)
 
     def test_change_displays_only_current_tenant(self):
         self.assertGreater(utils.get_tenant_model().objects.filter(owner=self.tester).count(), 1)
