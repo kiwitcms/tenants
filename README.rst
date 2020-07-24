@@ -135,6 +135,14 @@ its new MT version!
 Changelog
 ---------
 
+
+v1.2.1 (24 Jul 2020)
+~~~~~~~~~~~~~~~~~~~~
+
+- Filter out AuthorizedUsersChangeForm even on errors
+- Tested with Kiwi TCMS v8.5
+
+
 v1.2 (20 Jun 2020)
 ~~~~~~~~~~~~~~~~~~
 
