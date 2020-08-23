@@ -1,7 +1,7 @@
 -r requirements.txt
 
 flake8
-kiwitcms==8.5
+kiwitcms==8.6
 coveralls
 factory_boy
 pylint-django
