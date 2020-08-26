@@ -135,6 +135,13 @@ its new MT version!
 Changelog
 ---------
 
+v1.3 (26 Aug 2020)
+~~~~~~~~~~~~~~~~~~
+
+- Tested with Kiwi TCMS v8.6
+- Update django-tenants from 3.1.0 to 3.2.1
+- Don't pin dependencies in devel.txt
+
 
 v1.2.1 (24 Jul 2020)
 ~~~~~~~~~~~~~~~~~~~~
