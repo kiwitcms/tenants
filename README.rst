@@ -135,6 +135,12 @@ its new MT version!
 Changelog
 ---------
 
+v1.3.1 (09 Sep 2020)
+~~~~~~~~~~~~~~~~~~~~
+
+- Replace deprecated import to silence warnings with Django 3.1
+
+
 v1.3 (26 Aug 2020)
 ~~~~~~~~~~~~~~~~~~
 
