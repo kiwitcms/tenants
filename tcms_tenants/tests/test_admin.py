@@ -121,23 +121,24 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
         response = self.client.post(
             reverse('admin:tcms_tenants_tenant_authorized_users_add'), {
                 # NOTE: No tenant field specified
-                'user': self.tester2.pk,
+                'user': self.tester2.username,
                 '_save': 'Save',
             })
 
         self.assertContains(response, "<ul class='errorlist'>", html=True)
         self.assertContains(response, "This field is required")
-        self.assertContains(response, "<option value=''>---------</option>", html=True)
+        self.assertContains(response, "<option value='' selected>---------</option>", html=True)
         self.assertContains(response,
                             "<option value='%d'>%s</option>" % (self.tenant.pk,
                                                                 self.tenant),
                             html=True)
         self.assertNotContains(response, self.tenant2)
 
-        self.assertContains(response,
-                            "<option value='%d' selected>%s</option>" % (self.tester2.pk,
-                                                                         self.tester2.username),
-                            html=True)
+        self.assertContains(
+            response,
+            '<input id="id_user" type="text" name="user" value="%s" required>' %
+            self.tester2.username,
+            html=True)
 
     def test_change_displays_only_current_tenant(self):
         self.assertGreater(utils.get_tenant_model().objects.filter(owner=self.tester).count(), 1)
