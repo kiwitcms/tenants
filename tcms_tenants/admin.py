@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -7,9 +7,10 @@ from django import forms
 from django.urls import reverse
 from django.contrib import admin
 from django.forms.utils import ErrorList
-from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponseForbidden, HttpResponseRedirect
+
+from tcms.core.forms.fields import UserField
 
 from tcms_tenants.models import Tenant
 from tcms_tenants.utils import owns_tenant
@@ -65,8 +66,8 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
     tenant = forms.models.ModelChoiceField(
         queryset=Tenant.objects.all(),
     )
-    user = forms.models.ModelChoiceField(
-        queryset=get_user_model().objects.all(),  # it is OK to be able to select between all users
+    user = UserField(  # pylint: disable=form-field-help-text-used
+        help_text=_('Existing username, email or user ID')
     )
 
     def __init__(self,  # pylint: disable=too-many-arguments
