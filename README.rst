@@ -65,14 +65,18 @@ default tenant on which your application runs::
                               --name "Public tenant"
                               --paid_until 2050-12-31
                               --on_trial False
-                              --owner_id 1
+                              --owner_id 2
                               --organization "Testing department"
                               --domain-domain public.tenants.example.org
                               --domain-is_primary True
 
-**WARNING:** schema_name `public` is special, the rest is up to you.
-`owner_id` is usually the ID of the first superuser in the database which means
+**WARNING:** schema_name ``public`` is special, the rest is up to you.
+``owner_id`` is usually the ID of the first superuser in the database which means
 you must have executed ``createsuperuser`` first!
+
+**WARNING:** fresh installations of Kiwi TCMS v8.8 and later contain a special
+record with name ``AnonymousUser`` with ID == 1. Super-user will usually have an
+ID of 2 in this case! Pay attention to the ``owner_id`` value in the above command!
 
 You can use `create_tenant` afterwards to create other tenants for various teams
 or projects. Non-public tenants can also be created via the web interface as well.
