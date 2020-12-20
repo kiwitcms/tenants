@@ -3,15 +3,17 @@
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
 from django.views.generic.base import RedirectView
 from django.views.generic.edit import FormView
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import permission_required
+from django.utils.translation import gettext_lazy as _
 
 from tcms_tenants import utils
-from tcms_tenants.forms import NewTenantForm, VALIDATION_RE
+from tcms_tenants.forms import InviteUsersForm, NewTenantForm, VALIDATION_RE
 
 
 @method_decorator(permission_required('tcms_tenants.add_tenant'), name='dispatch')
@@ -66,3 +68,34 @@ class RedirectTo(RedirectView):
         tenant = kwargs['tenant']
         path = kwargs['path']
         return '%s/%s' % (utils.tenant_url(self.request, tenant), path)
+
+
+@method_decorator(login_required, name='dispatch')  # pylint: disable=missing-permission-required
+class InviteUsers(FormView):
+    """
+        Invite users to tenant via email.
+
+        .. important::
+
+            Anyone who is authorized for this tenant can invite others
+            in the same way they can add them directly via the `Authorized users`
+            menu!
+    """
+    form_class = InviteUsersForm
+    template_name = "tcms_tenants/invite_users.html"
+
+    def get(self, request, *args, **kwargs):
+        if not utils.owns_tenant(request.user, request.tenant):
+            messages.add_message(
+                request,
+                messages.ERROR,
+                _("Only users who are authorized for this tenant can invite others"),
+            )
+            return HttpResponseRedirect('/')
+
+        return super().get(self, request, *args, **kwargs)
+
+    def form_valid(self, form):
+        utils.invite_users(self.request, form.cleaned_data["emails"])
+
+        return HttpResponseRedirect('/')

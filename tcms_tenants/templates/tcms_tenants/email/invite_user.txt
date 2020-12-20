@@ -1,0 +1,6 @@
+{% load i18n %}{% blocktrans %}Dear tester,
+{{ invited_by }} has invited you to join their Kiwi TCMS tenant at
+{{ tenant_url }}
+
+In case you have never logged in before an account was created for you
+automatically. You will have to reset your password before you can login!{% endblocktrans %}
