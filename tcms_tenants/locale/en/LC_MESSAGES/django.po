@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-09 20:56+0000\n"
+"POT-Creation-Date: 2020-12-21 17:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: tcms_tenants/admin.py:41 tcms_tenants/middleware.py:32
+#: tcms_tenants/admin.py:40 tcms_tenants/middleware.py:32
 msgid "Unauthorized"
 msgstr ""
 
-#: tcms_tenants/admin.py:71
+#: tcms_tenants/admin.py:70
 msgid "Existing username, email or user ID"
 msgstr ""
 
-#: tcms_tenants/admin.py:105
+#: tcms_tenants/admin.py:104
 msgid "Username"
 msgstr ""
 
-#: tcms_tenants/admin.py:110
+#: tcms_tenants/admin.py:109
 msgid "Full name"
 msgstr ""
 
@@ -47,6 +47,11 @@ msgid "Create"
 msgstr ""
 
 #: tcms_tenants/menu.py:14
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:9
+msgid "Invite users"
+msgstr ""
+
+#: tcms_tenants/menu.py:15
 msgid "Authorized users"
 msgstr ""
 
@@ -58,6 +63,17 @@ msgstr ""
 msgid "Tenant expires in less than 7 days"
 msgstr ""
 
+#: tcms_tenants/templates/tcms_tenants/email/invite_user.txt:1
+#, python-format
+msgid ""
+"Dear tester,\n"
+"%(invited_by)s has invited you to join their Kiwi TCMS tenant at\n"
+"%(tenant_url)s\n"
+"\n"
+"In case you have never logged in before an account was created for you\n"
+"automatically. You will have to reset your password before you can login!"
+msgstr ""
+
 #: tcms_tenants/templates/tcms_tenants/email/new.txt:1
 #, python-format
 msgid ""
@@ -65,6 +81,15 @@ msgid ""
 "%(tenant_url)s\n"
 "\n"
 "If you have troubles please contact support!"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:18
+msgid "Email"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:24
+#: tcms_tenants/templates/tcms_tenants/new.html:49
+msgid "Save"
 msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/new.html:9
@@ -87,14 +112,18 @@ msgstr ""
 msgid "Validation pattern"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:49
-msgid "Save"
-msgstr ""
-
-#: tcms_tenants/utils.py:40
+#: tcms_tenants/utils.py:45
 msgid "Schema name already in use"
 msgstr ""
 
-#: tcms_tenants/utils.py:100
+#: tcms_tenants/utils.py:105
 msgid "New Kiwi TCMS tenant created"
+msgstr ""
+
+#: tcms_tenants/utils.py:181
+msgid "Invitation to join to Kiwi TCMS"
+msgstr ""
+
+#: tcms_tenants/views.py:92
+msgid "Only users who are authorized for this tenant can invite others"
 msgstr ""

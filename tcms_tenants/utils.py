@@ -1,8 +1,9 @@
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
 import datetime
+import uuid
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -12,9 +13,13 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
 from django_tenants.utils import schema_context, tenant_context
+from tcms.kiwi_auth import forms as kiwi_auth_forms
 from tcms.core.utils.mailto import mailto
 
 from tcms_tenants.models import Domain, Tenant
+
+
+UserModel = get_user_model()
 
 
 def can_access(user, tenant):
@@ -115,7 +120,7 @@ def create_oss_tenant(owner, name, schema_name, organization):
         user = None
 
         def __init__(self, username):
-            self.user = get_user_model().objects.get(username=username)
+            self.user = UserModel.objects.get(username=username)
 
     data = {
         'name': name,
@@ -128,3 +133,63 @@ def create_oss_tenant(owner, name, schema_name, organization):
     request = FakeRequest(owner)
 
     return create_tenant(data, request)
+
+
+# NOTE: defined here to avoid circular imports with forms.py
+class RegistrationForm(kiwi_auth_forms.RegistrationForm):
+    """
+        Override captcha field b/c Kiwi TCMS may be configured to
+        use reCAPTCHA and we don't want this to block automatic
+        creation of user accounts!
+    """
+    captcha = None.__class__
+
+
+def create_user_account(email_address):
+    desired_username = username = email_address.split("@")[0]
+    password = uuid.uuid4().hex
+
+    i = 1
+    while UserModel.objects.filter(username=username).exists():
+        username = "%s.%d" % (desired_username, i)
+        i += 1
+
+    form = RegistrationForm(data={
+        "username": username,
+        "password1": password,
+        "password2": password,
+        "email": email_address,
+    })
+
+    user = form.save()
+
+    # activate their account instead of sending them email with activation key
+    user.is_active = True
+    user.save()
+
+    return user
+
+
+def invite_users(request, email_addresses):
+    for email in email_addresses:
+        # note: users are on public_schema
+        user = UserModel.objects.filter(email=email).first()
+
+        # email not found, need to create account for them
+        if not user:
+            user = create_user_account(email)
+
+        # user already authorized for tenant
+        if request.tenant.authorized_users.filter(pk=user.pk).exists():
+            continue
+
+        request.tenant.authorized_users.add(user)
+        mailto(
+            template_name='tcms_tenants/email/invite_user.txt',
+            recipients=[user.email],
+            subject=str(_('Invitation to join to Kiwi TCMS')),
+            context={
+                "invited_by": request.user.get_full_name() or request.user.username,
+                "tenant_url": tenant_url(request, request.tenant.schema_name),
+            }
+        )

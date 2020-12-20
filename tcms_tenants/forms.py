@@ -37,3 +37,27 @@ class NewTenantForm(forms.Form):  # pylint: disable=must-inherit-from-model-form
                                   widget=forms.HiddenInput)
     organization = forms.CharField(max_length=64, required=False,
                                    widget=forms.HiddenInput)
+
+
+class InviteUsersForm(forms.Form):  # pylint: disable=must-inherit-from-model-form
+    number_of_fields = 10
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for i in self.range:
+            self.fields["email_%d" % i] = forms.CharField(required=False)
+
+    def clean(self):
+        emails = set()
+
+        for i in self.range:
+            email = self.cleaned_data["email_%d" % i]
+            if email:
+                emails.add(email)
+
+        self.cleaned_data["emails"] = emails
+
+    @property
+    def range(self):
+        return range(self.number_of_fields)
