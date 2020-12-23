@@ -139,10 +139,11 @@ its new MT version!
 Changelog
 ---------
 
-v1.4.1 (23 Dec 2020)
+v1.4.2 (23 Dec 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
 - Fix a bug with how we override captcha field in user registration form
+- Fix invitation email subject
 
 
 v1.4 (23 Dec 2020)
