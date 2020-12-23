@@ -13,6 +13,8 @@
 {% block contents %}
     <div class="container-fluid container-cards-pf">
         <form class="form-horizontal" action="{% url 'tcms_tenants:invite-users' %}" method="post">
+        {% csrf_token %}
+
         {% for i in form.range %}
             <div class="form-group">
                 <label class="col-md-1 col-lg-1" for="email_{{ i }}">{% trans "Email" %}</label>

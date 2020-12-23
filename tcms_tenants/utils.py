@@ -142,7 +142,7 @@ class RegistrationForm(kiwi_auth_forms.RegistrationForm):
         use reCAPTCHA and we don't want this to block automatic
         creation of user accounts!
     """
-    captcha = None.__class__
+    captcha = None
 
 
 def create_user_account(email_address):
