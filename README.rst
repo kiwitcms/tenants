@@ -139,6 +139,17 @@ its new MT version!
 Changelog
 ---------
 
+v1.4 (23 Dec 2020)
+~~~~~~~~~~~~~~~~~~
+
+- Tested with Kiwi TCMS v8.9
+- Add warning for ``owner_id`` in README
+- Replace ModelChoiceField with UserField. Fixes
+  `Issue #114 <https://github.com/kiwitcms/tenants/issues/114>`_
+- Support user invitions for tenant. Fixes
+  `Issue #116 <https://github.com/kiwitcms/tenants/issues/116>`_
+
+
 v1.3.1 (09 Sep 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
