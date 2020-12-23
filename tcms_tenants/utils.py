@@ -187,7 +187,7 @@ def invite_users(request, email_addresses):
         mailto(
             template_name='tcms_tenants/email/invite_user.txt',
             recipients=[user.email],
-            subject=str(_('Invitation to join to Kiwi TCMS')),
+            subject=str(_('Invitation to join Kiwi TCMS')),
             context={
                 "invited_by": request.user.get_full_name() or request.user.username,
                 "tenant_url": tenant_url(request, request.tenant.schema_name),
