@@ -139,6 +139,12 @@ its new MT version!
 Changelog
 ---------
 
+v1.4.3 (25 Jan 2021)
+~~~~~~~~~~~~~~~~~~~~
+
+- Add missing csrf_token in NewTenantForm
+
+
 v1.4.2 (23 Dec 2020)
 ~~~~~~~~~~~~~~~~~~~~
 
