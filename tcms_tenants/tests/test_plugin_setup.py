@@ -1,10 +1,9 @@
-# Copyright (c) 2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2020-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
 
 from django.conf import settings
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from tcms_tenants import menu
@@ -26,6 +25,6 @@ class PluginSetupTestCase(LoggedInTestCase):
         self.fail('PLUGINS not found in settings.MENU_ITEMS')
 
     def test_menu_rendering(self):
-        response = self.client.get(reverse('iframe-navigation'))
+        response = self.client.get('/', follow=True)
         self.assertContains(response, 'Tenant')
         self.assertContains(response, 'Authorized users')
