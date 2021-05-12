@@ -139,6 +139,14 @@ its new MT version!
 Changelog
 ---------
 
+v1.4.4 (12 May 2021)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.2.1 to 3.3.0
+- Tested with Kiwi TCMS v10.0
+- Tested with Python 3.8
+
+
 v1.4.3 (25 Jan 2021)
 ~~~~~~~~~~~~~~~~~~~~
 
