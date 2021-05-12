@@ -25,7 +25,7 @@ pylint:
 	fi
 	
 	PYTHONPATH=.:$(KIWI_LINT_INCLUDE_PATH) DJANGO_SETTINGS_MODULE="test_project.settings" \
-	pylint --load-plugins=pylint_django --load-plugins=kiwi_lint \
+	pylint --load-plugins=pylint_django --load-plugins=kiwi_lint -d similar-string \
 	    -d missing-docstring -d duplicate-code -d module-in-directory-without-init \
 	    *.py tcms_settings_dir/ tcms_tenants/ test_project/
 

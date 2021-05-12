@@ -5,3 +5,4 @@ kiwitcms==10.0
 coveralls
 factory_boy
 pylint-django
+textdistance
