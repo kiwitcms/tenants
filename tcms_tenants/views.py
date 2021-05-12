@@ -45,8 +45,8 @@ class NewTenantView(FormView):
         return HttpResponseRedirect(utils.tenant_url(self.request, tenant.schema_name))
 
 
-@method_decorator(login_required, name='dispatch')  # pylint: disable=missing-permission-required
-class RedirectTo(RedirectView):
+@method_decorator(login_required, name='dispatch')
+class RedirectTo(RedirectView):  # pylint: disable=missing-permission-required
     """
         Will redirect to tenant.domain.domain/path!
 
@@ -70,8 +70,8 @@ class RedirectTo(RedirectView):
         return '%s/%s' % (utils.tenant_url(self.request, tenant), path)
 
 
-@method_decorator(login_required, name='dispatch')  # pylint: disable=missing-permission-required
-class InviteUsers(FormView):
+@method_decorator(login_required, name='dispatch')
+class InviteUsers(FormView):  # pylint: disable=missing-permission-required
     """
         Invite users to tenant via email.
 
