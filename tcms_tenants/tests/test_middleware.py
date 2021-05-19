@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -14,6 +14,8 @@ from tcms_tenants.tests import LoggedInTestCase
 
 class BlockUnauthorizedUserMiddlewareTestCase(LoggedInTestCase):
     def test_unauthorized_user_cant_access_tenant(self):
+        self.assertFalse(self.tenant.publicly_readable)
+
         self.tenant.authorized_users.remove(self.tester)
         response = self.client.get('/')
 

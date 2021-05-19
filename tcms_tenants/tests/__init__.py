@@ -9,6 +9,9 @@ from factory.django import DjangoModelFactory
 
 from django_tenants.test.client import TenantClient
 from django_tenants.test.cases import FastTenantTestCase
+from django_tenants.utils import tenant_context
+
+from tcms.tests.factories import TestPlanFactory
 
 
 class UserFactory(DjangoModelFactory):
@@ -52,6 +55,10 @@ class LoggedInTestCase(FastTenantTestCase):
 
         # authorize this user
         cls.tenant.authorized_users.add(cls.tester)
+
+        # initial data
+        with tenant_context(cls.tenant):
+            cls.test_plan_by_owner = TestPlanFactory(author=cls.tenant.owner)
 
     def setUp(self):
         super().setUp()
