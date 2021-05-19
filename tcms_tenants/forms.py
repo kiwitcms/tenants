@@ -33,8 +33,9 @@ class NewTenantForm(forms.Form):  # pylint: disable=must-inherit-from-model-form
                                               _check_domain_name,
                                               utils.schema_name_not_used])
     paid_until = forms.DateTimeField(required=False, widget=forms.HiddenInput)
-    on_trial = forms.BooleanField(initial=True, required=False,
-                                  widget=forms.HiddenInput)
+    publicly_readable = forms.BooleanField(initial=False,
+                                           required=False,
+                                           widget=forms.HiddenInput)
     organization = forms.CharField(max_length=64, required=False,
                                    widget=forms.HiddenInput)
 

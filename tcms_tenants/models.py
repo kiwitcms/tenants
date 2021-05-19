@@ -16,7 +16,7 @@ class Tenant(TenantMixin):
     name = models.CharField(max_length=100, db_index=True)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
     paid_until = models.DateTimeField(null=True, blank=True, db_index=True)
-    on_trial = models.BooleanField(default=True, db_index=True)
+    publicly_readable = models.BooleanField(default=False, db_index=True)
     authorized_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,
                               on_delete=models.CASCADE,

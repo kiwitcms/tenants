@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -63,7 +63,7 @@ def create_tenant(form_data, request):
     owner = request.user
     name = form_data['name']
     schema_name = form_data['schema_name'].lower()
-    on_trial = form_data['on_trial']
+    publicly_readable = form_data['publicly_readable']
     paid_until = form_data['paid_until']
 
     with schema_context('public'):
@@ -71,7 +71,7 @@ def create_tenant(form_data, request):
             name=name,
             schema_name=schema_name,
             paid_until=paid_until,
-            on_trial=on_trial,
+            publicly_readable=publicly_readable,
             owner=owner,
             organization=form_data['organization'],
         )
@@ -126,7 +126,7 @@ def create_oss_tenant(owner, name, schema_name, organization):
         'name': name,
         'schema_name': schema_name.lower(),
         'organization': organization,
-        'on_trial': False,
+        'publicly_readable': False,
         'paid_until': datetime.datetime(2999, 12, 31),
     }
 
