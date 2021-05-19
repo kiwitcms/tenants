@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-few-public-methods
@@ -14,7 +14,7 @@ from tcms_tenants.utils import can_access
 
 class BlockUnauthorizedUserMiddleware:
     """
-        Raises 404 if the user making the request is not authorized
+        Raises 403 if the user making the request is not authorized
         explicitly to access the tenant instance!
 
         .. warning:

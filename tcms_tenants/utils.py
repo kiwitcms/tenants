@@ -6,13 +6,18 @@ import datetime
 import uuid
 
 from django.conf import settings
+from django.db import connections
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
-from django_tenants.utils import schema_context, tenant_context
+from django_tenants.utils import (
+    get_tenant_database_alias,
+    schema_context,
+    tenant_context,
+)
 from tcms.kiwi_auth import forms as kiwi_auth_forms
 from tcms.core.utils.mailto import mailto
 
@@ -22,9 +27,17 @@ from tcms_tenants.models import Domain, Tenant
 UserModel = get_user_model()
 
 
+def get_current_tenant():
+    return connections[get_tenant_database_alias()].tenant
+
+
 def can_access(user, tenant):
     # everybody can access the public schema
     if tenant.schema_name == 'public':
+        return True
+
+    # everyone can access publicly readable tenants
+    if tenant.publicly_readable:
         return True
 
     # anonymous users "can access" because they need to be able

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2020-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=undefined-variable
@@ -29,6 +29,9 @@ if 'django_tenants.middleware.main.TenantMainMiddleware' not in MIDDLEWARE:     
 
 if 'tcms_tenants.middleware.BlockUnauthorizedUserMiddleware' not in MIDDLEWARE:   # noqa: F821
     MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')  # noqa: F821
+
+if 'tcms_tenants.backends.PubliclyReadableBackend' not in AUTHENTICATION_BACKENDS:   # noqa: F821
+    AUTHENTICATION_BACKENDS.append('tcms_tenants.backends.PubliclyReadableBackend')  # noqa: F821
 
 
 TENANT_MODEL = "tcms_tenants.Tenant"
