@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -50,9 +50,11 @@ class NewTenantViewTestCase(LoggedInTestCase):
         response = self.client.get(reverse('tcms_tenants:create-tenant'))
         # assert hidden fields are shown with defaults b/c the tests below
         # can't simulate opening the page and clicking the submit button
-        self.assertContains(response,
-                            '<input id="id_on_trial" name="on_trial" value="True" type="hidden">',
-                            html=True)
+        self.assertContains(
+            response,
+            ('<input id="id_publicly_readable" name="publicly_readable"'
+             'value="False" type="hidden">'),
+            html=True)
         self.assertContains(response,
                             '<input id="id_paid_until" name="paid_until" type="hidden">',
                             html=True)
@@ -65,7 +67,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             {
                 'name': 'Dash Is Not Allowed',
                 'schema_name': 'kiwi-tcms',
-                'on_trial': True,
+                'publicly_readable': False,
                 'paid_until': '',
             })
 
@@ -81,7 +83,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             {
                 'name': 'Underscore is allowed in Postres but not in domains',
                 'schema_name': 'kiwi_tcms',
-                'on_trial': True,
+                'publicly_readable': False,
                 'paid_until': '',
             })
 
@@ -97,7 +99,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             {
                 'name': 'Use an existing schema name',
                 'schema_name': self.tenant.schema_name,
-                'on_trial': True,
+                'publicly_readable': False,
                 'paid_until': '',
             })
 
@@ -113,7 +115,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
                 'name': 'Tenant, Inc.',
                 'schema_name': 'tinc',
                 # this is what the default form view sends
-                'on_trial': True,
+                'publicly_readable': False,
                 'paid_until': '',
             })
 
@@ -121,10 +123,10 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertEqual(response['Location'], expected_url)
 
         tenant = Tenant.objects.get(schema_name='tinc')
-        self.assertTrue(tenant.on_trial)
+        self.assertFalse(tenant.publicly_readable)
         self.assertIsNone(tenant.paid_until)
 
-    def test_create_tenant_with_name_schema_on_trial_payment_date(self):
+    def test_create_tenant_with_name_schema_publicly_readable_payment_date(self):
         """
             Similar invocation will be used via inherited view in
             GitHub Marketplace integration.
@@ -137,7 +139,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             {
                 'name': 'Subscriber LLC',
                 'schema_name': 'subscriber',
-                'on_trial': False,
+                'publicly_readable': False,
                 'paid_until': paid_until.strftime('%Y-%m-%d %H:%M:%S'),
             })
 
@@ -145,7 +147,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertEqual(response['Location'], expected_url)
 
         tenant = Tenant.objects.get(schema_name='subscriber')
-        self.assertFalse(tenant.on_trial)
+        self.assertFalse(tenant.publicly_readable)
         self.assertEqual(tenant.paid_until, paid_until)
 
     @patch('tcms.core.utils.mailto.send_mail')
@@ -155,7 +157,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             {
                 'name': 'Email Ltd',
                 'schema_name': 'email',
-                'on_trial': True,
+                'publicly_readable': False,
                 'paid_until': '',
             })
 
