@@ -64,7 +64,7 @@ default tenant on which your application runs::
     ./manage.py create_tenant --schema_name public
                               --name "Public tenant"
                               --paid_until 2050-12-31
-                              --on_trial False
+                              --publicly_readable False
                               --owner_id 2
                               --organization "Testing department"
                               --domain-domain public.tenants.example.org
