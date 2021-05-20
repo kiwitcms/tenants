@@ -39,6 +39,11 @@ class NewTenantView(FormView):
         context['validation_pattern'] = VALIDATION_RE.pattern
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["initial"]["owner"] = self.request.user.pk
+        return kwargs
+
     def form_valid(self, form):
         tenant = utils.create_tenant(form.cleaned_data, self.request)
         # all is successfull so redirect to the new tenant
