@@ -52,9 +52,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
         # can't simulate opening the page and clicking the submit button
         self.assertContains(
             response,
-            ('<input id="id_publicly_readable" name="publicly_readable"'
-             'value="False" type="hidden">'),
-            html=True)
+            'class="bootstrap-switch" name="publicly_readable" type="checkbox"')
         self.assertContains(response,
                             '<input id="id_paid_until" name="paid_until" type="hidden">',
                             html=True)
