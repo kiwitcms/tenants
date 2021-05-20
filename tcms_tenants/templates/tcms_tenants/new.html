@@ -16,6 +16,7 @@
     <div class="container-fluid container-cards-pf">
         <form class="form-horizontal" action="{{ form_action_url|default:form_url }}" method="post">
             {% csrf_token %}
+            <input name="owner" type="hidden" value="{{ form.owner.value }}">
 
             <div class="form-group">
                 <label class="col-md-1 col-lg-1" for="id_name">{% trans "Name" %}</label>

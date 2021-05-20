@@ -113,6 +113,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
                 'name': 'Tenant, Inc.',
                 'schema_name': 'tinc',
                 # this is what the default form view sends
+                'owner': self.tester.pk,
                 'publicly_readable': False,
                 'paid_until': '',
             })
@@ -139,6 +140,8 @@ class NewTenantViewTestCase(LoggedInTestCase):
                 'schema_name': 'subscriber',
                 'publicly_readable': False,
                 'paid_until': paid_until.strftime('%Y-%m-%d %H:%M:%S'),
+                # this is what the default form view sends
+                'owner': self.tester.pk,
             })
 
         self.assertIsInstance(response, HttpResponseRedirect)
@@ -157,6 +160,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
                 'schema_name': 'email',
                 'publicly_readable': False,
                 'paid_until': '',
+                'owner': self.tester.pk,
             })
 
         self.assertIsInstance(response, HttpResponseRedirect)
