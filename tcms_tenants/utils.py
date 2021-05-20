@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
 from django_tenants.utils import (
+    get_public_schema_name,
     get_tenant_database_alias,
     schema_context,
     tenant_context,
@@ -33,7 +34,7 @@ def get_current_tenant():
 
 def can_access(user, tenant):
     # everybody can access the public schema
-    if tenant.schema_name == 'public':
+    if tenant.schema_name == get_public_schema_name():
         return True
 
     # everyone can access publicly readable tenants
@@ -49,7 +50,7 @@ def can_access(user, tenant):
 
 
 def owns_tenant(user, tenant):
-    return tenant.schema_name != 'public' and \
+    return tenant.schema_name != get_public_schema_name() and \
             tenant.authorized_users.filter(pk=user.pk).exists()
 
 
