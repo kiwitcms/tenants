@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-23 15:28+0000\n"
+"POT-Creation-Date: 2021-05-27 08:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: tcms_tenants/forms.py:25
+#: tcms_tenants/forms.py:26
 msgid "Invalid string"
 msgstr ""
 
@@ -88,7 +88,7 @@ msgid "Email"
 msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/invite_users.html:26
-#: tcms_tenants/templates/tcms_tenants/new.html:49
+#: tcms_tenants/templates/tcms_tenants/new.html:61
 msgid "Save"
 msgstr ""
 
@@ -96,34 +96,46 @@ msgstr ""
 msgid "New tenant"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:19
+#: tcms_tenants/templates/tcms_tenants/new.html:22
 msgid "Name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:22
+#: tcms_tenants/templates/tcms_tenants/new.html:25
 msgid "Company, team or project name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:29
+#: tcms_tenants/templates/tcms_tenants/new.html:32
 msgid "Schema"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:41
+#: tcms_tenants/templates/tcms_tenants/new.html:44
 msgid "Validation pattern"
 msgstr ""
 
-#: tcms_tenants/utils.py:45
+#: tcms_tenants/templates/tcms_tenants/new.html:49
+msgid "Publicly readable"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:53
+msgid "Yes"
+msgstr ""
+
+#: tcms_tenants/templates/tcms_tenants/new.html:53
+msgid "No"
+msgstr ""
+
+#: tcms_tenants/utils.py:59
 msgid "Schema name already in use"
 msgstr ""
 
-#: tcms_tenants/utils.py:105
+#: tcms_tenants/utils.py:119
 msgid "New Kiwi TCMS tenant created"
 msgstr ""
 
-#: tcms_tenants/utils.py:190
+#: tcms_tenants/utils.py:204
 msgid "Invitation to join Kiwi TCMS"
 msgstr ""
 
-#: tcms_tenants/views.py:92
+#: tcms_tenants/views.py:97
 msgid "Only users who are authorized for this tenant can invite others"
 msgstr ""
