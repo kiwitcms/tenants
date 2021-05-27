@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 MENU_ITEMS = [
     (_('Tenant'), [
         (_('Create'), reverse_lazy('tcms_tenants:create-tenant')),
+        (_('Edit'), reverse_lazy('tcms_tenants:edit-tenant')),
         ('-', '-'),
         (_('Invite users'), reverse_lazy('tcms_tenants:invite-users')),
         (_('Authorized users'), '/admin/tcms_tenants/tenant_authorized_users/'),

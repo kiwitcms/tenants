@@ -6,7 +6,8 @@
     {{ form.media }}
 {% endblock %}
 {% block title %}
-    {% trans "New tenant" %}
+    {% trans "New tenant" as default_page_title %}
+    {{ page_title|default:default_page_title }}
 {% endblock %}
 
 
@@ -24,7 +25,8 @@
                     <input type="text" id="id_name" maxlength="{{ form.fields.name.max_length }}"
                            placeholder='{% trans "Company, team or project name" %}'
                            name="name" value="{{ form.name.value|default:'' }}"
-                           class="form-control" required>
+                           class="form-control" required
+                           {% if form.name.field.disabled %}disabled{% endif %}>
                     {{ form.name.errors }}
                 </div>
             </div>
@@ -36,7 +38,8 @@
                         <input type="text" id="id_schema" maxlength="{{ form.fields.schema_name.max_length }}"
                                placeholder="commodore64"
                                name="schema_name" value="{{ form.schema_name.value|default:'' }}"
-                               class="form-control" required>
+                               class="form-control" required
+                               {% if form.schema_name.field.disabled %}disabled{% endif %}>
                         <span class="input-group-addon">.{{ tcms_tenants_domain }}</span>
                     </div>
                     {{ form.schema_name.errors }}
@@ -50,6 +53,7 @@
                 <div class="col-md-3 col-lg-3 {% if form.publicly_readable.errors %}has-error{% endif %}">
                     <input class="bootstrap-switch" name="publicly_readable" type="checkbox"
                         {% if form.publicly_readable.value %}checked{% endif %}
+                        {% if form.publicly_readable.field.disabled %}disabled{% endif %}
                         data-on-text="{% trans 'Yes' %}" data-off-text="{% trans 'No' %}">
                     {{ form.publicly_readable.errors }}
                 </div>

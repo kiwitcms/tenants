@@ -8,12 +8,19 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponseRedirect
 from django.views.generic.base import RedirectView
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 
 from tcms_tenants import utils
-from tcms_tenants.forms import InviteUsersForm, NewTenantForm, VALIDATION_RE
+from tcms_tenants.forms import (
+    InviteUsersForm,
+    NewTenantForm,
+    UpdateTenantForm,
+    VALIDATION_RE,
+)
+from tcms_tenants.models import Tenant
 
 
 @method_decorator(permission_required('tcms_tenants.add_tenant'), name='dispatch')
@@ -48,6 +55,48 @@ class NewTenantView(FormView):
         tenant = utils.create_tenant(form, self.request)
         # all is successfull so redirect to the new tenant
         return HttpResponseRedirect(utils.tenant_url(self.request, tenant.schema_name))
+
+
+@method_decorator(permission_required('tcms_tenants.change_tenant'), name='dispatch')
+class UpdateTenantView(UpdateView):
+    model = Tenant
+    form_class = UpdateTenantForm
+    template_name = 'tcms_tenants/new.html'
+    success_url = '/'
+
+    @staticmethod
+    def check_owner(request):
+        # super-user can edit all tenants
+        if request.user.is_superuser:
+            return None
+
+        # tenant owner can edit their own tenant
+        if request.user == request.tenant.owner:
+            return None
+
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _("Only super-user and tenant owner are allowed to edit tenant properties"),
+        )
+        return HttpResponseRedirect('/')
+
+    def get(self, request, *args, **kwargs):
+        return self.check_owner(request) or super().get(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.check_owner(request) or super().post(*args, **kwargs)
+
+    def get_object(self, queryset=None):
+        return self.request.tenant
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tcms_tenants_domain'] = settings.KIWI_TENANTS_DOMAIN
+        context['validation_pattern'] = VALIDATION_RE.pattern
+        context['form_action_url'] = reverse('tcms_tenants:edit-tenant')
+        context['page_title'] = _('Edit tenant')
+        return context
 
 
 @method_decorator(login_required, name='dispatch')
