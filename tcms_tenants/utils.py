@@ -5,6 +5,7 @@
 import datetime
 import uuid
 
+from django import forms
 from django.conf import settings
 from django.db import connections
 from django.contrib.sites.models import Site
@@ -73,24 +74,11 @@ def tenant_url(request, schema_name):
     return url
 
 
-def create_tenant(form_data, request):
-    owner = request.user
-    name = form_data['name']
-    schema_name = form_data['schema_name'].lower()
-    publicly_readable = form_data['publicly_readable']
-    paid_until = form_data['paid_until']
-
+def create_tenant(form, request):
     with schema_context('public'):
-        tenant = Tenant.objects.create(
-            name=name,
-            schema_name=schema_name,
-            paid_until=paid_until,
-            publicly_readable=publicly_readable,
-            owner=owner,
-            organization=form_data['organization'],
-        )
+        tenant = form.save()
         domain = Domain.objects.create(
-            domain=tenant_domain(schema_name),
+            domain=tenant_domain(tenant.schema_name),
             is_primary=True,
             tenant=tenant,
         )
@@ -104,7 +92,7 @@ def create_tenant(form_data, request):
 
         # make the owner the first authorized user
         # otherwise they can't login
-        tenant.authorized_users.add(owner)
+        tenant.authorized_users.add(tenant.owner)
 
     with tenant_context(tenant):
         # this is used to build full URLs for things like emails
@@ -115,7 +103,7 @@ def create_tenant(form_data, request):
 
     mailto(
         template_name='tcms_tenants/email/new.txt',
-        recipients=[owner.email],
+        recipients=[tenant.owner.email],
         subject=str(_('New Kiwi TCMS tenant created')),
         context={
             'tenant_url': tenant_url(request, tenant.schema_name),
@@ -136,17 +124,23 @@ def create_oss_tenant(owner, name, schema_name, organization):
         def __init__(self, username):
             self.user = UserModel.objects.get(username=username)
 
-    data = {
+    class FakeTenantForm(forms.ModelForm):  # pylint: disable=nested-class-found
+        class Meta:
+            model = Tenant
+            exclude = ("authorized_users",)  # pylint: disable=modelform-uses-exclude
+
+    request = FakeRequest(owner)
+
+    form = FakeTenantForm(initial={
+        'owner': request.user.pk,
         'name': name,
         'schema_name': schema_name.lower(),
         'organization': organization,
         'publicly_readable': False,
         'paid_until': datetime.datetime(2999, 12, 31),
-    }
+    })
 
-    request = FakeRequest(owner)
-
-    return create_tenant(data, request)
+    return create_tenant(form, request)
 
 
 # NOTE: defined here to avoid circular imports with forms.py

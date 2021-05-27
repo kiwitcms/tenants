@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -45,7 +45,7 @@ class NewTenantView(FormView):
         return kwargs
 
     def form_valid(self, form):
-        tenant = utils.create_tenant(form.cleaned_data, self.request)
+        tenant = utils.create_tenant(form, self.request)
         # all is successfull so redirect to the new tenant
         return HttpResponseRedirect(utils.tenant_url(self.request, tenant.schema_name))
 
