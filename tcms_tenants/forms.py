@@ -4,6 +4,7 @@
 import re
 
 from django import forms
+from django.forms.utils import ErrorList
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -63,3 +64,41 @@ class InviteUsersForm(forms.Form):  # pylint: disable=must-inherit-from-model-fo
     @property
     def range(self):
         return range(self.number_of_fields)
+
+
+class UpdateTenantForm(NewTenantForm):
+    enabled_fields = ('publicly_readable',)
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        data=None,
+        files=None,
+        auto_id="id_%s",
+        prefix=None,
+        initial=None,
+        error_class=ErrorList,
+        label_suffix=None,
+        empty_permitted=False,
+        instance=None,
+        use_required_attribute=None,
+        renderer=None,
+    ):
+        super().__init__(
+            data,
+            files,
+            auto_id,
+            prefix,
+            initial,
+            error_class,
+            label_suffix,
+            empty_permitted,
+            instance,
+            use_required_attribute,
+            renderer,
+        )
+
+        for field in self.fields:
+            self.fields[field].disabled = field not in self.enabled_fields
+
+        # remove validator which only makes sense when creating new tenants
+        self.fields['schema_name'].validators.remove(utils.schema_name_not_used)
