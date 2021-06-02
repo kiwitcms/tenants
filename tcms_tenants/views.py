@@ -82,10 +82,10 @@ class UpdateTenantView(UpdateView):
         return HttpResponseRedirect('/')
 
     def get(self, request, *args, **kwargs):
-        return self.check_owner(request) or super().get(*args, **kwargs)
+        return self.check_owner(request) or super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        return self.check_owner(request) or super().post(*args, **kwargs)
+        return self.check_owner(request) or super().post(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         return self.request.tenant
