@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-27 08:19+0000\n"
+"POT-Creation-Date: 2021-06-02 09:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: tcms_tenants/forms.py:26
+#: tcms_tenants/forms.py:27
 msgid "Invalid string"
 msgstr ""
 
@@ -46,12 +46,16 @@ msgstr ""
 msgid "Create"
 msgstr ""
 
-#: tcms_tenants/menu.py:14
+#: tcms_tenants/menu.py:13
+msgid "Edit"
+msgstr ""
+
+#: tcms_tenants/menu.py:15
 #: tcms_tenants/templates/tcms_tenants/invite_users.html:9
 msgid "Invite users"
 msgstr ""
 
-#: tcms_tenants/menu.py:15
+#: tcms_tenants/menu.py:16
 msgid "Authorized users"
 msgstr ""
 
@@ -88,7 +92,7 @@ msgid "Email"
 msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/invite_users.html:26
-#: tcms_tenants/templates/tcms_tenants/new.html:61
+#: tcms_tenants/templates/tcms_tenants/new.html:65
 msgid "Save"
 msgstr ""
 
@@ -96,46 +100,54 @@ msgstr ""
 msgid "New tenant"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:22
+#: tcms_tenants/templates/tcms_tenants/new.html:23
 msgid "Name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:25
+#: tcms_tenants/templates/tcms_tenants/new.html:26
 msgid "Company, team or project name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:32
+#: tcms_tenants/templates/tcms_tenants/new.html:34
 msgid "Schema"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:44
+#: tcms_tenants/templates/tcms_tenants/new.html:47
 msgid "Validation pattern"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:49
+#: tcms_tenants/templates/tcms_tenants/new.html:52
 msgid "Publicly readable"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:53
+#: tcms_tenants/templates/tcms_tenants/new.html:57
 msgid "Yes"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:53
+#: tcms_tenants/templates/tcms_tenants/new.html:57
 msgid "No"
 msgstr ""
 
-#: tcms_tenants/utils.py:59
+#: tcms_tenants/utils.py:60
 msgid "Schema name already in use"
 msgstr ""
 
-#: tcms_tenants/utils.py:119
+#: tcms_tenants/utils.py:107
 msgid "New Kiwi TCMS tenant created"
 msgstr ""
 
-#: tcms_tenants/utils.py:204
+#: tcms_tenants/utils.py:198
 msgid "Invitation to join Kiwi TCMS"
 msgstr ""
 
-#: tcms_tenants/views.py:97
+#: tcms_tenants/views.py:80
+msgid "Only super-user and tenant owner are allowed to edit tenant properties"
+msgstr ""
+
+#: tcms_tenants/views.py:98
+msgid "Edit tenant"
+msgstr ""
+
+#: tcms_tenants/views.py:146
 msgid "Only users who are authorized for this tenant can invite others"
 msgstr ""
