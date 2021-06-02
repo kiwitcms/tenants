@@ -21,6 +21,11 @@ class PubliclyReadableTestCase(LoggedInTestCase):
         cls.tenant.publicly_readable = True
         cls.tenant.save()
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.tenant.publicly_readable = False
+        cls.tenant.save()
+
     def test_unauthorized_user_can_view_on_publicly_readable_tenant(self):
         response = self.client.get(
             reverse('test_plan_url_short', args=[self.test_plan_by_owner.pk]),

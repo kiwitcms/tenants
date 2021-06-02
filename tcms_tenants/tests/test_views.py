@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 
 from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
@@ -48,6 +49,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
 
     def test_create_tenant_shows_defaults_for_trial_and_paid_until(self):
         response = self.client.get(reverse('tcms_tenants:create-tenant'))
+        self.assertContains(response, _('New tenant'))
         # assert hidden fields are shown with defaults b/c the tests below
         # can't simulate opening the page and clicking the submit button
         self.assertContains(
@@ -167,3 +169,118 @@ class NewTenantViewTestCase(LoggedInTestCase):
 
         self.assertTrue(send_mail.called)
         self.assertEqual(send_mail.call_count, 1)
+
+
+class UpdateTenantViewTestCase(LoggedInTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.change_tenant = Permission.objects.get(
+            content_type__app_label='tcms_tenants',
+            codename='change_tenant')
+        cls.tester.user_permissions.add(cls.change_tenant)
+
+    @classmethod
+    def setup_tenant(cls, tenant):
+        super().setup_tenant(tenant)
+        tenant.name = 'Fast Inc.'
+
+    def tearDown(self):
+        self.tenant.publicly_readable = False
+        self.tenant.save()
+
+        self.tester.is_superuser = False
+        self.tester.save()
+
+    def update_and_assert_tenant(self, client):
+        response = client.post(
+            reverse('tcms_tenants:edit-tenant'),
+            {
+                'name': self.tenant.name,
+                'schema_name': self.tenant.schema_name,
+                'publicly_readable': True,
+                'paid_until': '',
+            },
+            follow=True
+        )
+
+        # Then
+        self.assertRedirects(response, '/')
+
+        self.tenant.refresh_from_db()
+        self.assertTrue(self.tenant.publicly_readable)
+
+    def test_super_user_can_edit_any_tenant(self):
+        # Given
+        self.tester.is_superuser = True
+        self.tester.save()
+        self.assertNotEqual(self.tester, self.tenant.owner)
+        self.assertFalse(self.tenant.publicly_readable)
+
+        # When
+        response = self.client.get(reverse('tcms_tenants:edit-tenant'))
+
+        # Then
+        self.assertContains(response, _('Edit tenant'))
+        self.update_and_assert_tenant(self.client)
+
+    def test_owner_can_edit_own_tenant(self):
+        # Given
+        self.tenant.owner.set_password('password')
+        self.tenant.owner.save()
+        self.tenant.owner.user_permissions.add(self.change_tenant)
+        self.assertFalse(self.tenant.publicly_readable)
+
+        client = self.client.__class__(self.tenant)
+        client.login(username=self.tenant.owner.username,  # nosec:B106:hardcoded_password_funcarg
+                     password='password')
+        self.assertFalse(self.tenant.publicly_readable)
+
+        # When
+        response = client.get(reverse('tcms_tenants:edit-tenant'))
+
+        # Then
+        self.assertContains(response, _('Edit tenant'))
+        self.update_and_assert_tenant(client)
+
+    def test_non_owner_cant_edit_tenant(self):
+        # Given
+        self.assertNotEqual(self.tester, self.tenant.owner)
+        self.assertFalse(self.tester.is_superuser)
+        self.assertFalse(self.tenant.publicly_readable)
+
+        # When: get
+        response = self.client.get(
+            reverse('tcms_tenants:edit-tenant'),
+            follow=True
+        )
+
+        # Then
+        self.assertContains(
+            response,
+            _('Only super-user and tenant owner are allowed to edit tenant properties')
+        )
+        self.assertRedirects(response, '/')
+
+        # When: post
+        response = self.client.post(
+            reverse('tcms_tenants:edit-tenant'),
+            {
+                'name': self.tenant.name,
+                'schema_name': self.tenant.schema_name,
+                'publicly_readable': True,
+                'paid_until': '',
+            },
+            follow=True
+        )
+
+        # Then
+        self.assertContains(
+            response,
+            _('Only super-user and tenant owner are allowed to edit tenant properties')
+        )
+        self.assertRedirects(response, '/')
+
+        self.tenant.refresh_from_db()
+        self.assertFalse(self.tenant.publicly_readable)
