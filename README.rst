@@ -139,6 +139,18 @@ its new MT version!
 Changelog
 ---------
 
+
+v1.5.0 (04 Jun 2021)
+~~~~~~~~~~~~~~~~~~~~
+
+- Database: Rename ``Tenant.on_trial`` -> ``Tenant.publicly_readable``
+- Allow unauthorized users to access publicly readable tenants
+- Update django-tenants from 3.3.0 to 3.3.1
+- Update translation strings
+- Tested with Kiwi TCMS v10.1
+- Convert ``NewTenantForm`` to inherit from ``ModelForm``
+
+
 v1.4.4 (12 May 2021)
 ~~~~~~~~~~~~~~~~~~~~
 
