@@ -62,6 +62,13 @@ def schema_name_not_used(name):
 
 # warning: doesn't play well when the domain has a port number
 def tenant_domain(schema_name):
+    # take into account the fact that some customers deploy their 'public' schema
+    # without a prefix, e.g. tcms.example.com == KIWI_TENANTS_DOMAIN or could use a
+    # different domain for their tenant(s)!
+    domain = Domain.objects.filter(tenant__schema_name=schema_name, is_primary=True).first()
+    if domain:
+        return domain.domain
+
     return "%s.%s" % (schema_name, settings.KIWI_TENANTS_DOMAIN)
 
 
