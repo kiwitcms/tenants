@@ -140,6 +140,14 @@ Changelog
 ---------
 
 
+v1.6.0 (18 Jun 2021)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.3.1 to 3.3.2
+- More robust tenant domain detection to avoid bugs in the case where
+  public tenant's domain doesn't use a prefix (e.g. matches KIWI_TENANT_DOMAIN)
+
+
 v1.5.0 (04 Jun 2021)
 ~~~~~~~~~~~~~~~~~~~~
 
