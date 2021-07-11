@@ -32,7 +32,7 @@ multi_tenant_settings = os.path.join(
 
 # Kiwi TCMS loads extra settings in the same way using exec()
 exec(  # pylint: disable=exec-used
-    open(multi_tenant_settings, "rb").read(),
+    open(multi_tenant_settings, "rb").read(),  # pylint: disable=consider-using-with
     globals()
 )
 
