@@ -63,7 +63,7 @@ default tenant on which your application runs::
 
     ./manage.py create_tenant --schema_name public
                               --name "Public tenant"
-                              --paid_until 2050-12-31
+                              --paid_until 3000-03-31
                               --publicly_readable False
                               --owner_id 2
                               --organization "Testing department"
@@ -124,6 +124,28 @@ tools like ``dig`` and ``nslookup``::
 
 
 All sub-domains should resolve to the same IP address!
+
+
+Fast tenant creation
+--------------------
+
+Since version 1.7.0 kiwitcms-tenants allows for faster tenant creation by
+using the ``clone_tenant`` command. This will be automatically enabled if
+schema_name ``empty`` exists. To create it execute the command::
+
+    ./manage.py create_tenant --schema_name empty
+                              --name "Cloning Template"
+                              --paid_until 3000-03-31
+                              --publicly_readable False
+                              --owner_id 2
+                              --organization "Kiwi TCMS"
+                              --domain-domain empty.tenants.example.org
+                              --domain-is_primary True
+
+See the warnings for ``create_tenant`` command above!
+
+If a schema with name "empty" does not exist kiwitcms-tenants will default to
+applying all migrations one by one when creating new tenants!
 
 
 Migrating Single-Tenant to Multi-Tenant
