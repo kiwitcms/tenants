@@ -1,6 +1,6 @@
 # pylint: disable=missing-docstring
 
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -8,14 +8,14 @@ from setuptools import setup, find_packages
 
 
 def get_long_description():
-    with open('README.rst', 'r') as file:
+    with open('README.rst', 'r', encoding="utf-8") as file:
         return file.read()
 
 
 def get_install_requires(path):
     requires = []
 
-    with open(path, 'r') as file:
+    with open(path, 'r', encoding="utf-8") as file:
         for line in file:
             if line.startswith('-r '):
                 continue
