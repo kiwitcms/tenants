@@ -32,8 +32,9 @@ pylint:
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
 	
-	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) DJANGO_SETTINGS_MODULE="test_project.settings" \
-	pylint --load-plugins=pylint_django --load-plugins=kiwi_lint -d similar-string \
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) pylint \
+	    --load-plugins=pylint_django --django-settings-module=test_project.settings \
+	    --load-plugins=kiwi_lint -d similar-string \
 	    -d missing-docstring -d duplicate-code -d module-in-directory-without-init \
 	    *.py tcms_settings_dir/ tcms_tenants/ test_project/
 
