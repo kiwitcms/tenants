@@ -54,11 +54,11 @@ class TenantFileSystemStorageTestCase(LoggedInTestCase):
         self.assertEqual(t2_url, '/media/tenant2/%s' % t2_file_name)
 
         # assert contents are correct
-        with open(public_os_path, 'r') as fobj:
+        with open(public_os_path, 'r', encoding="utf-8") as fobj:
             self.assertEqual(fobj.read(), 'Hello World')
 
-        with open(t1_os_path, 'r') as fobj:
+        with open(t1_os_path, 'r', encoding="utf-8") as fobj:
             self.assertEqual(fobj.read(), 'Hello T1')
 
-        with open(t2_os_path, 'r') as fobj:
+        with open(t2_os_path, 'r', encoding="utf-8") as fobj:
             self.assertEqual(fobj.read(), 'Hello T2')
