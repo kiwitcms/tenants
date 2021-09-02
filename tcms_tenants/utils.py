@@ -11,6 +11,7 @@ from django.db import connections
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
@@ -83,12 +84,42 @@ def tenant_url(request, schema_name):
 
 def create_tenant(form, request):
     with schema_context('public'):
-        tenant = form.save()
-        domain = Domain.objects.create(
-            domain=tenant_domain(tenant.schema_name),
-            is_primary=True,
-            tenant=tenant,
-        )
+        # If a schema with name "empty" exists then use it for
+        # cloning b/c that's faster
+        if Tenant.objects.filter(schema_name='empty').first():
+            schema_name = form.cleaned_data["schema_name"]
+            paid_until = form.cleaned_data["paid_until"] or datetime.datetime(3000, 3, 31)
+            call_command(
+                "clone_tenant",
+                "--clone_from", "empty",
+                "--clone_tenant_fields", False,
+                "--schema_name", schema_name,
+                "--name", form.cleaned_data["name"],
+                "--paid_until", paid_until,
+                "--publicly_readable", form.cleaned_data["publicly_readable"],
+                "--owner_id", request.user.pk,
+                "--organization", form.cleaned_data["organization"] or "-",
+                "--domain-domain", tenant_domain(schema_name),
+                "--domain-is_primary", True,
+            )
+            tenant = Tenant.objects.get(schema_name=schema_name)
+            if not form.cleaned_data["paid_until"]:
+                tenant.paid_until = None
+                tenant.save()
+
+            if not form.cleaned_data["organization"]:
+                tenant.organization = ""
+                tenant.save()
+
+            domain = tenant.domains.first()
+        else:
+            # otherwise default to applying all migrations one by one
+            tenant = form.save()
+            domain = Domain.objects.create(
+                domain=tenant_domain(tenant.schema_name),
+                is_primary=True,
+                tenant=tenant,
+            )
 
         # work-around: for some reason the ContentType for tenant-user
         # relationship model doesn't get automatically created and if
