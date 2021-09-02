@@ -21,8 +21,8 @@ test:
 
 .PHONY: test_for_missing_migrations
 test_for_missing_migrations:
-	./manage.py migrate
-	./manage.py makemigrations --check
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) ./manage.py migrate
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) ./manage.py makemigrations --check
 
 
 .PHONY: pylint
