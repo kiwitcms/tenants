@@ -161,6 +161,15 @@ its new MT version!
 Changelog
 ---------
 
+v1.7.0 (03 Sep 2021)
+~~~~~~~~~~~~~~~~~~~~
+
+- Faster tenant creation with ``clone_tenant``. Fixes
+  `Issue #127 <https://github.com/kiwitcms/tenants/issues/127>`_
+  Requires a schema with name ``empty`` to be present!
+- Fix pylint warnings
+- Migrate from Travis CI to GitHub Actions
+
 
 v1.6.0 (18 Jun 2021)
 ~~~~~~~~~~~~~~~~~~~~
