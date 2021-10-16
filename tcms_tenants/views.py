@@ -121,7 +121,8 @@ class RedirectTo(RedirectView):  # pylint: disable=missing-permission-required
     def get_redirect_url(self, *args, **kwargs):
         tenant = kwargs['tenant']
         path = kwargs['path']
-        return '%s/%s' % (utils.tenant_url(self.request, tenant), path)
+        tenant_url = utils.tenant_url(self.request, tenant)
+        return f"{tenant_url}/{path}"
 
 
 @method_decorator(login_required, name='dispatch')

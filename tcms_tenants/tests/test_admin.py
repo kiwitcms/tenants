@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2020-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -110,8 +110,7 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
 
         self.assertContains(response, "<option value=''>---------</option>", html=True)
         self.assertContains(response,
-                            "<option value='%d' selected>%s</option>" % (self.tenant.pk,
-                                                                         self.tenant),
+                            f"<option value='{self.tenant.pk}' selected>{self.tenant}</option>",
                             html=True)
         self.assertNotContains(response, self.tenant2)
 
@@ -129,15 +128,14 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
         self.assertContains(response, "This field is required")
         self.assertContains(response, "<option value='' selected>---------</option>", html=True)
         self.assertContains(response,
-                            "<option value='%d'>%s</option>" % (self.tenant.pk,
-                                                                self.tenant),
+                            f"<option value='{self.tenant.pk}'>{self.tenant}</option>",
                             html=True)
         self.assertNotContains(response, self.tenant2)
 
         self.assertContains(
             response,
-            '<input id="id_user" type="text" name="user" value="%s" required>' %
-            self.tester2.username,
+            '<input id="id_user" type="text" name="user" '
+            f'value="{self.tester2.username}" required>',
             html=True)
 
     def test_change_displays_only_current_tenant(self):
@@ -149,7 +147,6 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
 
         self.assertContains(response, "<option value=''>---------</option>", html=True)
         self.assertContains(response,
-                            "<option value='%d' selected>%s</option>" % (self.tenant.pk,
-                                                                         self.tenant),
+                            f"<option value='{self.tenant.pk}' selected>{self.tenant}</option>",
                             html=True)
         self.assertNotContains(response, self.tenant2)

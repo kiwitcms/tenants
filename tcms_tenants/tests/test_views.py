@@ -59,7 +59,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
                             '<input id="id_paid_until" name="paid_until" type="hidden">',
                             html=True)
         self.assertContains(response,
-                            "Validation pattern: %s" % VALIDATION_RE.pattern)
+                            f"Validation pattern: {VALIDATION_RE.pattern}")
 
     def test_invalid_schema_name_shows_errors(self):
         response = self.client.post(
@@ -73,7 +73,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
 
         self.assertContains(response, 'Invalid string used for the schema name.')
         self.assertContains(response,
-                            "Validation pattern: %s" % VALIDATION_RE.pattern)
+                            f"Validation pattern: {VALIDATION_RE.pattern}")
         self.assertFalse(
             Tenant.objects.filter(schema_name='kiwi-tcms').exists())
 
@@ -89,7 +89,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
 
         self.assertContains(response, 'Invalid string')
         self.assertContains(response,
-                            "Validation pattern: %s" % VALIDATION_RE.pattern)
+                            f"Validation pattern: {VALIDATION_RE.pattern}")
         self.assertFalse(
             Tenant.objects.filter(schema_name='kiwi_tcms').exists())
 
@@ -105,10 +105,10 @@ class NewTenantViewTestCase(LoggedInTestCase):
 
         self.assertContains(response, 'Schema name already in use')
         self.assertContains(response,
-                            "Validation pattern: %s" % VALIDATION_RE.pattern)
+                            f"Validation pattern: {VALIDATION_RE.pattern}")
 
     def test_create_tenant_with_name_schema_only(self):
-        expected_url = 'https://tinc.%s' % settings.KIWI_TENANTS_DOMAIN
+        expected_url = f"https://tinc.{settings.KIWI_TENANTS_DOMAIN}"
         response = self.client.post(
             reverse('tcms_tenants:create-tenant'),
             {
@@ -132,7 +132,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
             Similar invocation will be used via inherited view in
             GitHub Marketplace integration.
         """
-        expected_url = 'https://subscriber.%s' % settings.KIWI_TENANTS_DOMAIN
+        expected_url = f"https://subscriber.{settings.KIWI_TENANTS_DOMAIN}"
         paid_until = timezone.now().replace(microsecond=0) + timedelta(days=30)
 
         response = self.client.post(

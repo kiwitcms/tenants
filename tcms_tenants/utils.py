@@ -70,7 +70,7 @@ def tenant_domain(schema_name):
     if domain:
         return domain.domain
 
-    return "%s.%s" % (schema_name, settings.KIWI_TENANTS_DOMAIN)
+    return f"{schema_name}.{settings.KIWI_TENANTS_DOMAIN}"
 
 
 def tenant_url(request, schema_name):
@@ -197,7 +197,7 @@ def create_user_account(email_address):
 
     i = 1
     while UserModel.objects.filter(username=username).exists():
-        username = "%s.%d" % (desired_username, i)
+        username = f"{desired_username}.{i}"
         i += 1
 
     form = RegistrationForm(data={

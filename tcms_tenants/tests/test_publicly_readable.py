@@ -33,7 +33,7 @@ class PubliclyReadableTestCase(LoggedInTestCase):
         )
 
         self.assertContains(response, self.test_plan_by_owner.name)
-        self.assertContains(response, "TP-%d" % self.test_plan_by_owner.pk)
+        self.assertContains(response, f"TP-{self.test_plan_by_owner.pk}")
         self.assertContains(response, self.test_plan_by_owner.text)
 
     def test_unauthorized_user_cannot_edit_on_publicly_readable_tenant(self):

@@ -49,13 +49,13 @@ class InviteUsersForm(forms.Form):  # pylint: disable=must-inherit-from-model-fo
         super().__init__(*args, **kwargs)
 
         for i in self.range:
-            self.fields["email_%d" % i] = forms.CharField(required=False)
+            self.fields[f"email_{i}"] = forms.CharField(required=False)
 
     def clean(self):
         emails = set()
 
         for i in self.range:
-            email = self.cleaned_data["email_%d" % i]
+            email = self.cleaned_data[f"email_{i}"]
             if email:
                 emails.add(email)
 

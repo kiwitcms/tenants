@@ -39,7 +39,7 @@ TENANT_DOMAIN_MODEL = "tcms_tenants.Domain"
 
 
 # share login session between tenants
-SESSION_COOKIE_DOMAIN = ".%s" % KIWI_TENANTS_DOMAIN
+SESSION_COOKIE_DOMAIN = f".{KIWI_TENANTS_DOMAIN}"
 
 
 # everybody can access the main instance
