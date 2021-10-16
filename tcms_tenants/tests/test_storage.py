@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -44,14 +44,14 @@ class TenantFileSystemStorageTestCase(LoggedInTestCase):
             t2_url = storage.url(t2_file_name)
 
         # assert the paths are correct
-        self.assertTrue(public_os_path.endswith('apps_dir/media/public/%s' % public_file_name))
-        self.assertTrue(t1_os_path.endswith('apps_dir/media/fast/%s' % t1_file_name))
-        self.assertTrue(t2_os_path.endswith('apps_dir/media/tenant2/%s' % t2_file_name))
+        self.assertTrue(public_os_path.endswith(f"apps_dir/media/public/{public_file_name}"))
+        self.assertTrue(t1_os_path.endswith(f"apps_dir/media/fast/{t1_file_name}"))
+        self.assertTrue(t2_os_path.endswith(f"apps_dir/media/tenant2/{t2_file_name}"))
 
         # assert urls are correct
-        self.assertEqual(public_url, '/media/public/%s' % public_file_name)
-        self.assertEqual(t1_url, '/media/fast/%s' % t1_file_name)
-        self.assertEqual(t2_url, '/media/tenant2/%s' % t2_file_name)
+        self.assertEqual(public_url, f"/media/public/{public_file_name}")
+        self.assertEqual(t1_url, f"/media/fast/{t1_file_name}")
+        self.assertEqual(t2_url, f"/media/tenant2/{t2_file_name}")
 
         # assert contents are correct
         with open(public_os_path, 'r', encoding="utf-8") as fobj:

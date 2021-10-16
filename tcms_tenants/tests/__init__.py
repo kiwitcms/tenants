@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -18,10 +18,10 @@ class UserFactory(DjangoModelFactory):
     class Meta:
         model = settings.AUTH_USER_MODEL
 
-    username = factory.Sequence(lambda n: 'User%d' % n)
-    first_name = factory.Sequence(lambda n: 'First%d' % n)
-    last_name = factory.Sequence(lambda n: 'Last%d-ov' % n)
-    email = factory.LazyAttribute(lambda user: '%s@kiwitcms.org' % user.username)
+    username = factory.Sequence(lambda n: f"User{n}")
+    first_name = factory.Sequence(lambda n: f"First{n}")
+    last_name = factory.Sequence(lambda n: f"Last{n}-ov")
+    email = factory.LazyAttribute(lambda user: f"{user.username}@kiwitcms.org")
     is_active = True
     is_staff = True
     is_superuser = False
