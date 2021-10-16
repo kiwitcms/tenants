@@ -161,6 +161,14 @@ its new MT version!
 Changelog
 ---------
 
+v1.8.0 (16 Oct 2021)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.3.2 to 3.3.4. Fixes a bug for cloning tenants
+  when DB username contains a dash
+- Use f-strings b/c pylint really loves them
+
+
 v1.7.0 (03 Sep 2021)
 ~~~~~~~~~~~~~~~~~~~~
 
