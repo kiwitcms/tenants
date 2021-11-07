@@ -14,15 +14,19 @@ test:
 	fi
 	
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
+        KIWI_TENANTS_DOMAIN='test.com' \
 	    coverage run --include "tcms_tenants/*.py" \
 	                 --omit "tcms_tenants/tests/*.py" \
 	                 ./manage.py test -v2 tcms_tenants.tests
 
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
+        KIWI_TENANTS_DOMAIN='' \
+	    ./manage.py check 2>&1 | grep "KIWI_TENANTS_DOMAIN environment variable is not set!"
 
 .PHONY: test_for_missing_migrations
 test_for_missing_migrations:
-	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) ./manage.py migrate
-	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) ./manage.py makemigrations --check
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) KIWI_TENANTS_DOMAIN='test.com' ./manage.py migrate
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) KIWI_TENANTS_DOMAIN='test.com' ./manage.py makemigrations --check
 
 
 .PHONY: pylint
