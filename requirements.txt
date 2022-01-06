@@ -1,1 +1,1 @@
-django-tenants==3.4.0
+django-tenants==3.4.1
