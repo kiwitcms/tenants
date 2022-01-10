@@ -71,7 +71,7 @@ class NewTenantViewTestCase(LoggedInTestCase):
                 'paid_until': '',
             })
 
-        self.assertContains(response, 'Invalid string used for the schema name.')
+        self.assertContains(response, 'Invalid string')
         self.assertContains(response,
                             f"Validation pattern: {VALIDATION_RE.pattern}")
         self.assertFalse(
