@@ -161,6 +161,13 @@ its new MT version!
 Changelog
 ---------
 
+v1.10.0 (19 Jan 2022)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.4.1 to 3.4.2,
+  will help with migration to Django 4
+
+
 v1.9.0 (10 Jan 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
