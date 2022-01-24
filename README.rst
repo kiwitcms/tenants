@@ -161,6 +161,13 @@ its new MT version!
 Changelog
 ---------
 
+v1.11.0 (24 Jan 2022)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Add System check for ``KIWI_TENANTS_DOMAIN`` environment variable. Closes
+  `Issue #140 <https://github.com/kiwitcms/tenants/issues/140>`_
+
+
 v1.10.0 (19 Jan 2022)
 ~~~~~~~~~~~~~~~~~~~~~
 
