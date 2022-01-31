@@ -12,6 +12,8 @@ MENU_ITEMS = [
         (_('Create'), reverse_lazy('tcms_tenants:create-tenant')),
         (_('Edit'), reverse_lazy('tcms_tenants:edit-tenant')),
         ('-', '-'),
+        (_('Groups'), '/admin/tenant_groups/group/'),
+        ('-', '-'),
         (_('Invite users'), reverse_lazy('tcms_tenants:invite-users')),
         (_('Authorized users'), '/admin/tcms_tenants/tenant_authorized_users/'),
     ]),

@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2022 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -14,6 +14,7 @@ from tcms.core.forms.fields import UserField
 
 from tcms_tenants.models import Tenant
 from tcms_tenants.utils import owns_tenant
+from tenant_groups.models import Group as TenantGroup
 
 
 class TenantAdmin(admin.ModelAdmin):
@@ -87,6 +88,13 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
         # when changing an existing object
         elif instance:
             self.fields['tenant'].queryset = Tenant.objects.filter(pk=instance.tenant.pk)
+
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        instance.save()
+
+        self.instance.user.tenant_groups.add(TenantGroup.objects.get(name="Tester"))
+        return instance
 
 
 class AuthorizedUsersAdmin(admin.ModelAdmin):
@@ -167,6 +175,15 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
             return super().get_model_perms(request)
 
         return {'view': owns_tenant(request.user, request.tenant)}
+
+    def delete_model(self, request, obj):
+        """
+            Remove user from tenant groups before removing the authorization!
+        """
+        for group in obj.user.tenant_groups.all():
+            group.user_set.remove(obj.user)
+
+        super().delete_model(request, obj)
 
 
 admin.site.register(Tenant, TenantAdmin)

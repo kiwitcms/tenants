@@ -15,9 +15,9 @@ test:
 
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
         KIWI_TENANTS_DOMAIN='test.com' \
-	    coverage run --include "tcms_tenants/*.py" \
-	                 --omit "tcms_tenants/tests/*.py" \
-	                 ./manage.py test -v2 tcms_tenants.tests
+	    coverage run --include "*/*.py" \
+	                 --omit "*/tests/*.py" \
+	                 ./manage.py test -v2
 
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
         KIWI_TENANTS_DOMAIN='' \
@@ -40,12 +40,12 @@ pylint:
 	    --load-plugins=pylint_django --django-settings-module=test_project.settings \
 	    --load-plugins=kiwi_lint -d similar-string \
 	    -d missing-docstring -d duplicate-code -d module-in-directory-without-init \
-	    *.py tcms_settings_dir/ tcms_tenants/ test_project/
+	    *.py tcms_settings_dir/ tcms_tenants/ tenant_groups/ test_project/
 
 
 .PHONY: flake8
 flake8:
-	flake8 *.py tcms_settings_dir/ tcms_tenants/ test_project/
+	flake8 *.py tcms_settings_dir/ tcms_tenants/ tenant_groups/ test_project/
 
 
 .PHONY: check

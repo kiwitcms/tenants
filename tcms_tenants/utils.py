@@ -25,6 +25,7 @@ from tcms.kiwi_auth import forms as kiwi_auth_forms
 from tcms.core.utils.mailto import mailto
 
 from tcms_tenants.models import Domain, Tenant
+from tenant_groups.models import Group as TenantGroup
 
 
 UserModel = get_user_model()
@@ -139,6 +140,10 @@ def create_tenant(form, request):
         site.name = domain.domain
         site.save()
 
+        # add owner to default groups b/c they need certain permissions
+        TenantGroup.objects.get(name="Administrator").user_set.add(tenant.owner)
+        TenantGroup.objects.get(name="Tester").user_set.add(tenant.owner)
+
     mailto(
         template_name='tcms_tenants/email/new.txt',
         recipients=[tenant.owner.email],
@@ -230,6 +235,9 @@ def invite_users(request, email_addresses):
             continue
 
         request.tenant.authorized_users.add(user)
+        with tenant_context(request.tenant):
+            TenantGroup.objects.get(name="Tester").user_set.add(user)
+
         mailto(
             template_name='tcms_tenants/email/invite_user.txt',
             recipients=[user.email],
