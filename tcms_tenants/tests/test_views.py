@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2022 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -8,6 +8,7 @@ from mock import patch
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
@@ -15,6 +16,9 @@ from django.utils.translation import gettext_lazy as _
 from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
 from tcms_tenants.tests import LoggedInTestCase
+
+
+UserModel = get_user_model()
 
 
 class RedirectToTestCase(LoggedInTestCase):
@@ -169,6 +173,52 @@ class NewTenantViewTestCase(LoggedInTestCase):
 
         self.assertTrue(send_mail.called)
         self.assertEqual(send_mail.call_count, 1)
+
+    def test_after_create_tenant_owner_should_be_added_to_default_groups(self):
+        expected_url = f"https://tgroups.{settings.KIWI_TENANTS_DOMAIN}"
+        paid_until = timezone.now().replace(microsecond=0) + timedelta(days=30)
+
+        response = self.client.post(
+            reverse('tcms_tenants:create-tenant'),
+            {
+                'name': 'Tenant With Groups',
+                'schema_name': 'tgroups',
+                'publicly_readable': False,
+                'paid_until': paid_until.strftime('%Y-%m-%d %H:%M:%S'),
+                # this is what the default form view sends
+                'owner': self.tester.pk,
+            })
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response['Location'], expected_url)
+
+        tenant = Tenant.objects.get(schema_name='tgroups')
+        self.assertEqual(tenant.owner, self.tester)
+        self.assertTrue(tenant.owner.tenant_groups.filter(name="Administrator").exists())
+        self.assertTrue(tenant.owner.tenant_groups.filter(name="Tester").exists())
+
+
+class InviteUsersViewTestCase(LoggedInTestCase):
+    @patch('tcms.core.utils.mailto.send_mail')
+    def test_invited_users_are_granted_access(self, send_mail):
+        self.assertFalse(UserModel.objects.filter(username="invited-via-email").exists())
+
+        response = self.client.post(
+            reverse('tcms_tenants:invite-users'),
+            {
+                'email_0': 'invited-via-email@example.com',
+            })
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response['Location'], "/")
+
+        self.assertTrue(send_mail.called)
+        self.assertEqual(send_mail.call_count, 1)
+
+        invited_user = UserModel.objects.get(username="invited-via-email")
+        self.assertTrue(invited_user.is_active)
+        self.assertTrue(self.tenant.authorized_users.filter(pk=invited_user.pk).exists())
+        self.assertTrue(invited_user.tenant_groups.filter(name="Tester").exists())
 
 
 class UpdateTenantViewTestCase(LoggedInTestCase):

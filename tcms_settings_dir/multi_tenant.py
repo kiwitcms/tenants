@@ -19,6 +19,10 @@ MULTITENANT_RELATIVE_MEDIA_ROOT = "tenant/%s"
 if 'django_tenants' not in INSTALLED_APPS:      # noqa: F821
     INSTALLED_APPS.insert(0, 'django_tenants')  # noqa: F821
 
+for app_list in (INSTALLED_APPS, TENANT_APPS):  # noqa: F821
+    if 'tenant_groups' not in app_list:
+        app_list.append('tenant_groups')
+
 
 KIWI_TENANTS_DOMAIN = os.environ.get('KIWI_TENANTS_DOMAIN')
 

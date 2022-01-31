@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2022 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -12,6 +12,7 @@ from django_tenants.test.cases import FastTenantTestCase
 from django_tenants.utils import tenant_context
 
 from tcms.tests.factories import TestPlanFactory
+from tenant_groups.models import Group as TenantGroup
 
 
 class UserFactory(DjangoModelFactory):
@@ -67,3 +68,21 @@ class LoggedInTestCase(FastTenantTestCase):
         self.client = TenantClient(self.tenant)
         self.client.login(username=self.tester.username,  # nosec:B106:hardcoded_password_funcarg
                           password='password')
+
+
+class TenantGroupsTestCase(LoggedInTestCase):
+    @classmethod
+    def setUpClass(cls):
+        # create the actual schema, similar to
+        # django_tenants.test.cases.TenantTestCase
+        cls.sync_shared()
+        super().setUpClass()
+
+    @classmethod
+    def setup_tenant(cls, tenant):
+        super().setup_tenant(tenant)
+
+        # add owner to default groups b/c they need certain permissions
+        # and b/c this is what utils.create_tenant() does
+        TenantGroup.objects.get(name="Administrator").user_set.add(tenant.owner)
+        TenantGroup.objects.get(name="Tester").user_set.add(tenant.owner)

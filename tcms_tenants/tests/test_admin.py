@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2020-2022 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -11,6 +11,7 @@ from django_tenants import utils
 
 from tcms_tenants.tests import LoggedInTestCase
 from tcms_tenants.tests import UserFactory
+from tenant_groups.models import Group as TenantGroup
 
 
 class TenantAdminTestCase(LoggedInTestCase):
@@ -150,3 +151,55 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
                             f"<option value='{self.tenant.pk}' selected>{self.tenant}</option>",
                             html=True)
         self.assertNotContains(response, self.tenant2)
+
+    def test_authorized_user_is_added_to_default_groups(self):
+        self.assertFalse(self.tester2.tenant_groups.filter(name="Tester").exists())
+
+        response = self.client.post(
+            reverse('admin:tcms_tenants_tenant_authorized_users_add'), {
+                'tenant': self.tenant.pk,
+                'user': self.tester2.username,
+                '_save': 'Save',
+            },
+            follow=True)
+
+        self.assertContains(response, self.tester2.username)
+        self.assertContains(response, "was added successfully")
+
+        self.assertTrue(self.tester2.tenant_groups.filter(name="Tester").exists())
+
+    def test_when_removing_authorized_users_they_are_removed_from_default_groups(self):
+        user_to_be_deleted = UserFactory()
+
+        # first add this user and make sure groups are OK.
+        response = self.client.post(
+            reverse('admin:tcms_tenants_tenant_authorized_users_add'), {
+                'tenant': self.tenant.pk,
+                'user': user_to_be_deleted.username,
+                '_save': 'Save',
+            },
+            follow=True)
+
+        self.assertContains(response, user_to_be_deleted.username)
+        self.assertContains(response, "was added successfully")
+        self.assertTrue(user_to_be_deleted.tenant_groups.filter(name="Tester").exists())
+
+        # get the 'through' record for the m2m relationship
+        record = self.tenant.authorized_users.through.objects.get(user=user_to_be_deleted.pk)
+
+        response = self.client.post(
+            f"/admin/tcms_tenants/tenant_authorized_users/{record.pk}/delete/",
+            {"post": "yes"},
+            follow=True,
+        )
+
+        # user is no longer authorized
+        self.assertContains(response, "was deleted successfully")
+        self.assertFalse(self.tenant.authorized_users.filter(pk=user_to_be_deleted.pk).exists())
+
+        # and default group has been updated
+        self.assertFalse(
+            TenantGroup.objects.get(
+                name="Tester"
+            ).user_set.filter(pk=user_to_be_deleted.pk).exists()
+        )
