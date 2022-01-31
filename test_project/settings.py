@@ -52,3 +52,7 @@ DATABASES['default'].update({  # noqa: F405 pylint: disable=objects-update-used
     'HOST': 'localhost',
     'OPTIONS': {},
 })
+
+
+if 'test_app' not in INSTALLED_APPS:                # noqa: F405
+    INSTALLED_APPS.append('test_project.test_app')  # noqa: F405

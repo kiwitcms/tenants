@@ -34,6 +34,11 @@ if 'django_tenants.middleware.main.TenantMainMiddleware' not in MIDDLEWARE:     
 if 'tcms_tenants.middleware.BlockUnauthorizedUserMiddleware' not in MIDDLEWARE:   # noqa: F821
     MIDDLEWARE.append('tcms_tenants.middleware.BlockUnauthorizedUserMiddleware')  # noqa: F821
 
+# replace ModelBackend with GroupsBackend
+if 'django.contrib.auth.backends.ModelBackend' in AUTHENTICATION_BACKENDS:            # noqa: F821
+    idx = AUTHENTICATION_BACKENDS.index('django.contrib.auth.backends.ModelBackend')  # noqa: F821
+    AUTHENTICATION_BACKENDS[idx] = 'tenant_groups.backends.GroupsBackend'             # noqa: F821
+
 if 'tcms_tenants.backends.PubliclyReadableBackend' not in AUTHENTICATION_BACKENDS:   # noqa: F821
     AUTHENTICATION_BACKENDS.append('tcms_tenants.backends.PubliclyReadableBackend')  # noqa: F821
 

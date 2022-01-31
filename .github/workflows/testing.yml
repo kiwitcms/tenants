@@ -23,7 +23,7 @@ jobs:
       - name: Create database
         run: |
           docker-compose pull db
-          docker-compose run -d -p 5432:5432 --name postgresql_database db
+          docker-compose up -d
 
       - name: Execute tests
         run: |
@@ -36,6 +36,11 @@ jobs:
 
           make check
 
+          docker-compose down --volumes
+
+          # restart database for integration tests
+          docker-compose up -d
+
       - name: Local coverage report
         run: |
           coverage report -m
@@ -46,3 +51,15 @@ jobs:
         with:
           fail_ci_if_error: true
           files: ./coverage.xml
+
+      - name: Integration tests
+        run: |
+          # monkey-patch createsuperuser.py b/c it rejects input when not using a TTY
+          DJANGO_PATH=$(python -c "import os, django; print(os.path.dirname(django.__file__))")
+
+          sed -i "s/raise NotRunningInTTYException/pass/" "${DJANGO_PATH}/contrib/auth/management/commands/createsuperuser.py"
+          sed -i "s/getpass.getpass/input/"               "${DJANGO_PATH}/contrib/auth/management/commands/createsuperuser.py"
+
+          echo -e "admin\nroot@example.com\nsecret\nsecret\npublic.test.com" | PYTHONPATH=.:../Kiwi/ KIWI_TENANTS_DOMAIN='test.com' ./manage.py initial_setup
+
+          PYTHONPATH=.:../Kiwi/ KIWI_TENANTS_DOMAIN='test.com' ./manage.py execute_integration_tests

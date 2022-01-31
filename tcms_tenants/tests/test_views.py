@@ -13,9 +13,11 @@ from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 
+from django_tenants.utils import tenant_context
+
 from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
-from tcms_tenants.tests import LoggedInTestCase
+from tcms_tenants.tests import LoggedInTestCase, TenantGroupsTestCase
 
 
 UserModel = get_user_model()
@@ -41,7 +43,7 @@ class RedirectToTestCase(LoggedInTestCase):
         self.assertEqual(response['Location'], expected_url)
 
 
-class NewTenantViewTestCase(LoggedInTestCase):
+class NewTenantViewTestCase(TenantGroupsTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -111,7 +113,8 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertContains(response,
                             f"Validation pattern: {VALIDATION_RE.pattern}")
 
-    def test_create_tenant_with_name_schema_only(self):
+    @patch('tcms.core.utils.mailto.send_mail')
+    def test_create_tenant_with_name_schema_only(self, send_mail):
         expected_url = f"https://tinc.{settings.KIWI_TENANTS_DOMAIN}"
         response = self.client.post(
             reverse('tcms_tenants:create-tenant'),
@@ -127,9 +130,14 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertEqual(response['Location'], expected_url)
 
+        # assert tenant was created
         tenant = Tenant.objects.get(schema_name='tinc')
         self.assertFalse(tenant.publicly_readable)
         self.assertIsNone(tenant.paid_until)
+
+        # assert email was sent
+        self.assertTrue(send_mail.called)
+        self.assertEqual(send_mail.call_count, 1)
 
     def test_create_tenant_with_name_schema_publicly_readable_payment_date(self):
         """
@@ -157,48 +165,13 @@ class NewTenantViewTestCase(LoggedInTestCase):
         self.assertFalse(tenant.publicly_readable)
         self.assertEqual(tenant.paid_until, paid_until)
 
-    @patch('tcms.core.utils.mailto.send_mail')
-    def test_creating_tenant_sends_email(self, send_mail):
-        response = self.client.post(
-            reverse('tcms_tenants:create-tenant'),
-            {
-                'name': 'Email Ltd',
-                'schema_name': 'email',
-                'publicly_readable': False,
-                'paid_until': '',
-                'owner': self.tester.pk,
-            })
-
-        self.assertIsInstance(response, HttpResponseRedirect)
-
-        self.assertTrue(send_mail.called)
-        self.assertEqual(send_mail.call_count, 1)
-
-    def test_after_create_tenant_owner_should_be_added_to_default_groups(self):
-        expected_url = f"https://tgroups.{settings.KIWI_TENANTS_DOMAIN}"
-        paid_until = timezone.now().replace(microsecond=0) + timedelta(days=30)
-
-        response = self.client.post(
-            reverse('tcms_tenants:create-tenant'),
-            {
-                'name': 'Tenant With Groups',
-                'schema_name': 'tgroups',
-                'publicly_readable': False,
-                'paid_until': paid_until.strftime('%Y-%m-%d %H:%M:%S'),
-                # this is what the default form view sends
-                'owner': self.tester.pk,
-            })
-
-        self.assertIsInstance(response, HttpResponseRedirect)
-        self.assertEqual(response['Location'], expected_url)
-
-        tenant = Tenant.objects.get(schema_name='tgroups')
-        self.assertEqual(tenant.owner, self.tester)
-        self.assertTrue(tenant.owner.tenant_groups.filter(name="Administrator").exists())
-        self.assertTrue(tenant.owner.tenant_groups.filter(name="Tester").exists())
+        # assert tenant owner was added to default groups
+        with tenant_context(tenant):
+            self.assertTrue(tenant.owner.tenant_groups.filter(name="Administrator").exists())
+            self.assertTrue(tenant.owner.tenant_groups.filter(name="Tester").exists())
 
 
-class InviteUsersViewTestCase(LoggedInTestCase):
+class InviteUsersViewTestCase(TenantGroupsTestCase):
     @patch('tcms.core.utils.mailto.send_mail')
     def test_invited_users_are_granted_access(self, send_mail):
         self.assertFalse(UserModel.objects.filter(username="invited-via-email").exists())
@@ -231,20 +204,22 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
             codename='change_tenant')
         cls.tester.user_permissions.add(cls.change_tenant)
 
-    @classmethod
-    def setup_tenant(cls, tenant):
-        super().setup_tenant(tenant)
-        tenant.name = 'Fast Inc.'
+        # name required for edit operations below
+        cls.tenant.name = 'Fast Inc.'
+        cls.tenant.save()
 
     def tearDown(self):
+        self.client.logout()
+
         self.tenant.publicly_readable = False
         self.tenant.save()
 
         self.tester.is_superuser = False
         self.tester.save()
+        super().tearDown()
 
-    def update_and_assert_tenant(self, client):
-        response = client.post(
+    def update_and_assert_tenant(self):
+        response = self.client.post(
             reverse('tcms_tenants:edit-tenant'),
             {
                 'name': self.tenant.name,
@@ -273,7 +248,7 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
 
         # Then
         self.assertContains(response, _('Edit tenant'))
-        self.update_and_assert_tenant(self.client)
+        self.update_and_assert_tenant()
 
     def test_owner_can_edit_own_tenant(self):
         # Given
@@ -282,17 +257,17 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
         self.tenant.owner.user_permissions.add(self.change_tenant)
         self.assertFalse(self.tenant.publicly_readable)
 
-        client = self.client.__class__(self.tenant)
-        client.login(username=self.tenant.owner.username,  # nosec:B106:hardcoded_password_funcarg
-                     password='password')
+        self.client.logout()
+        self.client.login(username=self.tenant.owner.username,
+                          password='password')
         self.assertFalse(self.tenant.publicly_readable)
 
         # When
-        response = client.get(reverse('tcms_tenants:edit-tenant'))
+        response = self.client.get(reverse('tcms_tenants:edit-tenant'))
 
         # Then
         self.assertContains(response, _('Edit tenant'))
-        self.update_and_assert_tenant(client)
+        self.update_and_assert_tenant()
 
     def test_non_owner_cant_edit_tenant(self):
         # Given

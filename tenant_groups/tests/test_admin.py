@@ -22,9 +22,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
         cls.random_user.set_password('password')
         cls.random_user.save()
 
-        # simulate perms b/c the migrations applied via manage.py test
-        # and the parent class don't create tenant schemas and default perms
-        # aren't assigned to groups
+        # assign perms for cls.tester b/c they're not in any of the default groups
         perms = Permission.objects.filter(
             content_type__app_label__contains="tenant_groups"
         )
@@ -37,7 +35,11 @@ class TestGroupAdmin(TenantGroupsTestCase):
             cls.group = TenantGroup.objects.create(name="New Tenant Group")
             cls.defaultGroups = TenantGroup.objects.filter(name__in=["Administrator", "Tester"])
 
-    def test_should_not_be_allowed_to_change_default_groups(self):
+    def tearDown(self):
+        super().tearDown()
+        self.client.logout()
+
+    def test_user_with_perms_should_not_be_allowed_to_change_default_groups(self):
         for group in self.defaultGroups:
             response = self.client.get(
                 reverse("admin:tenant_groups_group_change", args=[group.id])
@@ -51,7 +53,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
                 response, f'<div class="grp-readonly">{group.name}</div>'
             )
 
-    def test_should_not_be_allowed_to_delete_default_groups(self):
+    def test_user_with_perms_should_not_be_allowed_to_delete_default_groups(self):
         for group in self.defaultGroups:
             response = self.client.get(
                 reverse("admin:tenant_groups_group_change", args=[group.id])
@@ -63,7 +65,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
                 f'<a href="{_expected_url}" class="grp-button grp-delete-link">{_delete}</a>',
             )
 
-    def test_should_be_allowed_to_create_new_group(self):
+    def test_user_with_perms_should_be_allowed_to_create_new_group(self):
         response = self.client.get(reverse("admin:tenant_groups_group_add"))
         _add_group = _("Add %s") % _("group")
         self.assertContains(response, f"<h1>{_add_group}</h1>")
@@ -82,14 +84,14 @@ class TestGroupAdmin(TenantGroupsTestCase):
         _capfirst = capfirst(_("users"))
         self.assertContains(response, f'<label for="id_users">{_capfirst}')
 
-    def test_owner_should_be_able_to_delete_a_non_default_group(self):
+    def test_user_with_perms_should_be_able_to_delete_a_non_default_group(self):
         response = self.client.get(
             reverse("admin:tenant_groups_group_delete", args=[self.group.id]), follow=True
         )
         _are_you_sure = _("Are you sure?")
         self.assertContains(response, f"<h1>{_are_you_sure}</h1>")
 
-    def test_should_be_able_to_edit_a_non_default_group(self):
+    def test_user_with_perms_should_be_able_to_edit_a_non_default_group(self):
         response = self.client.get(
             reverse("admin:tenant_groups_group_change", args=[self.group.id])
         )
@@ -130,7 +132,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
             f'{self.non_authorized_user.username}</option>',
         )
 
-    def test_should_be_allowed_to_create_new_group_with_added_user(self):
+    def test_user_with_perms_should_be_allowed_to_create_new_group_with_added_user(self):
         group_name = "TenantGroupName"
         self.assertFalse(self.random_user.tenant_groups.filter(name=group_name).exists())
 
@@ -151,7 +153,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
         )
         self.assertTrue(self.random_user.tenant_groups.filter(name=group.name).exists())
 
-    def test_should_be_able_to_add_user_while_editing_a_group(self):
+    def test_user_with_perms_should_be_able_to_add_user_while_editing_a_group(self):
         self.assertFalse(self.random_user.tenant_groups.filter(name=self.group.name).exists())
         response = self.client.post(
             reverse("admin:tenant_groups_group_change", args=[self.group.id]),
@@ -165,33 +167,36 @@ class TestGroupAdmin(TenantGroupsTestCase):
         )
         self.assertTrue(self.random_user.tenant_groups.filter(name=self.group.name).exists())
 
-    def test_non_owner_should_not_be_able_to_delete_groups(self):
-        client = self.client.__class__(self.tenant)
-        client.login(username=self.random_user,  # nosec:B106:hardcoded_password_funcarg
-                     password='password')
+    def test_user_without_perms_should_not_be_able_to_delete_groups(self):
+        self.client.logout()
+        self.client.login(
+                username=self.random_user.username,
+                password='password')
 
-        response = client.get(
+        response = self.client.get(
             reverse("admin:tenant_groups_group_delete", args=[self.group.id]), follow=True
         )
         self.assertEqual(HTTPStatus.FORBIDDEN, response.status_code)
 
-    def test_non_owner_should_not_be_able_to_edit_groups(self):
-        client = self.client.__class__(self.tenant)
-        client.login(username=self.random_user,  # nosec:B106:hardcoded_password_funcarg
-                     password='password')
+    def test_user_without_perms_should_not_be_able_to_edit_groups(self):
+        self.client.logout()
+        self.client.login(
+            username=self.random_user.username,
+            password='password')
 
-        response = client.get(
+        response = self.client.get(
             reverse("admin:tenant_groups_group_change", args=[self.group.id])
         )
         self.assertEqual(HTTPStatus.FORBIDDEN, response.status_code)
 
-    def test_non_owner_should_not_be_able_to_create_new_group(self):
-        client = self.client.__class__(self.tenant)
-        client.login(username=self.random_user,  # nosec:B106:hardcoded_password_funcarg
-                     password='password')
+    def test_user_without_perms_should_not_be_able_to_create_new_group(self):
+        self.client.logout()
+        self.client.login(
+            username=self.random_user.username,
+            password='password')
 
         group_name = "TenantGroupName"
-        response = client.post(
+        response = self.client.post(
             reverse("admin:tenant_groups_group_add"),
             {"name": group_name},
             follow=True,
