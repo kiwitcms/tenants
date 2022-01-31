@@ -12,6 +12,9 @@ class Group(models.Model):
     """
     Per-tenant group definition! See
     https://github.com/kiwitcms/tenants/issues/104#issuecomment-949956789
+
+    Note: essentially copy-pasted from django.contrib.auth b/c we need separate
+    records inside tenant's schema.
     """
     name = models.CharField(_('name'), max_length=150, unique=True)
     permissions = models.ManyToManyField(

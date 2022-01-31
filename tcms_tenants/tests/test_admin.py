@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django_tenants import utils
 
-from tcms_tenants.tests import LoggedInTestCase
+from tcms_tenants.tests import LoggedInTestCase, TenantGroupsTestCase
 from tcms_tenants.tests import UserFactory
 from tenant_groups.models import Group as TenantGroup
 
@@ -76,16 +76,16 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        # reset owner for cls.tenant b/c we'd like for testing all tenants
-        # to be owned by the same user
-        cls.tenant.owner = cls.tester
-        cls.tenant.name = 'For testing purposes'
-        cls.tenant.save()
-
         # we give this 2nd user access to the tenant
         cls.tester2 = UserFactory()
 
         with utils.schema_context('public'):
+            # reset owner for cls.tenant b/c we'd like for testing all tenants
+            # to be owned by the same user
+            cls.tenant.owner = cls.tester
+            cls.tenant.name = 'For testing purposes'
+            cls.tenant.save()
+
             cls.tenant2 = utils.get_tenant_model()(schema_name='my_other_tenant',
                                                    owner=cls.tester)
             cls.tenant2.save()
@@ -152,21 +152,24 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
                             html=True)
         self.assertNotContains(response, self.tenant2)
 
+
+class AuthorizedUsersAdminAndTenantGroups(TenantGroupsTestCase):
     def test_authorized_user_is_added_to_default_groups(self):
-        self.assertFalse(self.tester2.tenant_groups.filter(name="Tester").exists())
+        tester2 = UserFactory()
+        self.assertFalse(tester2.tenant_groups.filter(name="Tester").exists())
 
         response = self.client.post(
             reverse('admin:tcms_tenants_tenant_authorized_users_add'), {
                 'tenant': self.tenant.pk,
-                'user': self.tester2.username,
+                'user': tester2.username,
                 '_save': 'Save',
             },
             follow=True)
 
-        self.assertContains(response, self.tester2.username)
+        self.assertContains(response, tester2.username)
         self.assertContains(response, "was added successfully")
 
-        self.assertTrue(self.tester2.tenant_groups.filter(name="Tester").exists())
+        self.assertTrue(tester2.tenant_groups.filter(name="Tester").exists())
 
     def test_when_removing_authorized_users_they_are_removed_from_default_groups(self):
         user_to_be_deleted = UserFactory()
