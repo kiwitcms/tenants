@@ -323,7 +323,7 @@ v1.0 (15 Mar 2020)
 
 - Turn into proper Kiwi TCMS plugin and install settings overrides under
   ``tcms_settings_dir/`` (compatible with Kiwi TCMS v8.2 or later)
-  
+
   - does not need ``MENU_ITEMS`` and ``ROOT_URLCONF`` override anymore
   - does not need to load ``tcms_tenants`` in ``INSTALLED_APPS`` manually
   - only need to specify ``KIWI_TENANTS_DOMAIN`` env variable!
