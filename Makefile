@@ -12,7 +12,7 @@ test:
 	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
-	
+
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
         KIWI_TENANTS_DOMAIN='test.com' \
 	    coverage run --include "tcms_tenants/*.py" \
@@ -35,7 +35,7 @@ pylint:
 	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
-	
+
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) pylint \
 	    --load-plugins=pylint_django --django-settings-module=test_project.settings \
 	    --load-plugins=kiwi_lint -d similar-string \
