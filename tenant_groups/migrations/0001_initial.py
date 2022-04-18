@@ -25,10 +25,6 @@ def forwards_add_default_groups_and_permissions(apps, schema_editor):
 
     permission_model = apps.get_model("auth", "Permission")
 
-    admin = group_model.objects.get(name="Administrator")
-    all_perms = permission_model.objects.all()
-    admin.permissions.add(*all_perms)
-
     tester = group_model.objects.get(name="Tester")
     tester_perms = tester.permissions.all()
     # apply all permissions for test case & product management
@@ -50,6 +46,15 @@ def forwards_add_default_groups_and_permissions(apps, schema_editor):
             codename="delete_foreign_attachments",
         )
         tester.permissions.add(*app_perms)
+
+    # Admin gets the same permissions as Tester + tenant_groups
+    admin = group_model.objects.get(name="Administrator")
+    admin.permissions.add(*tester.permissions.all())
+    admin.permissions.add(
+        *permission_model.objects.filter(
+            content_type__app_label="tenant_groups"
+        )
+    )
 
 
 def forwards_add_authorized_users_to_default_groups(apps, schema_editor):
