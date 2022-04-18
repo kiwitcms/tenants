@@ -132,6 +132,64 @@ class TestGroupAdmin(TenantGroupsTestCase):
             f'{self.non_authorized_user.username}</option>',
         )
 
+    def test_new_group_shows_only_filtered_permissions(self):
+        response = self.client.get(reverse("admin:tenant_groups_group_add"))
+
+        for permission in (
+            "attachments | attachment | Can change attachment",
+            "bugs | bug | Can add bug",
+            "django_comments | comment | Can delete comment",
+            "linkreference | link reference | Can view link reference",
+            "management | product | Can view product",
+            "testcases | category | Can add category",
+            "testplans | test plan | Can delete test plan",
+            "testruns | test execution | Can delete test execution",
+        ):
+            self.assertContains(response, permission)
+
+        for permission in (
+            "admin |",
+            "auth |",
+            "captcha |",
+            "contenttypes |",
+            "kiwi_auth |",
+            "sessions |",
+            "sites |",
+            "social_django |",
+            "tcms_tenants |",
+        ):
+            self.assertNotContains(response, permission)
+
+    def test_change_group_shows_only_filtered_permissions(self):
+        for group in self.defaultGroups:
+            response = self.client.get(
+                reverse("admin:tenant_groups_group_change", args=[group.id]))
+
+            for permission in (
+                "attachments | attachment | Can change attachment",
+                "bugs | bug | Can add bug",
+                "django_comments | comment | Can delete comment",
+                "linkreference | link reference | Can view link reference",
+                "management | product | Can view product",
+                "testcases | category | Can add category",
+                "testplans | test plan | Can delete test plan",
+                "testruns | test execution | Can delete test execution",
+            ):
+                self.assertContains(response, permission)
+
+            for permission in (
+                "admin |",
+                "auth |",
+                "captcha |",
+                "contenttypes |",
+                "kiwi_auth |",
+                "sessions |",
+                "sites |",
+                "social_django |",
+                "tcms_tenants |",
+            ):
+                self.assertNotContains(response, permission)
+
     def test_user_with_perms_should_be_allowed_to_create_new_group_with_added_user(self):
         group_name = "TenantGroupName"
         self.assertFalse(self.random_user.tenant_groups.filter(name=group_name).exists())

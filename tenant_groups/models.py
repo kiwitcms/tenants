@@ -16,6 +16,18 @@ class Group(models.Model):
     Note: essentially copy-pasted from django.contrib.auth b/c we need separate
     records inside tenant's schema.
     """
+    relevant_apps = [
+        "attachments",
+        "bugs",
+        "django_comments",
+        "linkreference",
+        "management",
+        "testcases",
+        "testplans",
+        "testruns",
+        "tenant_groups",
+    ]
+
     name = models.CharField(_('name'), max_length=150, unique=True)
     permissions = models.ManyToManyField(
         Permission,
