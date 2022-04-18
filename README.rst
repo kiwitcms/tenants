@@ -161,6 +161,15 @@ its new MT version!
 Changelog
 ---------
 
+v2.0.0 (18 Apr 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Define per-tenant ``Group`` model and add an authentication backend which will
+  consume permissions from tenant-groups. Closes #104
+  `Issue #104 <https://github.com/kiwitcms/tenants/issues/104>`_
+- Add pre-commit CI config & apply automatic fixes
+
+
 v1.11.0 (24 Jan 2022)
 ~~~~~~~~~~~~~~~~~~~~~
 
