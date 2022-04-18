@@ -99,10 +99,9 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
 
         self.assertContains(response, 'Username')
         self.assertContains(response, 'Full name')
-        self.assertContains(response, 'Tenant name')
+        self.assertContains(response, 'Groups')
         self.assertContains(response, self.tester.username)
         self.assertContains(response, self.tester.get_full_name())
-        self.assertContains(response, self.tenant.name)
 
     def test_add_displays_only_current_tenant(self):
         self.assertGreater(utils.get_tenant_model().objects.filter(owner=self.tester).count(), 1)

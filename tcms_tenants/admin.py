@@ -102,8 +102,8 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
         Allows administering which users are authorized for tenants!
     """
     actions = ['delete_selected']
-    list_display = ('user_username', 'user_full_name', 'tenant_name')
-    search_fields = ('user__username', 'tenant__name')
+    list_display = ('user_username', 'user_full_name', 'groups',)
+    search_fields = ('user__username',)
 
     form = AuthorizedUsersChangeForm
 
@@ -116,9 +116,9 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
         return instance.user.get_full_name()
     user_full_name.short_description = _('Full name')
 
-    def tenant_name(self, instance):  # pylint: disable=no-self-use
-        return instance.tenant.name
-    tenant_name.admin_order_field = 'tenant__name'
+    def groups(self, instance):  # pylint: disable=no-self-use
+        return list(instance.user.tenant_groups.values_list('name', flat=True))
+    groups.short_description = _('Groups')
 
     def get_queryset(self, request):
         """
