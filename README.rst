@@ -161,6 +161,12 @@ its new MT version!
 Changelog
 ---------
 
+v2.0.1 (19 Apr 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Fix URL is help message
+
+
 v2.0.0 (18 Apr 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
