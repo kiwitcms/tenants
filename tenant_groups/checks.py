@@ -14,7 +14,7 @@ def tenant_groups_backend(app_configs, **kwargs):  # pylint: disable=unused-argu
                 msg='tenant_groups.backends.GroupsBackend '
                     'is not pesent in AUTHENTICATION_BACKENDS!',
                 hint=('See '
-                      'https://kiwitcms.readthedocs.io/en/latest/admin.html#tenant-permissions'),
+                      'https://kiwitcms.readthedocs.io/en/latest/admin.html#tenant-groups'),
             )
         )
     return errors
