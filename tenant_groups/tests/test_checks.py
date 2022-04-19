@@ -22,7 +22,7 @@ class CheckGroupsBackendTestCase(TestCase):
                         'is not pesent in AUTHENTICATION_BACKENDS!',
                     hint=(
                         'See '
-                        'https://kiwitcms.readthedocs.io/en/latest/admin.html#tenant-permissions'
+                        'https://kiwitcms.readthedocs.io/en/latest/admin.html#tenant-groups'
                     ),
                 ),
             ]
