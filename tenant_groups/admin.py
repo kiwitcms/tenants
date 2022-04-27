@@ -31,11 +31,12 @@ class GroupAdminForm(forms.ModelForm):
         if self.instance.pk:
             self.fields["users"].initial = self.instance.user_set.all()
 
-        self.fields["permissions"].queryset = auth.models.Permission.objects.filter(
-            content_type__app_label__in=Group.relevant_apps
-        )
-        if self.instance.pk:
-            self.fields["permissions"].initial = self.instance.permissions.all()
+        if "permissions" in self.fields:
+            self.fields["permissions"].queryset = auth.models.Permission.objects.filter(
+                content_type__app_label__in=Group.relevant_apps
+            )
+            if self.instance.pk:
+                self.fields["permissions"].initial = self.instance.permissions.all()
 
     def save(self, commit=True):
         instance = super().save(commit=commit)
