@@ -161,6 +161,13 @@ its new MT version!
 Changelog
 ---------
 
+v2.1.0 (27 Apr 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Add ``refresh_tenant_permissions`` command which will be executed automatically
+  by ``refresh_permissions``
+
+
 v2.0.1 (19 Apr 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
