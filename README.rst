@@ -161,6 +161,13 @@ its new MT version!
 Changelog
 ---------
 
+v2.1.1 (27 Apr 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Don't crash if user can't change tenant groups. Fixes
+  `KIWI-TCMS-J8 <https://sentry.io/organizations/kiwitcms/issues/3230191406/>`_
+
+
 v2.1.0 (27 Apr 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
