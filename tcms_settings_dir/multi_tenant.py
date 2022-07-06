@@ -55,5 +55,5 @@ SESSION_COOKIE_DOMAIN = f".{KIWI_TENANTS_DOMAIN}"
 SHARED_APPS = INSTALLED_APPS  # noqa: F821
 
 # add tennants context processor
-if 'tenant_navbar_processor' not in TEMPLATES['OPTIONS'['context_processors']]:   # noqa: F821
-    TEMPLATES['OPTIONS'['context_processors']].append('tenant_navbar_processor')  # noqa: F821
+if 'tenant_navbar_processor' not in TEMPLATES[['OPTIONS'['context_processors']]]:   # noqa: F821
+    TEMPLATES[['OPTIONS'['context_processors']]].append('tenant_navbar_processor')  # noqa: F821
