@@ -6,6 +6,8 @@ def tenant_navbar_processor(request):
     Provide tenant name for display in navbar
     """
     tenant_name = request.tenant.schema_name
+    if request.tenant.name:
+        tenant_name = request.tenant.name
     if request.tenant.organization:
         tenant_name = request.tenant.organization
     customized_logo_contents = render_to_string(
