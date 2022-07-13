@@ -1,4 +1,4 @@
-from django.template.loader import render_to_string  # noqa: E402
+from django.template.loader import render_to_string
 
 
 def tenant_navbar_processor(request):
