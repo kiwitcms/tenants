@@ -37,9 +37,11 @@ pylint:
 	fi
 
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) pylint \
+	    --load-plugins=pylint.extensions.no_self_use \
 	    --load-plugins=pylint_django --django-settings-module=test_project.settings \
 	    --load-plugins=kiwi_lint -d similar-string \
 	    -d missing-docstring -d duplicate-code -d module-in-directory-without-init \
+	    --ignore migrations \
 	    *.py tcms_settings_dir/ tcms_tenants/ tenant_groups/ test_project/
 
 
