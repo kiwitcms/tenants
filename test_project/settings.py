@@ -56,3 +56,6 @@ DATABASES['default'].update({  # noqa: F405 pylint: disable=objects-update-used
 
 if 'test_app' not in INSTALLED_APPS:                # noqa: F405
     INSTALLED_APPS.append('test_project.test_app')  # noqa: F405
+
+# Allows us to hook-up kiwitcms-django-plugin at will
+TEST_RUNNER = os.environ.get("DJANGO_TEST_RUNNER", "django.test.runner.DiscoverRunner")
