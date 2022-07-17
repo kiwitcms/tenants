@@ -5,3 +5,4 @@ coveralls
 factory_boy
 pylint-django
 textdistance
+kiwitcms-django-plugin

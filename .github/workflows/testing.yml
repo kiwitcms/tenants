@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8]
+        kiwitcms-url: [tcms.kiwitcms.org, public.tenant.kiwitcms.org]
 
     steps:
       - uses: actions/checkout@v2
@@ -25,6 +26,13 @@ jobs:
           docker-compose pull db
           docker-compose up -d
 
+      - name: Configure ~/.tcms.conf for ${{ matrix.kiwitcms-url }}
+        run: |
+          echo "[tcms]" > ~/.tcms.conf
+          echo "url = https://${{ matrix.kiwitcms-url }}/xml-rpc/" >> ~/.tcms.conf
+          echo "username = kiwitcms-bot" >> ~/.tcms.conf
+          echo "password = ${{ secrets.TCMS_PASSWORD }}" >> ~/.tcms.conf
+
       - name: Execute tests
         run: |
           pip install -U pip wheel setuptools
@@ -33,6 +41,14 @@ jobs:
           pip install psycopg2
 
           docker exec -i postgresql_database psql -c "ALTER USER kiwi CREATEDB;"
+
+          # report to Kiwi TCMS only if we have access to secrets
+          if [ -n "${{ secrets.TCMS_PASSWORD }}" ]; then
+              export DJANGO_TEST_RUNNER="tcms_django_plugin.TestRunner"
+              export TCMS_PRODUCT=$GITHUB_REPOSITORY
+              export TCMS_PRODUCT_VERSION=$(echo $GITHUB_REF | sed "s|refs/heads/||" | sed "s|refs/||" | sed "s|/merge||")
+              export TCMS_BUILD=$(echo $GITHUB_SHA | cut -c1-7)
+          fi
 
           make check
 
