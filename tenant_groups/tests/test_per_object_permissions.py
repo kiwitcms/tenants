@@ -119,8 +119,8 @@ class TestPermissions(TenantGroupsTestCase):
     def test_can_change_specific_bug(self):
         summary_edit = "An edited summary"
         with tenant_context(self.tenant):
-            version_edit = VersionFactory()
-            build_edit = BuildFactory()
+            version_edit = VersionFactory(product=self.existing.product)
+            build_edit = BuildFactory(version=version_edit)
 
         response = self.client.post(
             reverse("bugs-edit", args=(self.existing.pk,)),
