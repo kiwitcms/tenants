@@ -87,8 +87,8 @@ class TestPermissions(TenantGroupsTestCase):
         with tenant_context(self.tenant):
             existing = BugFactory()
             summary_edit = "An edited summary"
-            version_edit = VersionFactory()
-            build_edit = BuildFactory()
+            version_edit = VersionFactory(product=existing.product)
+            build_edit = BuildFactory(version=version_edit)
 
         response = self.client.post(
             reverse("bugs-edit", args=(existing.pk,)),
