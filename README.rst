@@ -1,3 +1,5 @@
+DEBUG TESTS
+
 Multi-tenant support for Kiwi TCMS
 ==================================
 
