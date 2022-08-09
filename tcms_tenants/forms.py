@@ -67,7 +67,7 @@ class InviteUsersForm(forms.Form):  # pylint: disable=must-inherit-from-model-fo
 
 
 class UpdateTenantForm(NewTenantForm):
-    enabled_fields = ('publicly_readable',)
+    enabled_fields = ('name', 'publicly_readable',)
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
