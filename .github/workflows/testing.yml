@@ -40,8 +40,6 @@ jobs:
           # workaround for https://github.com/tomturner/django-tenants/issues/336
           pip install psycopg>=3.1.17
 
-          docker exec -i postgresql_database psql -c "ALTER USER kiwi CREATEDB;"
-
           # report to Kiwi TCMS only if we have access to secrets
           if [ -n "${{ secrets.TCMS_PASSWORD }}" ]; then
               export DJANGO_TEST_RUNNER="tcms_django_plugin.TestRunner"
