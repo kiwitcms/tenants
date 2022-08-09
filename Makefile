@@ -11,6 +11,7 @@ test:
 	if [ ! -d "$(KIWI_INCLUDE_PATH)/kiwi_lint" ]; then \
 	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
+	    pip install -U Django==4.1.1; \
 	fi
 
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
@@ -34,6 +35,7 @@ pylint:
 	if [ ! -d "$(KIWI_INCLUDE_PATH)/kiwi_lint" ]; then \
 	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
+	    pip install -U Django==4.1.1; \
 	fi
 
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) pylint \
