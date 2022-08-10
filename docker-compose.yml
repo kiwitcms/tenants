@@ -13,5 +13,15 @@ services:
             POSTGRESQL_DATABASE: test_project
             POSTGRESQL_USER: kiwi
             POSTGRESQL_PASSWORD: kiwi
+    pgadmin:
+        container_name: pgadmin
+        image: dpage/pgadmin4
+        restart: always
+        ports:
+            - 8888:80
+        environment:
+            PGADMIN_DEFAULT_EMAIL: pgadmin@kiwitcms.org
+            PGADMIN_DEFAULT_PASSWORD: kiwi
+
 volumes:
     postgresql_database_data:
