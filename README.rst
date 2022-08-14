@@ -161,6 +161,16 @@ its new MT version!
 Changelog
 ---------
 
+v2.2.0 (14 Aug 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.4.2 to 3.4.4
+- Show tenant information in navigation (Ivajlo Karabojkov)
+- Allow editing Tenant.name to make it easier for admins to customize the
+  text shown in navigation!
+- Internal updates around testing and CI
+
+
 v2.1.1 (27 Apr 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
