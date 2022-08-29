@@ -25,7 +25,7 @@ def create_oss_tenant(owner, name, schema_name, organization):
 
     request = FakeRequest(owner)
 
-    form = NewTenantForm(initial={
+    form = NewTenantForm({
         'owner': request.user.pk,
         'name': name,
         'schema_name': schema_name.lower(),
