@@ -18,6 +18,7 @@ from django_tenants.utils import tenant_context
 from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
 from tcms_tenants.tests import LoggedInTestCase, TenantGroupsTestCase
+from tcms_tenants.utils import create_oss_tenant
 
 
 UserModel = get_user_model()
@@ -169,6 +170,21 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
         with tenant_context(tenant):
             self.assertTrue(tenant.owner.tenant_groups.filter(name="Administrator").exists())
             self.assertTrue(tenant.owner.tenant_groups.filter(name="Tester").exists())
+
+    @patch('tcms.core.utils.mailto.send_mail')
+    def test_create_oss_tenant_with_helper_function(self, send_mail):
+        tenant = create_oss_tenant(
+            self.tester.username, 'osstenant', 'osstenant', 'Free Organization')
+
+        # assert tenant was created
+        self.assertFalse(tenant.publicly_readable)
+        self.assertEqual(tenant.owner.pk, self.tester.pk)
+        # OSS tenants are valid until year 2999
+        self.assertGreater(tenant.paid_until - timezone.now(), timedelta(days=1000))
+
+        # assert email was sent
+        self.assertTrue(send_mail.called)
+        self.assertEqual(send_mail.call_count, 1)
 
 
 class InviteUsersViewTestCase(TenantGroupsTestCase):
