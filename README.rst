@@ -161,6 +161,12 @@ its new MT version!
 Changelog
 ---------
 
+v2.2.1 (30 Aug 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Fix a bug in the ``create_oss_tenant()`` helper function
+
+
 v2.2.0 (14 Aug 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
