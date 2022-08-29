@@ -18,7 +18,7 @@ from django_tenants.utils import tenant_context
 from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
 from tcms_tenants.tests import LoggedInTestCase, TenantGroupsTestCase
-from tcms_tenants.utils import create_oss_tenant
+from tcms_tenants.oss_utils import create_oss_tenant
 
 
 UserModel = get_user_model()
