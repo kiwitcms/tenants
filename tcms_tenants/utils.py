@@ -5,7 +5,6 @@
 import datetime
 import uuid
 
-from django import forms
 from django.conf import settings
 from django.db import connections
 from django.contrib.sites.models import Site
@@ -153,37 +152,6 @@ def create_tenant(form, request):
         }
     )
     return tenant
-
-
-def create_oss_tenant(owner, name, schema_name, organization):
-    """
-        Used to create tenants for our OSS program. Executed by the
-        instance administrator!
-    """
-    class FakeRequest:  # pylint: disable=too-few-public-methods,nested-class-found
-        is_secure = True
-        user = None
-
-        def __init__(self, username):
-            self.user = UserModel.objects.get(username=username)
-
-    class FakeTenantForm(forms.ModelForm):  # pylint: disable=nested-class-found
-        class Meta:
-            model = Tenant
-            exclude = ("authorized_users",)  # pylint: disable=modelform-uses-exclude
-
-    request = FakeRequest(owner)
-
-    form = FakeTenantForm(initial={
-        'owner': request.user.pk,
-        'name': name,
-        'schema_name': schema_name.lower(),
-        'organization': organization,
-        'publicly_readable': False,
-        'paid_until': datetime.datetime(2999, 12, 31),
-    })
-
-    return create_tenant(form, request)
 
 
 # NOTE: defined here to avoid circular imports with forms.py
