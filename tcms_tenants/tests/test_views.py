@@ -148,6 +148,9 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
             Similar invocation will be used via inherited view in
             GitHub Marketplace integration.
         """
+        tenant = Tenant.objects.filter(schema_name='subscriber').first()
+        self.assertIsNone(tenant)
+
         expected_url = f"https://subscriber.{settings.KIWI_TENANTS_DOMAIN}"
         paid_until = timezone.now().replace(microsecond=0) + timedelta(days=30)
 
