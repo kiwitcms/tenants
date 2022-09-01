@@ -13,8 +13,7 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from tcms.core.forms.fields import UserField
 
 from tcms_tenants.models import Tenant
-from tcms_tenants.utils import owns_tenant
-from tenant_groups.models import Group as TenantGroup
+from tcms_tenants.utils import add_to_default_groups, owns_tenant
 
 
 class TenantAdmin(admin.ModelAdmin):
@@ -93,7 +92,7 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
         instance = super().save(commit=commit)
         instance.save()
 
-        self.instance.user.tenant_groups.add(TenantGroup.objects.get(name="Tester"))
+        add_to_default_groups(self.instance.user)
         return instance
 
 
