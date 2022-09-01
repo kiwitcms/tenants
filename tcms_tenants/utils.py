@@ -7,6 +7,7 @@ import uuid
 
 from django.conf import settings
 from django.db import connections
+from django.contrib import messages
 from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -189,7 +190,7 @@ def create_user_account(email_address):
     return user
 
 
-def add_to_default_groups(user):
+def add_to_default_groups(user, request=None):
     """
     If there are tenant groups whose names match the default setting the user
     will be added to them. Otherwise it's up to administrator to assign
@@ -197,6 +198,12 @@ def add_to_default_groups(user):
     """
     for group in TenantGroup.objects.filter(name__in=settings.DEFAULT_GROUPS):
         user.tenant_groups.add(group)
+        if request:
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _(f"User {user.username} added to tenant group {group.name}"),
+            )
 
 
 def invite_users(request, email_addresses):
