@@ -12,6 +12,10 @@ class PubliclyReadableBackend(BaseBackend):
     """
 
     def has_perm(self, user_obj, perm, obj=None):
+        # let other backends decide
+        if perm.startswith("auth."):
+            return False
+
         current_tenant = get_current_tenant()
 
         # allow everyone to view
