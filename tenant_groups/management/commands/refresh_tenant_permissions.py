@@ -5,18 +5,18 @@
 from django_tenants.utils import get_public_schema_name, get_tenant_model, tenant_context
 from tcms.core.management.commands import refresh_permissions
 
-from tenant_groups.models import Group
+from tenant_groups.models import Group as TenantGroup
 
 
 class Command(refresh_permissions.Command):
     help = "Refresh permissions for tenant groups and remove stale ones."
 
-    group_model = Group
+    group_model = TenantGroup
     admin_permissions_filter = {
-        'content_type__app_label__in': Group.relevant_apps,
+        'content_type__app_label__in': TenantGroup.relevant_apps,
     }
     tester_permissions_filter = {
-        'content_type__app_label__in': Group.relevant_apps,
+        'content_type__app_label__in': TenantGroup.relevant_apps,
     }
 
     def handle(self, *args, **kwargs):
