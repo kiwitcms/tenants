@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2022 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -189,6 +189,16 @@ def create_user_account(email_address):
     return user
 
 
+def add_to_default_groups(user):
+    """
+    If there are tenant groups whose names match the default setting the user
+    will be added to them. Otherwise it's up to administrator to assign
+    appropriate membership & permissions for authorized users.
+    """
+    for group in TenantGroup.objects.filter(name__in=settings.DEFAULT_GROUPS):
+        user.tenant_groups.add(group)
+
+
 def invite_users(request, email_addresses):
     for email in email_addresses:
         # note: users are on public_schema
@@ -204,7 +214,7 @@ def invite_users(request, email_addresses):
 
         request.tenant.authorized_users.add(user)
         with tenant_context(request.tenant):
-            TenantGroup.objects.get(name="Tester").user_set.add(user)
+            add_to_default_groups(user)
 
         mailto(
             template_name='tcms_tenants/email/invite_user.txt',

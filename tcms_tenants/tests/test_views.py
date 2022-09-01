@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.http import HttpResponseRedirect
+from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 
 from django_tenants.utils import tenant_context
@@ -19,6 +20,8 @@ from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
 from tcms_tenants.tests import LoggedInTestCase, TenantGroupsTestCase
 from tcms_tenants.oss_utils import create_oss_tenant
+
+from tenant_groups.models import Group as TenantGroup
 
 
 UserModel = get_user_model()
@@ -188,8 +191,12 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
 
 
 class InviteUsersViewTestCase(TenantGroupsTestCase):
+    @override_settings(DEFAULT_GROUPS=["InvitedUsers"])
     @patch('tcms.core.utils.mailto.send_mail')
     def test_invited_users_are_granted_access(self, send_mail):
+        with tenant_context(self.tenant):
+            TenantGroup.objects.create(name="InvitedUsers")
+
         self.assertFalse(UserModel.objects.filter(username="invited-via-email").exists())
 
         response = self.client.post(
@@ -207,7 +214,9 @@ class InviteUsersViewTestCase(TenantGroupsTestCase):
         invited_user = UserModel.objects.get(username="invited-via-email")
         self.assertTrue(invited_user.is_active)
         self.assertTrue(self.tenant.authorized_users.filter(pk=invited_user.pk).exists())
-        self.assertTrue(invited_user.tenant_groups.filter(name="Tester").exists())
+
+        self.assertTrue(invited_user.tenant_groups.filter(name="InvitedUsers").exists())
+        self.assertFalse(invited_user.tenant_groups.filter(name="Tester").exists())
 
 
 class UpdateTenantViewTestCase(LoggedInTestCase):

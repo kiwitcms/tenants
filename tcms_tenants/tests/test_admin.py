@@ -4,6 +4,7 @@
 # pylint: disable=too-many-ancestors
 from http import HTTPStatus
 
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -153,9 +154,13 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
 
 
 class AuthorizedUsersAdminAndTenantGroups(TenantGroupsTestCase):
+    @override_settings(DEFAULT_GROUPS=["AuthorizedUsers"])
     def test_authorized_user_is_added_to_default_groups(self):
+        with utils.tenant_context(self.tenant):
+            TenantGroup.objects.create(name="AuthorizedUsers")
+
         tester2 = UserFactory()
-        self.assertFalse(tester2.tenant_groups.filter(name="Tester").exists())
+        self.assertEqual(tester2.tenant_groups.count(), 0)
 
         response = self.client.post(
             reverse('admin:tcms_tenants_tenant_authorized_users_add'), {
@@ -168,7 +173,8 @@ class AuthorizedUsersAdminAndTenantGroups(TenantGroupsTestCase):
         self.assertContains(response, tester2.username)
         self.assertContains(response, "was added successfully")
 
-        self.assertTrue(tester2.tenant_groups.filter(name="Tester").exists())
+        self.assertTrue(tester2.tenant_groups.filter(name="AuthorizedUsers").exists())
+        self.assertFalse(tester2.tenant_groups.filter(name="Tester").exists())
 
     def test_when_removing_authorized_users_they_are_removed_from_default_groups(self):
         user_to_be_deleted = UserFactory()
