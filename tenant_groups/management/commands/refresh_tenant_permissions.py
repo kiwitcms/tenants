@@ -9,7 +9,7 @@ from tenant_groups.models import Group as TenantGroup
 
 
 class Command(refresh_permissions.Command):
-    help = "Refresh permissions for tenant groups and remove stale ones."
+    help = "Refresh permissions for tenant groups 'Admin' & 'Tester'."
 
     group_model = TenantGroup
     admin_permissions_filter = {
