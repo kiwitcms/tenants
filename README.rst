@@ -161,6 +161,19 @@ its new MT version!
 Changelog
 ---------
 
+v2.3.0 (02 Sep 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Don't grant ``auth.view_`` permissions even on publicly readable tenants
+- Honor ``settings.DEFAULT_GROUPS`` instead of hard-coding. Invited users and
+  users authorized via the Admin panel will be added to tenant groups which
+  match ``settings.DEFAULT_GROUPS`` ("Tester" by default) if such tenant groups
+  exist. If the setting is an empty list or there are no tenant groups matching
+  the specific names configured then authorized users will be left without
+  group associations. It will be up to a Kiwi TCMS administrator to
+  manually assign permissions and tenant groups for each user.
+
+
 v2.2.1 (30 Aug 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
