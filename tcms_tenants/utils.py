@@ -88,6 +88,7 @@ def create_tenant(form, request):
         # If a schema with name "empty" exists then use it for
         # cloning b/c that's faster
         if Tenant.objects.filter(schema_name='empty').first():
+            print("**** DEBUG: create_tenant() - will clone")
             schema_name = form.cleaned_data["schema_name"]
             paid_until = form.cleaned_data["paid_until"] or datetime.datetime(3000, 3, 31)
             call_command(
@@ -140,9 +141,24 @@ def create_tenant(form, request):
         site.name = domain.domain
         site.save()
 
+        print('++++ DEBUG: before user/group assignment for', tenant, "owner=", tenant.owner)
+        for grp in TenantGroup.objects.all():
+            print('--- TG=', grp.pk, grp, grp.user_set.all())
+
+        print('===== through objects ====')
+        for obj in TenantGroup.user_set.through.objects.all():
+            print('>>>> through obj', obj, obj.pk, obj.group_id, obj.user_id)
+        print('===== through objects ====')
+
         # add owner to default groups b/c they need certain permissions
         TenantGroup.objects.get(name="Administrator").user_set.add(tenant.owner)
         TenantGroup.objects.get(name="Tester").user_set.add(tenant.owner)
+
+        print("++++ DEBUG: After group assignment for ", tenant, "owner=", tenant.owner)
+        for grp in TenantGroup.objects.all():
+            print('--- TG=', grp.pk, grp, grp.user_set.all())
+
+        print("++++ DEBUG: Tenant Groups for ", tenant.owner, "=", tenant.owner.tenant_groups.all())
 
     mailto(
         template_name='tcms_tenants/email/new.txt',
