@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 
-from django_tenants.utils import tenant_context
+from django_tenants.utils import tenant_context, schema_context
 
 from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
@@ -153,6 +153,12 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
 
         expected_url = f"https://subscriber.{settings.KIWI_TENANTS_DOMAIN}"
         paid_until = timezone.now().replace(microsecond=0) + timedelta(days=30)
+
+        print("**** DEBUG: before post, inspecting groups on empty tenant")
+        with schema_context('empty'):
+            for grp in TenantGroup.objects.all():
+                print("*** TG=", grp.pk, grp)
+        print("**** END")
 
         response = self.client.post(
             reverse('tcms_tenants:create-tenant'),

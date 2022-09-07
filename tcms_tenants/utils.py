@@ -140,9 +140,17 @@ def create_tenant(form, request):
         site.name = domain.domain
         site.save()
 
+        print("++++ still creating tenant. Will assign TGs for ", tenant, "owner=", tenant.owner)
+        for grp in TenantGroup.objects.all():
+            print('--- before user/group assignment TG=', grp.pk, grp, grp.user_set.all())
+
         # add owner to default groups b/c they need certain permissions
         TenantGroup.objects.get(name="Administrator").user_set.add(tenant.owner)
         TenantGroup.objects.get(name="Tester").user_set.add(tenant.owner)
+
+        print("++++ After group assignment for ", tenant)
+        for grp in TenantGroup.objects.all():
+            print('--- TG=', grp.pk, grp, grp.user_set.all())
 
     mailto(
         template_name='tcms_tenants/email/new.txt',
