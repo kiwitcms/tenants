@@ -145,8 +145,10 @@ def create_tenant(form, request):
             print('--- before user/group assignment TG=', grp.pk, grp, grp.user_set.all())
 
         # add owner to default groups b/c they need certain permissions
-        TenantGroup.objects.get(name="Administrator").user_set.add(tenant.owner)
-        TenantGroup.objects.get(name="Tester").user_set.add(tenant.owner)
+        # TenantGroup.objects.get(name="Administrator").user_set.add(tenant.owner)
+        # TenantGroup.objects.get(name="Tester").user_set.add(tenant.owner)
+        tenant.owner.tenant_groups.add(TenantGroup.objects.get(name="Administrator"))
+        tenant.owner.tenant_groups.add(TenantGroup.objects.get(name="Tester"))
 
         print("++++ After group assignment for ", tenant)
         for grp in TenantGroup.objects.all():
