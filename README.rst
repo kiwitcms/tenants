@@ -161,6 +161,13 @@ its new MT version!
 Changelog
 ---------
 
+v2.3.1 (10 Sep 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Don't access ``request.tenant`` if such attribute does not exist. Fixes
+  `KIWI-TCMS-K2 <https://sentry.io/organizations/kiwitcms/issues/3565864401/>`_
+
+
 v2.3.0 (02 Sep 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
