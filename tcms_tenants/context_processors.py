@@ -5,6 +5,9 @@ def tenant_navbar_processor(request):
     """
     Provide tenant name for display in navbar
     """
+    if not getattr(request, "tenant", None):
+        return {"CUSTOMIZED_LOGO_CONTENTS": ""}
+
     if request.tenant.organization:
         tenant_name = request.tenant.organization
     elif request.tenant.name:
