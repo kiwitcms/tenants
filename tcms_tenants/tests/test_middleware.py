@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2022 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -6,10 +6,27 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.test import modify_settings
+from django.test import TestCase
+from django.test.client import RequestFactory
 from django.utils import timezone
 from django.http import HttpResponseForbidden
 
 from tcms_tenants.tests import LoggedInTestCase
+from tcms_tenants.context_processors import tenant_navbar_processor
+
+
+class ContextProcessor(TestCase):
+    def test_without_tenant(self):
+        """
+        This simulates the case where TenantMainMiddleware returns a 404 for
+        non-existing tenant but there's no request.tenant attribute and the
+        follow-up post-processing fails with a 500.
+        """
+        factory = RequestFactory()
+        request = factory.get('/robots.txt', HTTP_HOST='non-existing.tenant.bg')
+
+        result = tenant_navbar_processor(request)
+        self.assertEqual(result, {"CUSTOMIZED_LOGO_CONTENTS": ""})
 
 
 class BlockUnauthorizedUserMiddlewareTestCase(LoggedInTestCase):
