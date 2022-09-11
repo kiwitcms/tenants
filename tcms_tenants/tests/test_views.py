@@ -182,6 +182,11 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
         tenant = create_oss_tenant(
             self.tester.username, 'osstenant', 'osstenant', 'Free Organization')
 
+        # assert tenant owner was added to default groups
+        with tenant_context(tenant):
+            self.assertTrue(tenant.owner.tenant_groups.filter(name="Administrator").exists())
+            self.assertTrue(tenant.owner.tenant_groups.filter(name="Tester").exists())
+
         # assert tenant was created
         self.assertFalse(tenant.publicly_readable)
         self.assertEqual(tenant.owner.pk, self.tester.pk)
