@@ -59,7 +59,7 @@ def forwards_add_default_groups_and_permissions(apps, schema_editor):
 
 def forwards_add_authorized_users_to_default_groups(apps, schema_editor):
     current_tenant = connections[get_tenant_database_alias()].tenant
-    if current_tenant.schema_name == get_public_schema_name():
+    if current_tenant.schema_name in [get_public_schema_name(), "empty"]:
         return
 
     group_model = apps.get_model("tenant_groups", "Group")
