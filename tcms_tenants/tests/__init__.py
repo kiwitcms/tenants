@@ -33,48 +33,6 @@ class UserFactory(DjangoModelFactory):
 
 
 class LoggedInTestCase(FastTenantTestCase):
-    @classmethod
-    def get_test_schema_name(cls):
-        return "fast"
-
-    @classmethod
-    def setup_tenant(cls, tenant):
-        super().setup_tenant(tenant)
-
-        tenant.publicly_readable = False
-        tenant.owner = UserFactory()
-        tenant.owner.set_password('password')
-        tenant.owner.save()
-
-    @classmethod
-    def setUpClass(cls):
-        # b/c it may create a new tenant
-        with schema_context('public'):
-            super().setUpClass()
-
-        # authorize tenant owner
-        cls.tenant.authorized_users.add(cls.tenant.owner)
-
-        cls.tester = UserFactory()
-        cls.tester.set_password('password')
-        cls.tester.save()
-
-        # authorize this user
-        cls.tenant.authorized_users.add(cls.tester)
-
-        # initial data
-        with tenant_context(cls.tenant):
-            cls.test_plan_by_owner = TestPlanFactory(author=cls.tenant.owner)
-
-    def setUp(self):
-        super().setUp()
-
-        self.client = TenantClient(self.tenant)
-        self.client.login(username=self.tester.username,  # nosec:B106:hardcoded_password_funcarg
-                          password='password')
-
-
-class TenantGroupsTestCase(LoggedInTestCase):
     original_value = None
 
     @classmethod
@@ -90,6 +48,15 @@ class TenantGroupsTestCase(LoggedInTestCase):
     @classmethod
     def get_verbosity(cls):
         return 1
+
+    @classmethod
+    def setup_tenant(cls, tenant):
+        super().setup_tenant(tenant)
+
+        tenant.publicly_readable = False
+        tenant.owner = UserFactory()
+        tenant.owner.set_password('password')
+        tenant.owner.save()
 
     @classmethod
     def setUpClass(cls):
@@ -110,13 +77,40 @@ class TenantGroupsTestCase(LoggedInTestCase):
             # tenant creation may happen here so it needs to be on public schema
             super().setUpClass()
 
+            # authorize tenant owner
+            cls.tenant.authorized_users.add(cls.tenant.owner)
+
+        cls.tester = UserFactory()
+        cls.tester.set_password('password')
+        cls.tester.save()
+
+        # initial data
         with tenant_context(cls.tenant):
-            # add owner to default groups b/c they need certain permissions
-            # and b/c this is what utils.create_tenant() does
-            TenantGroup.objects.get(name="Administrator").user_set.add(cls.tenant.owner)
-            TenantGroup.objects.get(name="Tester").user_set.add(cls.tenant.owner)
+            # authorize this user
+            cls.tenant.authorized_users.add(cls.tester)
+            cls.test_plan_by_owner = TestPlanFactory(author=cls.tenant.owner)
 
     @classmethod
     def tearDownClass(cls):
         get_tenant_model().auto_create_schema = cls.original_value
         super().tearDownClass()
+
+    def setUp(self):
+        super().setUp()
+
+        self.client = TenantClient(self.tenant)
+        self.client.login(username=self.tester.username,  # nosec:B106:hardcoded_password_funcarg
+                          password='password')
+
+
+class TenantGroupsTestCase(LoggedInTestCase):
+    @classmethod
+    def setUpClass(cls):
+        # tenant creation may happen here so it needs to be on public schema
+        super().setUpClass()
+
+        with tenant_context(cls.tenant):
+            # add owner to default groups b/c they need certain permissions
+            # and b/c this is what utils.create_tenant() does
+            TenantGroup.objects.get(name="Administrator").user_set.add(cls.tenant.owner)
+            TenantGroup.objects.get(name="Tester").user_set.add(cls.tenant.owner)
