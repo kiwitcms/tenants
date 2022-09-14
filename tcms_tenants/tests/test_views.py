@@ -47,7 +47,7 @@ class RedirectToTestCase(LoggedInTestCase):
         self.assertEqual(response['Location'], expected_url)
 
 
-class NewTenantViewTestCase(TenantGroupsTestCase):
+class NewTenantViewTestCase(LoggedInTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
