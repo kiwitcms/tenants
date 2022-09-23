@@ -62,9 +62,26 @@
             {% block extra_contents %}
                 {{ form.paid_until }}
             {% endblock %}
-            <button type="submit" class="btn btn-default btn-lg">{% trans "Save" %}</button>
+
+            <div class="form-group">
+                <label class="col-md-1 col-lg-1"></label>
+                <div class="col-md-3 col-lg-3">
+                    <button type="submit" class="btn btn-default btn-lg">{% trans "Save" %}</button>
+                </div>
+            </div>
         </form>
     </div>
+    <br>
+    {% if object %}
+        <div class="container-fluid container-cards-pf">
+            <div class="form-group">
+                <label class="col-md-1 col-lg-1">{% trans "Logo" %}</label>
+                <div class="col-sm-11 col-md-8 col-lg-5">
+                    {% include 'include/attachments.html' %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
 
     <script src="{% static 'bootstrap-switch/dist/js/bootstrap-switch.min.js' %}"></script>
     <script>
