@@ -9,7 +9,7 @@ from django.test import modify_settings
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.utils import timezone
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseNotFound
 
 from tcms_tenants.tests import LoggedInTestCase
 from tcms_tenants.context_processors import tenant_navbar_processor
@@ -87,3 +87,20 @@ class BlockUnpaidTenantMiddlewareTestCase(LoggedInTestCase):
         response = self.client.get('/')
 
         self.assertContains(response, 'DASHBOARD')
+
+
+class InvalidHostname(LoggedInTestCase):
+    @classmethod
+    def get_test_tenant_domain(cls):
+        # This domain is not valid according to RFC 1034/1035
+        return '_.kiwitcms.eu'
+
+    @classmethod
+    def get_test_schema_name(cls):
+        # we need a different schema name here so that it gets created
+        return '_underscore'
+
+    def test_invalid_hostname_should_return_404(self):
+        response = self.client.get('/')
+
+        self.assertIsInstance(response, HttpResponseNotFound)
