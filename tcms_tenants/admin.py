@@ -13,7 +13,7 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from tcms.core.forms.fields import UserField
 
 from tcms_tenants.models import Tenant
-from tcms_tenants.utils import add_to_default_groups, owns_tenant
+from tcms_tenants.utils import add_to_default_groups, owns_tenant, tenant_url
 
 
 class TenantAdmin(admin.ModelAdmin):
@@ -27,10 +27,12 @@ class TenantAdmin(admin.ModelAdmin):
     ordering = ['-created_on']
 
     def add_view(self, request, form_url='', extra_context=None):
-        return HttpResponseRedirect(reverse('admin:tcms_tenants_tenant_changelist'))
+        return HttpResponseRedirect(reverse('tcms_tenants:create-tenant'))
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        return HttpResponseRedirect(reverse('admin:tcms_tenants_tenant_changelist'))
+        tenant = Tenant.objects.get(pk=object_id)
+        target_url = tenant_url(request, tenant.schema_name) + reverse('tcms_tenants:edit-tenant')
+        return HttpResponseRedirect(target_url)
 
     @admin.options.csrf_protect_m
     def changelist_view(self, request, extra_context=None):
@@ -44,7 +46,7 @@ class TenantAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return super().delete_view(request, object_id, extra_context)
 
-        return HttpResponseRedirect(reverse('admin:tcms_tenants_tenant_changelist'))
+        return HttpResponseForbidden(_('Unauthorized'))
 
     def domain_name(self, instance):  # pylint: disable=no-self-use
         return instance.domains.filter(is_primary=True).first().domain
