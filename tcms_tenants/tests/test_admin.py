@@ -22,25 +22,31 @@ class TenantAdminTestCase(LoggedInTestCase):
 
         super().tearDown()
 
-    def test_cant_add_tenant_via_admin(self):
+    def test_add_tenant_redirects_to_view(self):
         response = self.client.get(reverse('admin:tcms_tenants_tenant_add'))
         self.assertRedirects(response,
-                             reverse('admin:tcms_tenants_tenant_changelist'),
+                             reverse('tcms_tenants:create-tenant'),
                              fetch_redirect_response=False)
 
-    def test_cant_change_tenant_via_admin(self):
+    def test_change_tenant_redirects_to_view(self):
         response = self.client.get(reverse('admin:tcms_tenants_tenant_change',
                                            args=[self.tenant.pk]))
+
+        # Note: this is a hack b/c we don't have a request object to determine the
+        # exact URL using tenant_url()
+        expected_url = (
+            'https://' +
+            self.get_test_tenant_domain() +
+            reverse('tcms_tenants:edit-tenant')
+        )
         self.assertRedirects(response,
-                             reverse('admin:tcms_tenants_tenant_changelist'),
+                             expected_url,
                              fetch_redirect_response=False)
 
-    def test_cant_delete_tenant_via_admin(self):
+    def test_regular_user_cant_delete_tenant_via_admin(self):
         response = self.client.get(reverse('admin:tcms_tenants_tenant_delete',
                                            args=[self.tenant.pk]))
-        self.assertRedirects(response,
-                             reverse('admin:tcms_tenants_tenant_changelist'),
-                             fetch_redirect_response=False)
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
 
     def test_cant_access_changelist(self):
         response = self.client.get(reverse('admin:tcms_tenants_tenant_changelist'))
