@@ -128,7 +128,7 @@ v2.3.2 (31 Oct 2022)
 
 - Update django-tenants from 3.4.5 to 3.4.7
 - Don't add users to TenantGroup on ``empty`` tenant
- -Adjust redirects from Tenant admin page to avoid confusion
+- Adjust redirects from Tenant admin page to avoid confusion
 - Update docs for initial configuration
 - Add more assertions into test
 
