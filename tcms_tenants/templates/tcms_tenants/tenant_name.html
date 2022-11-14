@@ -2,6 +2,7 @@
     <img
         src="{% if tenant_logo %}{{ tenant_logo.attachment_file.url }}{% else %}/non-existing.png{% endif %}"
         alt="{{ tenant_name }}"
+        {% if tenant_logo %}title="{{ tenant_name }}"{% endif %}
         style="max-height: 20px"
     />
 </a>
