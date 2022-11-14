@@ -62,25 +62,15 @@
             {% block extra_contents %}
                 {{ form.paid_until }}
             {% endblock %}
-
-            <div class="form-group">
-                <label class="col-md-1 col-lg-1"></label>
-                <div class="col-md-3 col-lg-3">
-                    <button type="submit" class="btn btn-default btn-lg">{% trans "Save" %}</button>
-                </div>
-            </div>
+            <button type="submit" class="btn btn-default btn-lg">{% trans "Save" %}</button>
         </form>
     </div>
-    <br>
+
     {% if object %}
-        <div class="container-fluid container-cards-pf">
-            <div class="form-group">
-                <label class="col-md-1 col-lg-1">{% trans "Logo" %}</label>
-                <div class="col-sm-11 col-md-8 col-lg-5">
-                    {% include 'include/attachments.html' %}
-                </div>
-            </div>
-        </div>
+    <div class="col-sm-11 col-md-6 col-lg-6" style="padding-left: 10px;">
+        {% trans "Tenant logo" as card_title %}
+        {% include 'include/attachments.html' %}
+    </div>
     {% endif %}
 
     <script src="{% static 'bootstrap-switch/dist/js/bootstrap-switch.min.js' %}"></script>
