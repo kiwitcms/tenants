@@ -1,5 +1,7 @@
 <a class="navbar-brand" href="/">
     <img
         src="{% if tenant_logo %}{{ tenant_logo.attachment_file.url }}{% else %}/non-existing.png{% endif %}"
-        alt="{{ tenant_name }}" />
+        alt="{{ tenant_name }}"
+        style="max-height: 20px"
+    />
 </a>
