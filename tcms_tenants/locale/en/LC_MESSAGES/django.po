@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-02 09:16+0000\n"
+"POT-Creation-Date: 2022-11-14 20:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,20 +18,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: tcms_tenants/admin.py:40 tcms_tenants/middleware.py:32
+#: tcms_tenants/admin.py:42 tcms_tenants/admin.py:49
+#: tcms_tenants/middleware.py:32
 msgid "Unauthorized"
 msgstr ""
 
-#: tcms_tenants/admin.py:70
+#: tcms_tenants/admin.py:72
 msgid "Existing username, email or user ID"
 msgstr ""
 
-#: tcms_tenants/admin.py:104
+#: tcms_tenants/admin.py:113
 msgid "Username"
 msgstr ""
 
-#: tcms_tenants/admin.py:109
+#: tcms_tenants/admin.py:118
 msgid "Full name"
+msgstr ""
+
+#: tcms_tenants/admin.py:122 tcms_tenants/menu.py:15
+msgid "Groups"
 msgstr ""
 
 #: tcms_tenants/forms.py:27
@@ -50,12 +55,12 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: tcms_tenants/menu.py:15
+#: tcms_tenants/menu.py:17
 #: tcms_tenants/templates/tcms_tenants/invite_users.html:9
 msgid "Invite users"
 msgstr ""
 
-#: tcms_tenants/menu.py:16
+#: tcms_tenants/menu.py:18
 msgid "Authorized users"
 msgstr ""
 
@@ -128,15 +133,24 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: tcms_tenants/utils.py:60
+#: tcms_tenants/templates/tcms_tenants/new.html:71
+msgid "Tenant logo"
+msgstr ""
+
+#: tcms_tenants/utils.py:62
 msgid "Schema name already in use"
 msgstr ""
 
-#: tcms_tenants/utils.py:107
+#: tcms_tenants/utils.py:150
 msgid "New Kiwi TCMS tenant created"
 msgstr ""
 
-#: tcms_tenants/utils.py:198
+#: tcms_tenants/utils.py:205
+#, python-brace-format
+msgid "User {user.username} added to tenant group {group.name}"
+msgstr ""
+
+#: tcms_tenants/utils.py:229
 msgid "Invitation to join Kiwi TCMS"
 msgstr ""
 
@@ -148,6 +162,26 @@ msgstr ""
 msgid "Edit tenant"
 msgstr ""
 
-#: tcms_tenants/views.py:146
+#: tcms_tenants/views.py:147
 msgid "Only users who are authorized for this tenant can invite others"
+msgstr ""
+
+#: tenant_groups/admin.py:29
+msgid "users"
+msgstr ""
+
+#: tenant_groups/models.py:31
+msgid "name"
+msgstr ""
+
+#: tenant_groups/models.py:34
+msgid "permissions"
+msgstr ""
+
+#: tenant_groups/models.py:42
+msgid "group"
+msgstr ""
+
+#: tenant_groups/models.py:43
+msgid "groups"
 msgstr ""

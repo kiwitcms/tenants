@@ -7,7 +7,8 @@ messages:
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
 
-	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) KIWI_TENANTS_DOMAIN='test.com' ./manage.py makemessages --locale en --no-obsolete --ignore "test*.py"
+	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) KIWI_TENANTS_DOMAIN='test.com' \
+	    ./manage.py makemessages --locale en --no-obsolete --no-vinaigrette --ignore "test*.py"
 	ls tcms_tenants/locale/*/LC_MESSAGES/*.po | xargs -n 1 -I @ msgattrib -o @ --no-fuzzy @
 
 
