@@ -123,6 +123,14 @@ its new MT version!
 Changelog
 ---------
 
+v2.4.0 (15 Nov 2022)
+~~~~~~~~~~~~~~~~~~~~
+
+- Allow customization of tenant logo in navigation (Ivajlo Karabojkov)
+- Add CodeQL workflow for GitHub code scanning
+- Fix make messages command
+
+
 v2.3.2 (31 Oct 2022)
 ~~~~~~~~~~~~~~~~~~~~
 
