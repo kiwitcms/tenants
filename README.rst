@@ -123,6 +123,13 @@ its new MT version!
 Changelog
 ---------
 
+v2.5.0 (10 Feb 2023)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update to django-tenants==3.4.8
+- Bug fix on Create Tenant page for Kiwi TCMS v11.7 or later
+
+
 v2.4.0 (15 Nov 2022)
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -1,6 +1,6 @@
 # pylint: disable=missing-docstring
 
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2023 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -25,7 +25,7 @@ def get_install_requires(path):
 
 setup(
     name='kiwitcms-tenants',
-    version='2.4.0',
+    version='2.5.0',
     description='Multi-tenant support for Kiwi TCMS',
     long_description=get_long_description(),
     author='Kiwi TCMS',
