@@ -123,6 +123,13 @@ its new MT version!
 Changelog
 ---------
 
+v2.5.1 (12 May 2023)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update to django-tenants==3.5.0
+- Replace ``form_errors_to_list()`` which was removed in Kiwi TCMS v12.2
+
+
 v2.5.0 (10 Feb 2023)
 ~~~~~~~~~~~~~~~~~~~~
 
