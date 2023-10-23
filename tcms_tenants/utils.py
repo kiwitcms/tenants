@@ -156,7 +156,7 @@ def create_tenant(form, request):
 
 
 # NOTE: defined here to avoid circular imports with forms.py
-class RegistrationForm(kiwi_auth_forms.RegistrationForm):
+class RegistrationForm(kiwi_auth_forms.RegistrationForm):  # pylint: disable=too-many-ancestors
     """
         Override captcha field b/c Kiwi TCMS may be configured to
         use reCAPTCHA and we don't want this to block automatic
