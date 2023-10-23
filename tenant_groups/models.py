@@ -26,6 +26,7 @@ class Group(models.Model):
         "testplans",
         "testruns",
         "tenant_groups",
+        "trackers_integration",
     ]
 
     name = models.CharField(_('name'), max_length=150, unique=True)
