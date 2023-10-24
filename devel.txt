@@ -3,6 +3,6 @@
 flake8
 coveralls
 factory_boy
-pylint-django==2.5.3
+pylint-django==2.5.5
 textdistance
 kiwitcms-django-plugin
