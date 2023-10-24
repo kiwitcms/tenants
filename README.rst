@@ -123,6 +123,14 @@ its new MT version!
 Changelog
 ---------
 
+v2.5.2 (24 Oct 2023)
+~~~~~~~~~~~~~~~~~~~~
+
+- Add ``trackers_integration`` into ``tenant_groups.models.Group.relevant_apps``
+  to allow per-tenant assignment for permissions around personal API
+  tokens, see https://github.com/kiwitcms/trackers-integration/pull/44
+
+
 v2.5.1 (12 May 2023)
 ~~~~~~~~~~~~~~~~~~~~
 
