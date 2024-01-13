@@ -123,6 +123,15 @@ its new MT version!
 Changelog
 ---------
 
+v2.6.0 (14 Jan 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.5.0 to 3.6.1
+- Update pylint-django from 2.5.3 to 2.5.5
+- Start building and testing with Python 3.11
+- Start testing with psycopg3
+
+
 v2.5.2 (24 Oct 2023)
 ~~~~~~~~~~~~~~~~~~~~
 
