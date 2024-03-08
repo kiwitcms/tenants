@@ -123,6 +123,13 @@ its new MT version!
 Changelog
 ---------
 
+v2.6.1 (08 Mar 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Remove use of ``non-existing.png`` file in tenant name area
+  to avoid 404 responses which trigger rate limiting
+
+
 v2.6.0 (14 Jan 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
