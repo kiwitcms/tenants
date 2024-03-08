@@ -22,8 +22,8 @@ class WhenOrganizationValueIsSet(LoggedInTestCase):
     def test_display(self):
         response = self.client.get(reverse('tcms-login'))
 
-        self.assertContains(response, 'alt="Demo Instance"')
-        self.assertNotContains(response, 'alt="demonstration"')
+        self.assertContains(response, '<span>Demo Instance</span>')
+        self.assertNotContains(response, 'demonstration')
         self.assertNotContains(response, self.tenant.schema_name)
 
 
@@ -40,8 +40,8 @@ class WhenNameValueIsSetAndOrganizationValueIsNotSet(LoggedInTestCase):
     def test_display(self):
         response = self.client.get(reverse('tcms-login'))
 
-        self.assertNotContains(response, 'alt="Demo Instance"')
-        self.assertContains(response, 'alt="demonstration"')
+        self.assertNotContains(response, 'Demo Instance')
+        self.assertContains(response, '<span>demonstration</span>')
         self.assertNotContains(response, self.tenant.schema_name)
 
 
@@ -58,6 +58,6 @@ class WhenNameAndOrganizationValuesAreNotSet(LoggedInTestCase):
     def test_display(self):
         response = self.client.get(reverse('tcms-login'))
 
-        self.assertNotContains(response, 'alt="Demo Instance"')
-        self.assertNotContains(response, 'alt="demonstration"')
+        self.assertNotContains(response, 'Demo Instance')
+        self.assertNotContains(response, 'demonstration')
         self.assertContains(response, self.tenant.schema_name)
