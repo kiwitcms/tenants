@@ -141,7 +141,7 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
 
         self.assertContains(
             response,
-            '<input id="id_user" type="text" name="user" '
+            '<input id="id_user" type="text" name="user" aria-describedby="id_user_helptext" '
             f'value="{self.tester2.username}" required>',
             html=True)
 
