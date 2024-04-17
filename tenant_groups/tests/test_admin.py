@@ -136,14 +136,14 @@ class TestGroupAdmin(TenantGroupsTestCase):
         response = self.client.get(reverse("admin:tenant_groups_group_add"))
 
         for permission in (
-            "attachments | attachment | Can change attachment",
-            "bugs | bug | Can add bug",
-            "django_comments | comment | Can delete comment",
-            "linkreference | link reference | Can view link reference",
-            "management | product | Can view product",
-            "testcases | category | Can add category",
-            "testplans | test plan | Can delete test plan",
-            "testruns | test execution | Can delete test execution",
+            "Attachments | attachment | Can change attachment",
+            "Bugs | bug | Can add bug",
+            "Django_Comments | comment | Can delete comment",
+            "Linkreference | link reference | Can view link reference",
+            "Management | product | Can view product",
+            "Testcases | category | Can add category",
+            "Testplans | test plan | Can delete test plan",
+            "Testruns | test execution | Can delete test execution",
         ):
             self.assertContains(response, permission)
 
@@ -166,14 +166,14 @@ class TestGroupAdmin(TenantGroupsTestCase):
                 reverse("admin:tenant_groups_group_change", args=[group.id]))
 
             for permission in (
-                "attachments | attachment | Can change attachment",
-                "bugs | bug | Can add bug",
-                "django_comments | comment | Can delete comment",
-                "linkreference | link reference | Can view link reference",
-                "management | product | Can view product",
-                "testcases | category | Can add category",
-                "testplans | test plan | Can delete test plan",
-                "testruns | test execution | Can delete test execution",
+                "Attachments | attachment | Can change attachment",
+                "Bugs | bug | Can add bug",
+                "Django_Comments | comment | Can delete comment",
+                "Linkreference | link reference | Can view link reference",
+                "Management | product | Can view product",
+                "Testcases | category | Can add category",
+                "Testplans | test plan | Can delete test plan",
+                "Testruns | test execution | Can delete test execution",
             ):
                 self.assertContains(response, permission)
 
