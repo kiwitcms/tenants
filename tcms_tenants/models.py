@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2024 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -6,6 +6,7 @@ import os
 
 from django.db import models
 from django.conf import settings
+
 from django_tenants.models import TenantMixin, DomainMixin
 
 
@@ -22,6 +23,9 @@ class Tenant(TenantMixin):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tenant_owner"
     )
     organization = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    extra_emails = models.CharField(
+        null=True, blank=True, db_index=True, max_length=256
+    )
 
     def __str__(self):
         return f"[{self.schema_name}] {self.name}"
