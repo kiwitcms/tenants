@@ -63,7 +63,7 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
         # regular_user doesn't have any permissions assigned
         # via tenant-groups
         cls.regular_user = UserFactory()
-        cls.regular_user.set_password('password')
+        cls.regular_user.set_password("password")
         cls.regular_user.save()
         # but is authorized so they should only be able to view
         cls.tenant.authorized_users.add(cls.regular_user)
@@ -77,7 +77,7 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
 
     def test_unauthorized_user_can_view(self):
         response = self.client.get(
-            reverse('test_plan_url_short', args=[self.test_plan_by_owner.pk]),
+            reverse("test_plan_url_short", args=[self.test_plan_by_owner.pk]),
             follow=True,
         )
 
@@ -86,18 +86,20 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
         self.assertContains(response, self.test_plan_by_owner.text)
 
     def test_unauthorized_user_cannot_add(self):
-        target_url = reverse('plans-new')
+        target_url = reverse("plans-new")
         response = self.client.get(target_url)
         self.assertRedirects(response, reverse("tcms-login") + "?next=" + target_url)
 
     def test_unauthorized_user_cannot_edit(self):
-        target_url = reverse('plan-edit', args=[self.test_plan_by_owner.pk])
+        target_url = reverse("plan-edit", args=[self.test_plan_by_owner.pk])
         response = self.client.get(target_url)
         self.assertRedirects(response, reverse("tcms-login") + "?next=" + target_url)
 
     def test_unauthorized_user_cannot_delete(self):
         response = self.client.get(
-            reverse('admin:testplans_testplan_delete', args=[self.test_plan_by_owner.pk]),
+            reverse(
+                "admin:testplans_testplan_delete", args=[self.test_plan_by_owner.pk]
+            ),
         )
         self.assertIsInstance(response, HttpResponseForbidden)
 
@@ -105,7 +107,7 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
         self.client.logout()
 
         response = self.client.get(
-            reverse('test_plan_url_short', args=[self.test_plan_by_owner.pk]),
+            reverse("test_plan_url_short", args=[self.test_plan_by_owner.pk]),
             follow=True,
         )
 
@@ -116,31 +118,32 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
     def test_anonymous_user_cannot_add(self):
         self.client.logout()
 
-        target_url = reverse('plans-new')
+        target_url = reverse("plans-new")
         response = self.client.get(target_url)
         self.assertRedirects(response, reverse("tcms-login") + "?next=" + target_url)
 
     def test_anonymous_user_cannot_edit(self):
         self.client.logout()
 
-        target_url = reverse('plan-edit', args=[self.test_plan_by_owner.pk])
+        target_url = reverse("plan-edit", args=[self.test_plan_by_owner.pk])
         response = self.client.get(target_url)
         self.assertRedirects(response, reverse("tcms-login") + "?next=" + target_url)
 
     def test_anonymous_user_cannot_delete(self):
         self.client.logout()
 
-        target_url = reverse('admin:testplans_testplan_delete', args=[self.test_plan_by_owner.pk])
+        target_url = reverse(
+            "admin:testplans_testplan_delete", args=[self.test_plan_by_owner.pk]
+        )
         response = self.client.get(target_url)
         self.assertRedirects(response, "/admin/login/?next=" + target_url)
 
     def test_authorized_user_without_group_permissions_can_view(self):
         self.client.logout()
-        self.client.login(username=self.regular_user.username,
-                          password='password')
+        self.client.login(username=self.regular_user.username, password="password")
 
         response = self.client.get(
-            reverse('test_plan_url_short', args=[self.test_plan_by_owner.pk]),
+            reverse("test_plan_url_short", args=[self.test_plan_by_owner.pk]),
             follow=True,
         )
 
@@ -150,28 +153,27 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
 
     def test_authorized_user_without_group_permissions_cannot_add(self):
         self.client.logout()
-        self.client.login(username=self.regular_user.username,
-                          password='password')
+        self.client.login(username=self.regular_user.username, password="password")
 
-        target_url = reverse('plans-new')
+        target_url = reverse("plans-new")
         response = self.client.get(target_url)
         self.assertRedirects(response, reverse("tcms-login") + "?next=" + target_url)
 
     def test_authorized_user_without_group_permissions_cannot_edit(self):
         self.client.logout()
-        self.client.login(username=self.regular_user.username,
-                          password='password')
+        self.client.login(username=self.regular_user.username, password="password")
 
-        target_url = reverse('plan-edit', args=[self.test_plan_by_owner.pk])
+        target_url = reverse("plan-edit", args=[self.test_plan_by_owner.pk])
         response = self.client.get(target_url)
         self.assertRedirects(response, reverse("tcms-login") + "?next=" + target_url)
 
     def test_authorized_user_without_group_permissions_cannot_delete(self):
         self.client.logout()
-        self.client.login(username=self.regular_user.username,
-                          password='password')
+        self.client.login(username=self.regular_user.username, password="password")
 
         response = self.client.get(
-            reverse('admin:testplans_testplan_delete', args=[self.test_plan_by_owner.pk]),
+            reverse(
+                "admin:testplans_testplan_delete", args=[self.test_plan_by_owner.pk]
+            ),
         )
         self.assertIsInstance(response, HttpResponseForbidden)

@@ -51,9 +51,7 @@ def forwards_add_default_groups_and_permissions(apps, schema_editor):
     admin = group_model.objects.get(name="Administrator")
     admin.permissions.add(*tester.permissions.all())
     admin.permissions.add(
-        *permission_model.objects.filter(
-            content_type__app_label="tenant_groups"
-        )
+        *permission_model.objects.filter(content_type__app_label="tenant_groups")
     )
 
 
@@ -82,28 +80,46 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('tcms_tenants', '0005_rename_on_trial_to_public_read'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("tcms_tenants", "0005_rename_on_trial_to_public_read"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Group',
+            name="Group",
             fields=[
-                ('id', models.AutoField(
-                                auto_created=True, primary_key=True,
-                                serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150, unique=True, verbose_name='name')),
-                ('permissions', models.ManyToManyField(
-                                    blank=True, related_name='tenant_groups',
-                                    to='auth.Permission', verbose_name='permissions')),
-                ('user_set', models.ManyToManyField(
-                                to=settings.AUTH_USER_MODEL,
-                                related_name='tenant_groups')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=150, unique=True, verbose_name="name"),
+                ),
+                (
+                    "permissions",
+                    models.ManyToManyField(
+                        blank=True,
+                        related_name="tenant_groups",
+                        to="auth.Permission",
+                        verbose_name="permissions",
+                    ),
+                ),
+                (
+                    "user_set",
+                    models.ManyToManyField(
+                        to=settings.AUTH_USER_MODEL, related_name="tenant_groups"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'group',
-                'verbose_name_plural': 'groups',
+                "verbose_name": "group",
+                "verbose_name_plural": "groups",
             },
         ),
         migrations.RunPython(

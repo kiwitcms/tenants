@@ -10,7 +10,7 @@ from django_tenants.models import TenantMixin, DomainMixin
 
 
 class Tenant(TenantMixin):
-    auto_create_schema = bool(os.environ.get('AUTO_CREATE_SCHEMA', True))
+    auto_create_schema = bool(os.environ.get("AUTO_CREATE_SCHEMA", True))
     auto_drop_schema = True
 
     name = models.CharField(max_length=100, db_index=True)
@@ -18,9 +18,9 @@ class Tenant(TenantMixin):
     paid_until = models.DateTimeField(null=True, blank=True, db_index=True)
     publicly_readable = models.BooleanField(default=False, db_index=True)
     authorized_users = models.ManyToManyField(to=settings.AUTH_USER_MODEL)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=models.CASCADE,
-                              related_name='tenant_owner')
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tenant_owner"
+    )
     organization = models.CharField(max_length=64, null=True, blank=True, db_index=True)
 
     def __str__(self):

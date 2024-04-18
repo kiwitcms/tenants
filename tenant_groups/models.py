@@ -16,6 +16,7 @@ class Group(models.Model):
     Note: essentially copy-pasted from django.contrib.auth b/c we need separate
     records inside tenant's schema.
     """
+
     relevant_apps = [
         "attachments",
         "bugs",
@@ -29,19 +30,21 @@ class Group(models.Model):
         "trackers_integration",
     ]
 
-    name = models.CharField(_('name'), max_length=150, unique=True)
+    name = models.CharField(_("name"), max_length=150, unique=True)
     permissions = models.ManyToManyField(
         Permission,
-        verbose_name=_('permissions'),
+        verbose_name=_("permissions"),
         blank=True,
         related_name="tenant_groups",
     )
 
-    user_set = models.ManyToManyField(to=settings.AUTH_USER_MODEL, related_name='tenant_groups')
+    user_set = models.ManyToManyField(
+        to=settings.AUTH_USER_MODEL, related_name="tenant_groups"
+    )
 
     class Meta:
-        verbose_name = _('group')
-        verbose_name_plural = _('groups')
+        verbose_name = _("group")
+        verbose_name_plural = _("groups")
 
     def __str__(self):
         return self.name

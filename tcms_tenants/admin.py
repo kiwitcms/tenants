@@ -18,20 +18,32 @@ from tcms_tenants.utils import add_to_default_groups, owns_tenant, tenant_url
 
 class TenantAdmin(admin.ModelAdmin):
     """
-        Allows only super-user to see and delete tenants!
+    Allows only super-user to see and delete tenants!
     """
-    actions = ['delete_selected']
-    list_display = ('id', 'name', 'schema_name', 'domain_name', 'created_on', 'publicly_readable',
-                    'paid_until', 'owner', 'organization')
-    search_fields = ('name', 'schema_name', 'organization')
-    ordering = ['-created_on']
 
-    def add_view(self, request, form_url='', extra_context=None):
-        return HttpResponseRedirect(reverse('tcms_tenants:create-tenant'))
+    actions = ["delete_selected"]
+    list_display = (
+        "id",
+        "name",
+        "schema_name",
+        "domain_name",
+        "created_on",
+        "publicly_readable",
+        "paid_until",
+        "owner",
+        "organization",
+    )
+    search_fields = ("name", "schema_name", "organization")
+    ordering = ["-created_on"]
 
-    def change_view(self, request, object_id, form_url='', extra_context=None):
+    def add_view(self, request, form_url="", extra_context=None):
+        return HttpResponseRedirect(reverse("tcms_tenants:create-tenant"))
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
         tenant = Tenant.objects.get(pk=object_id)
-        target_url = tenant_url(request, tenant.schema_name) + reverse('tcms_tenants:edit-tenant')
+        target_url = tenant_url(request, tenant.schema_name) + reverse(
+            "tcms_tenants:edit-tenant"
+        )
         return HttpResponseRedirect(target_url)
 
     @admin.options.csrf_protect_m
@@ -39,14 +51,14 @@ class TenantAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return super().changelist_view(request, extra_context)
 
-        return HttpResponseForbidden(_('Unauthorized'))
+        return HttpResponseForbidden(_("Unauthorized"))
 
     @admin.options.csrf_protect_m
     def delete_view(self, request, object_id, extra_context=None):
         if request.user.is_superuser:
             return super().delete_view(request, object_id, extra_context)
 
-        return HttpResponseForbidden(_('Unauthorized'))
+        return HttpResponseForbidden(_("Unauthorized"))
 
     def domain_name(self, instance):  # pylint: disable=no-self-use
         return instance.domains.filter(is_primary=True).first().domain
@@ -54,10 +66,11 @@ class TenantAdmin(admin.ModelAdmin):
 
 class AuthorizedUsersChangeForm(forms.ModelForm):
     """
-        A custom add/change form which will filter the available
-        values of the ``tenant`` field so that only the current
-        tenant is shown!
+    A custom add/change form which will filter the available
+    values of the ``tenant`` field so that only the current
+    tenant is shown!
     """
+
     # IMPORTANT NOTICE:
     # As a security concern we would like to have this queryset set to
     # Tenant.objects.none() instead of .all(). However ModelChoiceField.to_python()
@@ -69,26 +82,46 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
         queryset=Tenant.objects.all(),
     )
     user = UserField(  # pylint: disable=form-field-help-text-used
-        help_text=_('Existing username, email or user ID')
+        help_text=_("Existing username, email or user ID")
     )
 
-    def __init__(self,  # pylint: disable=too-many-arguments
-                 data=None, files=None, auto_id='id_%s', prefix=None,
-                 initial=None, error_class=ErrorList, label_suffix=None,
-                 empty_permitted=False, instance=None, use_required_attribute=None,
-                 renderer=None):
-        super().__init__(data, files, auto_id, prefix,
-                         initial, error_class, label_suffix,
-                         empty_permitted, instance, use_required_attribute,
-                         renderer)
+    def __init__(
+        self,  # pylint: disable=too-many-arguments
+        data=None,
+        files=None,
+        auto_id="id_%s",
+        prefix=None,
+        initial=None,
+        error_class=ErrorList,
+        label_suffix=None,
+        empty_permitted=False,
+        instance=None,
+        use_required_attribute=None,
+        renderer=None,
+    ):
+        super().__init__(
+            data,
+            files,
+            auto_id,
+            prefix,
+            initial,
+            error_class,
+            label_suffix,
+            empty_permitted,
+            instance,
+            use_required_attribute,
+            renderer,
+        )
         # this is passed by ModelAdmin._chageform_view():L1578
         # when adding a new object
-        if initial and 'tenant' in initial:
-            self.fields['tenant'].queryset = Tenant.objects.filter(pk=initial['tenant'])
+        if initial and "tenant" in initial:
+            self.fields["tenant"].queryset = Tenant.objects.filter(pk=initial["tenant"])
         # this is passed by ModelAdmin._chageform_view():L1581
         # when changing an existing object
         elif instance:
-            self.fields['tenant'].queryset = Tenant.objects.filter(pk=instance.tenant.pk)
+            self.fields["tenant"].queryset = Tenant.objects.filter(
+                pk=instance.tenant.pk
+            )
 
     def save(self, commit=True):
         instance = super().save(commit=commit)
@@ -100,86 +133,97 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
 
 class AuthorizedUsersAdmin(admin.ModelAdmin):
     """
-        Allows administering which users are authorized for tenants!
+    Allows administering which users are authorized for tenants!
     """
-    actions = ['delete_selected']
-    list_display = ('user_username', 'user_full_name', 'groups',)
-    search_fields = ('user__username',)
+
+    actions = ["delete_selected"]
+    list_display = (
+        "user_username",
+        "user_full_name",
+        "groups",
+    )
+    search_fields = ("user__username",)
 
     form = AuthorizedUsersChangeForm
 
     def user_username(self, instance):  # pylint: disable=no-self-use
         return instance.user.username
-    user_username.short_description = _('Username')
-    user_username.admin_order_field = 'user__username'
+
+    user_username.short_description = _("Username")
+    user_username.admin_order_field = "user__username"
 
     def user_full_name(self, instance):  # pylint: disable=no-self-use
         return instance.user.get_full_name()
-    user_full_name.short_description = _('Full name')
+
+    user_full_name.short_description = _("Full name")
 
     def groups(self, instance):  # pylint: disable=no-self-use
-        return list(instance.user.tenant_groups.values_list('name', flat=True))
-    groups.short_description = _('Groups')
+        return list(instance.user.tenant_groups.values_list("name", flat=True))
+
+    groups.short_description = _("Groups")
 
     def get_queryset(self, request):
         """
-            Show only users authorized for the current tenant!
+        Show only users authorized for the current tenant!
         """
         return super().get_queryset(request).filter(tenant=request.tenant)
 
     # pylint: disable=too-many-arguments
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        context[
-            'adminform'
-        ].form.fields['tenant'].queryset = Tenant.objects.filter(pk=request.tenant.pk)
+    def render_change_form(
+        self, request, context, add=False, change=False, form_url="", obj=None
+    ):
+        context["adminform"].form.fields["tenant"].queryset = Tenant.objects.filter(
+            pk=request.tenant.pk
+        )
 
         return super().render_change_form(
-            request, context, add=add, change=change, form_url=form_url, obj=obj)
+            request, context, add=add, change=change, form_url=form_url, obj=obj
+        )
 
     def get_changeform_initial_data(self, request):
         """
-            Pass the current tenant to AuthorizedUsersChangeForm.__init__()
-            which will filter the available tenants and only show the current
-            one when add/change objects!
+        Pass the current tenant to AuthorizedUsersChangeForm.__init__()
+        which will filter the available tenants and only show the current
+        one when add/change objects!
         """
-        return {'tenant': request.tenant.pk}
+        return {"tenant": request.tenant.pk}
 
     def has_add_permission(self, request):
         """
-            Allow to add new authorized users.
+        Allow to add new authorized users.
         """
         return owns_tenant(request.user, request.tenant)
 
     def has_change_permission(self, request, obj=None):
         """
-            Allow to display the list of of authorized users.
+        Allow to display the list of of authorized users.
         """
         return owns_tenant(request.user, request.tenant)
 
     def has_delete_permission(self, request, obj=None):
         """
-            Allow to delete selected users.
+        Allow to delete selected users.
         """
         return request.user.is_superuser or owns_tenant(request.user, request.tenant)
 
     def has_module_permission(self, request):
         """
-            Allow this module to be seen in main admin page.
+        Allow this module to be seen in main admin page.
         """
         return owns_tenant(request.user, request.tenant)
 
     def get_model_perms(self, request):
         """
-            Allow this module to be seen in main admin page.
+        Allow this module to be seen in main admin page.
         """
         if request.user.is_superuser:
             return super().get_model_perms(request)
 
-        return {'view': owns_tenant(request.user, request.tenant)}
+        return {"view": owns_tenant(request.user, request.tenant)}
 
     def delete_model(self, request, obj):
         """
-            Remove user from tenant groups before removing the authorization!
+        Remove user from tenant groups before removing the authorization!
         """
         for group in obj.user.tenant_groups.all():
             group.user_set.remove(obj.user)

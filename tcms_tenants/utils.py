@@ -53,8 +53,10 @@ def can_access(user, tenant):
 
 
 def owns_tenant(user, tenant):
-    return tenant.schema_name != get_public_schema_name() and \
-            tenant.authorized_users.filter(pk=user.pk).exists()
+    return (
+        tenant.schema_name != get_public_schema_name()
+        and tenant.authorized_users.filter(pk=user.pk).exists()
+    )
 
 
 def schema_name_not_used(name):
@@ -67,7 +69,9 @@ def tenant_domain(schema_name):
     # take into account the fact that some customers deploy their 'public' schema
     # without a prefix, e.g. tcms.example.com == KIWI_TENANTS_DOMAIN or could use a
     # different domain for their tenant(s)!
-    domain = Domain.objects.filter(tenant__schema_name=schema_name, is_primary=True).first()
+    domain = Domain.objects.filter(
+        tenant__schema_name=schema_name, is_primary=True
+    ).first()
     if domain:
         return domain.domain
 
@@ -77,31 +81,43 @@ def tenant_domain(schema_name):
 def tenant_url(request, schema_name):
     url = tenant_domain(schema_name)
     if request.is_secure:
-        url = 'https://' + url
+        url = "https://" + url
     else:
-        url = 'http://' + url
+        url = "http://" + url
     return url
 
 
 def create_tenant(form, request):
-    with schema_context('public'):
+    with schema_context("public"):
         # If a schema with name "empty" exists then use it for
         # cloning b/c that's faster
-        if Tenant.objects.filter(schema_name='empty').first():
+        if Tenant.objects.filter(schema_name="empty").first():
             schema_name = form.cleaned_data["schema_name"]
-            paid_until = form.cleaned_data["paid_until"] or datetime.datetime(3000, 3, 31)
+            paid_until = form.cleaned_data["paid_until"] or datetime.datetime(
+                3000, 3, 31
+            )
             call_command(
                 "clone_tenant",
-                "--clone_from", "empty",
-                "--clone_tenant_fields", False,
-                "--schema_name", schema_name,
-                "--name", form.cleaned_data["name"],
-                "--paid_until", paid_until,
-                "--publicly_readable", form.cleaned_data["publicly_readable"],
-                "--owner_id", request.user.pk,
-                "--organization", form.cleaned_data["organization"] or "-",
-                "--domain-domain", tenant_domain(schema_name),
-                "--domain-is_primary", True,
+                "--clone_from",
+                "empty",
+                "--clone_tenant_fields",
+                False,
+                "--schema_name",
+                schema_name,
+                "--name",
+                form.cleaned_data["name"],
+                "--paid_until",
+                paid_until,
+                "--publicly_readable",
+                form.cleaned_data["publicly_readable"],
+                "--owner_id",
+                request.user.pk,
+                "--organization",
+                form.cleaned_data["organization"] or "-",
+                "--domain-domain",
+                tenant_domain(schema_name),
+                "--domain-is_primary",
+                True,
             )
             tenant = Tenant.objects.get(schema_name=schema_name)
             if not form.cleaned_data["paid_until"]:
@@ -145,23 +161,26 @@ def create_tenant(form, request):
         TenantGroup.objects.get(name="Tester").user_set.add(tenant.owner)
 
     mailto(
-        template_name='tcms_tenants/email/new.txt',
+        template_name="tcms_tenants/email/new.txt",
         recipients=[tenant.owner.email],
-        subject=str(_('New Kiwi TCMS tenant created')),
+        subject=str(_("New Kiwi TCMS tenant created")),
         context={
-            'tenant_url': tenant_url(request, tenant.schema_name),
-        }
+            "tenant_url": tenant_url(request, tenant.schema_name),
+        },
     )
     return tenant
 
 
 # NOTE: defined here to avoid circular imports with forms.py
-class RegistrationForm(kiwi_auth_forms.RegistrationForm):  # pylint: disable=too-many-ancestors
+class RegistrationForm(
+    kiwi_auth_forms.RegistrationForm
+):  # pylint: disable=too-many-ancestors
     """
-        Override captcha field b/c Kiwi TCMS may be configured to
-        use reCAPTCHA and we don't want this to block automatic
-        creation of user accounts!
+    Override captcha field b/c Kiwi TCMS may be configured to
+    use reCAPTCHA and we don't want this to block automatic
+    creation of user accounts!
     """
+
     captcha = None
 
 
@@ -174,12 +193,14 @@ def create_user_account(email_address):
         username = f"{desired_username}.{i}"
         i += 1
 
-    form = RegistrationForm(data={
-        "username": username,
-        "password1": password,
-        "password2": password,
-        "email": email_address,
-    })
+    form = RegistrationForm(
+        data={
+            "username": username,
+            "password1": password,
+            "password2": password,
+            "email": email_address,
+        }
+    )
 
     user = form.save()
 
@@ -224,11 +245,11 @@ def invite_users(request, email_addresses):
             add_to_default_groups(user)
 
         mailto(
-            template_name='tcms_tenants/email/invite_user.txt',
+            template_name="tcms_tenants/email/invite_user.txt",
             recipients=[user.email],
-            subject=str(_('Invitation to join Kiwi TCMS')),
+            subject=str(_("Invitation to join Kiwi TCMS")),
             context={
                 "invited_by": request.user.get_full_name() or request.user.username,
                 "tenant_url": tenant_url(request, request.tenant.schema_name),
-            }
+            },
         )

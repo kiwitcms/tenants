@@ -23,27 +23,28 @@ from tcms_tenants.forms import (
 from tcms_tenants.models import Tenant
 
 
-@method_decorator(permission_required('tcms_tenants.add_tenant'), name='dispatch')
+@method_decorator(permission_required("tcms_tenants.add_tenant"), name="dispatch")
 class NewTenantView(FormView):
     """
-        Everybody is allowed to create new tenants.
-        Depending on additional configuration they may have to pay
-        for using them!
+    Everybody is allowed to create new tenants.
+    Depending on additional configuration they may have to pay
+    for using them!
     """
+
     form_class = NewTenantForm
 
     def get_template_names(self):
         """
-            Allow downstream installations to override the template. For example
-            to provide a link to SLA or hosting policy! The overriden template
-            can extend the base one if needed.
+        Allow downstream installations to override the template. For example
+        to provide a link to SLA or hosting policy! The overriden template
+        can extend the base one if needed.
         """
-        return ['tcms_tenants/override_new.html', 'tcms_tenants/new.html']
+        return ["tcms_tenants/override_new.html", "tcms_tenants/new.html"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tcms_tenants_domain'] = settings.KIWI_TENANTS_DOMAIN
-        context['validation_pattern'] = VALIDATION_RE.pattern
+        context["tcms_tenants_domain"] = settings.KIWI_TENANTS_DOMAIN
+        context["validation_pattern"] = VALIDATION_RE.pattern
         return context
 
     def get_form_kwargs(self):
@@ -57,12 +58,12 @@ class NewTenantView(FormView):
         return HttpResponseRedirect(utils.tenant_url(self.request, tenant.schema_name))
 
 
-@method_decorator(permission_required('tcms_tenants.change_tenant'), name='dispatch')
+@method_decorator(permission_required("tcms_tenants.change_tenant"), name="dispatch")
 class UpdateTenantView(UpdateView):
     model = Tenant
     form_class = UpdateTenantForm
-    template_name = 'tcms_tenants/new.html'
-    success_url = '/'
+    template_name = "tcms_tenants/new.html"
+    success_url = "/"
 
     @staticmethod
     def check_owner(request):
@@ -79,7 +80,7 @@ class UpdateTenantView(UpdateView):
             messages.ERROR,
             _("Only super-user and tenant owner are allowed to edit tenant properties"),
         )
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/")
 
     def get(self, request, *args, **kwargs):
         return self.check_owner(request) or super().get(request, *args, **kwargs)
@@ -92,50 +93,52 @@ class UpdateTenantView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tcms_tenants_domain'] = settings.KIWI_TENANTS_DOMAIN
-        context['validation_pattern'] = VALIDATION_RE.pattern
-        context['form_action_url'] = reverse('tcms_tenants:edit-tenant')
-        context['page_title'] = _('Edit tenant')
+        context["tcms_tenants_domain"] = settings.KIWI_TENANTS_DOMAIN
+        context["validation_pattern"] = VALIDATION_RE.pattern
+        context["form_action_url"] = reverse("tcms_tenants:edit-tenant")
+        context["page_title"] = _("Edit tenant")
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class RedirectTo(RedirectView):  # pylint: disable=missing-permission-required
     """
-        Will redirect to tenant.domain.domain/path!
+    Will redirect to tenant.domain.domain/path!
 
-        Used together with GitHub logins and the ``tenant_url``
-        template tag!
+    Used together with GitHub logins and the ``tenant_url``
+    template tag!
 
-        When trying to do GitHub login on a tenant sub-domain
-        the HTML href will actually point to
+    When trying to do GitHub login on a tenant sub-domain
+    the HTML href will actually point to
 
-        https://public.tenants.localdomain/login/github?next=/tenants/go/to/tenant/path
+    https://public.tenants.localdomain/login/github?next=/tenants/go/to/tenant/path
 
-        instead of
+    instead of
 
-        http://tenant.tenants.localdomain/login/github?next=path
+    http://tenant.tenants.localdomain/login/github?next=path
 
-        This is to prevent redirect_uri mismatch errors!
+    This is to prevent redirect_uri mismatch errors!
     """
+
     def get_redirect_url(self, *args, **kwargs):
-        tenant = kwargs['tenant']
-        path = kwargs['path']
+        tenant = kwargs["tenant"]
+        path = kwargs["path"]
         tenant_url = utils.tenant_url(self.request, tenant)
         return f"{tenant_url}/{path}"
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class InviteUsers(FormView):  # pylint: disable=missing-permission-required
     """
-        Invite users to tenant via email.
+    Invite users to tenant via email.
 
-        .. important::
+    .. important::
 
-            Anyone who is authorized for this tenant can invite others
-            in the same way they can add them directly via the `Authorized users`
-            menu!
+        Anyone who is authorized for this tenant can invite others
+        in the same way they can add them directly via the `Authorized users`
+        menu!
     """
+
     form_class = InviteUsersForm
     template_name = "tcms_tenants/invite_users.html"
 
@@ -146,11 +149,11 @@ class InviteUsers(FormView):  # pylint: disable=missing-permission-required
                 messages.ERROR,
                 _("Only users who are authorized for this tenant can invite others"),
             )
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect("/")
 
         return super().get(self, request, *args, **kwargs)
 
     def form_valid(self, form):
         utils.invite_users(self.request, form.cleaned_data["emails"])
 
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect("/")
