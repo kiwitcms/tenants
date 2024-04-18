@@ -1,5 +1,5 @@
 # pylint: disable=wildcard-import, unused-wildcard-import
-# Copyright (c) 2019-2020 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2024 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=invalid-name, protected-access, wrong-import-position
@@ -45,8 +45,8 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, "tcms_tenants", "locale")]
 
 
 # start multi-tenant settings override
-DATABASES["default"].update(
-    {  # noqa: F405 pylint: disable=objects-update-used
+DATABASES["default"].update(  # noqa: F405 pylint: disable=objects-update-used
+    {
         "NAME": "test_project",
         "USER": "kiwi",
         "PASSWORD": "kiwi",
