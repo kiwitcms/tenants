@@ -18,11 +18,11 @@ class CheckGroupsBackendTestCase(TestCase):
         ):
             expected_errors = [
                 Error(
-                    msg='tenant_groups.backends.GroupsBackend '
-                        'is not pesent in AUTHENTICATION_BACKENDS!',
+                    msg="tenant_groups.backends.GroupsBackend "
+                    "is not pesent in AUTHENTICATION_BACKENDS!",
                     hint=(
-                        'See '
-                        'https://kiwitcms.readthedocs.io/en/latest/admin.html#tenant-groups'
+                        "See "
+                        "https://kiwitcms.readthedocs.io/en/latest/admin.html#tenant-groups"
                     ),
                 ),
             ]

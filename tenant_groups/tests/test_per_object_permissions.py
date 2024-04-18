@@ -24,7 +24,7 @@ class TestPermissions(TenantGroupsTestCase):
         super().setUpClass()
 
         cls.power_user = UserFactory()
-        cls.power_user.set_password('password')
+        cls.power_user.set_password("password")
         cls.power_user.save()
 
         with tenant_context(cls.tenant):
@@ -33,9 +33,11 @@ class TestPermissions(TenantGroupsTestCase):
 
             # power_user has been granted per-object perms for `existing`
             UserObjectPermission.objects.assign_perm(
-                'change_bug', cls.power_user, cls.existing)
+                "change_bug", cls.power_user, cls.existing
+            )
             UserObjectPermission.objects.assign_perm(
-                'delete_bug', cls.power_user, cls.to_be_deleted)
+                "delete_bug", cls.power_user, cls.to_be_deleted
+            )
 
             # and *view* permissions assigned via tenant-groups
             view_only, _created = TenantGroup.objects.get_or_create(name="Viewer")
@@ -51,7 +53,7 @@ class TestPermissions(TenantGroupsTestCase):
             ]:
                 app_perms = Permission.objects.filter(
                     content_type__app_label__contains=app_name,
-                    codename__startswith="view_"
+                    codename__startswith="view_",
                 )
                 view_only.permissions.add(*app_perms)
 
@@ -91,8 +93,7 @@ class TestPermissions(TenantGroupsTestCase):
 
         # perform all operations as power_user
         self.client.logout()
-        self.client.login(username=self.power_user.username,
-                          password='password')
+        self.client.login(username=self.power_user.username, password="password")
 
     def test_can_view_specific_bug(self):
         with tenant_context(self.tenant):

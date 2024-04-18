@@ -19,7 +19,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
         cls.non_authorized_user = UserFactory()
 
         cls.random_user = UserFactory()
-        cls.random_user.set_password('password')
+        cls.random_user.set_password("password")
         cls.random_user.save()
 
         # assign perms for cls.tester b/c they're not in any of the default groups
@@ -33,7 +33,9 @@ class TestGroupAdmin(TenantGroupsTestCase):
             cls.tenant.authorized_users.add(cls.random_user)
 
             cls.group = TenantGroup.objects.create(name="New Tenant Group")
-            cls.defaultGroups = TenantGroup.objects.filter(name__in=["Administrator", "Tester"])
+            cls.defaultGroups = TenantGroup.objects.filter(
+                name__in=["Administrator", "Tester"]
+            )
 
     def tearDown(self):
         super().tearDown()
@@ -86,7 +88,8 @@ class TestGroupAdmin(TenantGroupsTestCase):
 
     def test_user_with_perms_should_be_able_to_delete_a_non_default_group(self):
         response = self.client.get(
-            reverse("admin:tenant_groups_group_delete", args=[self.group.id]), follow=True
+            reverse("admin:tenant_groups_group_delete", args=[self.group.id]),
+            follow=True,
         )
         _are_you_sure = _("Are you sure?")
         self.assertContains(response, f"<h1>{_are_you_sure}</h1>")
@@ -113,12 +116,13 @@ class TestGroupAdmin(TenantGroupsTestCase):
         self.assertNotContains(
             response,
             f'<option value="{self.non_authorized_user.pk}">'
-            f'{self.non_authorized_user.username}</option>',
+            f"{self.non_authorized_user.username}</option>",
         )
 
     def test_change_group_shows_only_authorized_users(self):
         response = self.client.get(
-            reverse("admin:tenant_groups_group_change", args=[self.group.id]))
+            reverse("admin:tenant_groups_group_change", args=[self.group.id])
+        )
 
         for user in (self.tenant.owner, self.tester, self.random_user):
             self.assertContains(
@@ -129,7 +133,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
         self.assertNotContains(
             response,
             f'<option value="{self.non_authorized_user.pk}">'
-            f'{self.non_authorized_user.username}</option>',
+            f"{self.non_authorized_user.username}</option>",
         )
 
     def test_new_group_shows_only_filtered_permissions(self):
@@ -163,7 +167,8 @@ class TestGroupAdmin(TenantGroupsTestCase):
     def test_change_group_shows_only_filtered_permissions(self):
         for group in self.defaultGroups:
             response = self.client.get(
-                reverse("admin:tenant_groups_group_change", args=[group.id]))
+                reverse("admin:tenant_groups_group_change", args=[group.id])
+            )
 
             for permission in (
                 "Attachments | attachment | Can change attachment",
@@ -190,9 +195,13 @@ class TestGroupAdmin(TenantGroupsTestCase):
             ):
                 self.assertNotContains(response, permission)
 
-    def test_user_with_perms_should_be_allowed_to_create_new_group_with_added_user(self):
+    def test_user_with_perms_should_be_allowed_to_create_new_group_with_added_user(
+        self,
+    ):
         group_name = "TenantGroupName"
-        self.assertFalse(self.random_user.tenant_groups.filter(name=group_name).exists())
+        self.assertFalse(
+            self.random_user.tenant_groups.filter(name=group_name).exists()
+        )
 
         response = self.client.post(
             reverse("admin:tenant_groups_group_add"),
@@ -212,10 +221,16 @@ class TestGroupAdmin(TenantGroupsTestCase):
         self.assertTrue(self.random_user.tenant_groups.filter(name=group.name).exists())
 
     def test_user_with_perms_should_be_able_to_add_user_while_editing_a_group(self):
-        self.assertFalse(self.random_user.tenant_groups.filter(name=self.group.name).exists())
+        self.assertFalse(
+            self.random_user.tenant_groups.filter(name=self.group.name).exists()
+        )
         response = self.client.post(
             reverse("admin:tenant_groups_group_change", args=[self.group.id]),
-            {"name": self.group.name, "users": [self.random_user.id], "_continue": True},
+            {
+                "name": self.group.name,
+                "users": [self.random_user.id],
+                "_continue": True,
+            },
             follow=True,
         )
 
@@ -223,24 +238,23 @@ class TestGroupAdmin(TenantGroupsTestCase):
             response,
             f'<option value="{self.random_user.pk}" selected>{self.random_user.username}</option>',
         )
-        self.assertTrue(self.random_user.tenant_groups.filter(name=self.group.name).exists())
+        self.assertTrue(
+            self.random_user.tenant_groups.filter(name=self.group.name).exists()
+        )
 
     def test_user_without_perms_should_not_be_able_to_delete_groups(self):
         self.client.logout()
-        self.client.login(
-                username=self.random_user.username,
-                password='password')
+        self.client.login(username=self.random_user.username, password="password")
 
         response = self.client.get(
-            reverse("admin:tenant_groups_group_delete", args=[self.group.id]), follow=True
+            reverse("admin:tenant_groups_group_delete", args=[self.group.id]),
+            follow=True,
         )
         self.assertEqual(HTTPStatus.FORBIDDEN, response.status_code)
 
     def test_user_without_perms_should_not_be_able_to_edit_groups(self):
         self.client.logout()
-        self.client.login(
-            username=self.random_user.username,
-            password='password')
+        self.client.login(username=self.random_user.username, password="password")
 
         response = self.client.get(
             reverse("admin:tenant_groups_group_change", args=[self.group.id])
@@ -249,9 +263,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
 
     def test_user_without_perms_should_not_be_able_to_create_new_group(self):
         self.client.logout()
-        self.client.login(
-            username=self.random_user.username,
-            password='password')
+        self.client.login(username=self.random_user.username, password="password")
 
         group_name = "TenantGroupName"
         response = self.client.post(

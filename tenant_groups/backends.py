@@ -15,6 +15,7 @@ class GroupsBackend(ModelBackend):
     NOTE: Individually assigned permissions have higher priority
     (are valid across tenants) compared to group permissions.
     """
+
     public_schema_name = get_public_schema_name()
 
     @property
@@ -30,11 +31,10 @@ class GroupsBackend(ModelBackend):
         # permissions configured per-tenant via
         # tenant_groups.models.Group
         with tenant_context(self.tenant):
-            permissions = Permission.objects.filter(
-                tenant_groups__user_set__in=[user_obj]
-            ).values_list(
-                'content_type__app_label',
-                'codename'
-            ).order_by()
+            permissions = (
+                Permission.objects.filter(tenant_groups__user_set__in=[user_obj])
+                .values_list("content_type__app_label", "codename")
+                .order_by()
+            )
 
             return {f"{ct}.{name}" for ct, name in permissions}

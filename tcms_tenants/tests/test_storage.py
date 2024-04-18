@@ -13,38 +13,42 @@ from tcms_tenants.tests import LoggedInTestCase, UserFactory
 
 
 class TenantFileSystemStorageTestCase(LoggedInTestCase):
-    @override_settings(MEDIA_ROOT="apps_dir/media",
-                       MEDIA_URL="/media/",
-                       MULTITENANT_RELATIVE_MEDIA_ROOT="%s")
+    @override_settings(
+        MEDIA_ROOT="apps_dir/media",
+        MEDIA_URL="/media/",
+        MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    )
     def test_files_are_saved_under_subdirectories_per_tenant(self):
         storage = TenantFileSystemStorage()
 
         connection.set_schema_to_public()
-        tenant2 = utils.get_tenant_model()(schema_name='tenant2', owner=UserFactory())
+        tenant2 = utils.get_tenant_model()(schema_name="tenant2", owner=UserFactory())
         tenant2.save()
 
-        domain2 = utils.get_tenant_domain_model()(tenant=tenant2, domain='example.com')
+        domain2 = utils.get_tenant_domain_model()(tenant=tenant2, domain="example.com")
         domain2.save()
 
         # this file should be saved on the public schema
-        public_file_name = storage.save('hello_world.txt', ContentFile('Hello World'))
+        public_file_name = storage.save("hello_world.txt", ContentFile("Hello World"))
         public_os_path = storage.path(public_file_name)
         public_url = storage.url(public_file_name)
 
         # switch to tenant1
         with utils.tenant_context(self.tenant):
-            t1_file_name = storage.save('hello_from_1.txt', ContentFile('Hello T1'))
+            t1_file_name = storage.save("hello_from_1.txt", ContentFile("Hello T1"))
             t1_os_path = storage.path(t1_file_name)
             t1_url = storage.url(t1_file_name)
 
         # switch to tenant2
         with utils.tenant_context(tenant2):
-            t2_file_name = storage.save('hello_from_2.txt', ContentFile('Hello T2'))
+            t2_file_name = storage.save("hello_from_2.txt", ContentFile("Hello T2"))
             t2_os_path = storage.path(t2_file_name)
             t2_url = storage.url(t2_file_name)
 
         # assert the paths are correct
-        self.assertTrue(public_os_path.endswith(f"apps_dir/media/public/{public_file_name}"))
+        self.assertTrue(
+            public_os_path.endswith(f"apps_dir/media/public/{public_file_name}")
+        )
         self.assertTrue(t1_os_path.endswith(f"apps_dir/media/fast/{t1_file_name}"))
         self.assertTrue(t2_os_path.endswith(f"apps_dir/media/tenant2/{t2_file_name}"))
 
@@ -54,11 +58,11 @@ class TenantFileSystemStorageTestCase(LoggedInTestCase):
         self.assertEqual(t2_url, f"/media/tenant2/{t2_file_name}")
 
         # assert contents are correct
-        with open(public_os_path, 'r', encoding="utf-8") as fobj:
-            self.assertEqual(fobj.read(), 'Hello World')
+        with open(public_os_path, "r", encoding="utf-8") as fobj:
+            self.assertEqual(fobj.read(), "Hello World")
 
-        with open(t1_os_path, 'r', encoding="utf-8") as fobj:
-            self.assertEqual(fobj.read(), 'Hello T1')
+        with open(t1_os_path, "r", encoding="utf-8") as fobj:
+            self.assertEqual(fobj.read(), "Hello T1")
 
-        with open(t2_os_path, 'r', encoding="utf-8") as fobj:
-            self.assertEqual(fobj.read(), 'Hello T2')
+        with open(t2_os_path, "r", encoding="utf-8") as fobj:
+            self.assertEqual(fobj.read(), "Hello T2")

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tcms_tenants', '0003_use_datetime_fields'),
+        ("tcms_tenants", "0003_use_datetime_fields"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tenant',
-            name='organization',
+            model_name="tenant",
+            name="organization",
             field=models.CharField(blank=True, db_index=True, max_length=64, null=True),
         ),
     ]

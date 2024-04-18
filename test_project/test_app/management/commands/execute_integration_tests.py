@@ -31,7 +31,11 @@ class TestDefaultTenantGroups(unittest.TestCase):
 
     def test_tenant_groups_were_created_for_tenant_schemas(self):
         # inspect every tenant except
-        for tenant in get_tenant_model().objects.exclude(schema_name=self.public_schema):
+        for tenant in get_tenant_model().objects.exclude(
+            schema_name=self.public_schema
+        ):
             with tenant_context(tenant):
-                self.assertTrue(TenantGroup.objects.filter(name="Administrator").exists())
+                self.assertTrue(
+                    TenantGroup.objects.filter(name="Administrator").exists()
+                )
                 self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())

@@ -2,7 +2,11 @@
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
-from django_tenants.utils import get_public_schema_name, get_tenant_model, tenant_context
+from django_tenants.utils import (
+    get_public_schema_name,
+    get_tenant_model,
+    tenant_context,
+)
 from tcms.core.management.commands import refresh_permissions
 
 from tenant_groups.models import Group as TenantGroup
@@ -13,10 +17,10 @@ class Command(refresh_permissions.Command):
 
     group_model = TenantGroup
     admin_permissions_filter = {
-        'content_type__app_label__in': TenantGroup.relevant_apps,
+        "content_type__app_label__in": TenantGroup.relevant_apps,
     }
     tester_permissions_filter = {
-        'content_type__app_label__in': TenantGroup.relevant_apps,
+        "content_type__app_label__in": TenantGroup.relevant_apps,
     }
 
     def handle(self, *args, **kwargs):
@@ -30,7 +34,8 @@ class Command(refresh_permissions.Command):
             with tenant_context(tenant):
                 if output:
                     output.write(
-                        f"\n\n === Refreshing permissions for tenant '{tenant.schema_name}' ===")
+                        f"\n\n === Refreshing permissions for tenant '{tenant.schema_name}' ==="
+                    )
 
                 self.execute_commands(*args, **kwargs)
 

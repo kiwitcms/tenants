@@ -25,10 +25,10 @@ class TestPermissions(TenantGroupsTestCase):
 
         # power_user has *all* Bug permissions assigned directly
         cls.power_user = UserFactory()
-        cls.power_user.set_password('password')
+        cls.power_user.set_password("password")
         cls.power_user.save()
 
-        bug_perms = Permission.objects.filter(content_type__app_label__contains='bugs')
+        bug_perms = Permission.objects.filter(content_type__app_label__contains="bugs")
         cls.power_user.user_permissions.add(*bug_perms)
 
         with tenant_context(cls.tenant):
@@ -46,7 +46,7 @@ class TestPermissions(TenantGroupsTestCase):
             ]:
                 app_perms = Permission.objects.filter(
                     content_type__app_label__contains=app_name,
-                    codename__startswith="view_"
+                    codename__startswith="view_",
                 )
                 view_only.permissions.add(*app_perms)
 
@@ -70,9 +70,7 @@ class TestPermissions(TenantGroupsTestCase):
         ]:
             app_perms = Permission.objects.filter(
                 content_type__app_label__contains=app_name,
-            ).exclude(
-                codename__startswith="delete_"
-            )
+            ).exclude(codename__startswith="delete_")
             tester.permissions.add(*app_perms)
 
         # add users to the Tester group on public tenant
@@ -88,8 +86,7 @@ class TestPermissions(TenantGroupsTestCase):
 
         # perform all operations as power_user
         self.client.logout()
-        self.client.login(username=self.power_user.username,
-                          password='password')
+        self.client.login(username=self.power_user.username, password="password")
 
     def test_can_view_bug(self):
         with tenant_context(self.tenant):

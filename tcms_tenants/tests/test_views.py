@@ -30,21 +30,26 @@ UserModel = get_user_model()
 class RedirectToTestCase(LoggedInTestCase):
     def test_redirect_to_tenant_path(self):
         # note: see LoggedInTestCase.get_test_tenant_domain()
-        expected_url = 'https://tenant.fast-test.com/plans/search/'
-        response = self.client.get(reverse('tcms_tenants:redirect-to',
-                                           args=[self.tenant.schema_name, 'plans/search/']))
+        expected_url = "https://tenant.fast-test.com/plans/search/"
+        response = self.client.get(
+            reverse(
+                "tcms_tenants:redirect-to",
+                args=[self.tenant.schema_name, "plans/search/"],
+            )
+        )
 
         self.assertIsInstance(response, HttpResponseRedirect)
-        self.assertEqual(response['Location'], expected_url)
+        self.assertEqual(response["Location"], expected_url)
 
     def test_redirect_to_tenant_root_url(self):
         # note: see LoggedInTestCase.get_test_tenant_domain()
-        expected_url = 'https://tenant.fast-test.com/'
-        response = self.client.get(reverse('tcms_tenants:redirect-to',
-                                           args=[self.tenant.schema_name, '']))
+        expected_url = "https://tenant.fast-test.com/"
+        response = self.client.get(
+            reverse("tcms_tenants:redirect-to", args=[self.tenant.schema_name, ""])
+        )
 
         self.assertIsInstance(response, HttpResponseRedirect)
-        self.assertEqual(response['Location'], expected_url)
+        self.assertEqual(response["Location"], expected_url)
 
 
 class NewTenantViewTestCase(TenantGroupsTestCase):
@@ -53,89 +58,90 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
         super().setUpClass()
 
         add_tenant = Permission.objects.get(
-            content_type__app_label='tcms_tenants',
-            codename='add_tenant')
+            content_type__app_label="tcms_tenants", codename="add_tenant"
+        )
         cls.tester.user_permissions.add(add_tenant)
 
     def test_create_tenant_shows_defaults_for_trial_and_paid_until(self):
-        response = self.client.get(reverse('tcms_tenants:create-tenant'))
-        self.assertContains(response, _('New tenant'))
+        response = self.client.get(reverse("tcms_tenants:create-tenant"))
+        self.assertContains(response, _("New tenant"))
         # assert hidden fields are shown with defaults b/c the tests below
         # can't simulate opening the page and clicking the submit button
         self.assertContains(
             response,
-            'class="bootstrap-switch" name="publicly_readable" type="checkbox"')
-        self.assertContains(response,
-                            '<input id="id_paid_until" name="paid_until" type="hidden">',
-                            html=True)
-        self.assertContains(response,
-                            f"Validation pattern: {VALIDATION_RE.pattern}")
+            'class="bootstrap-switch" name="publicly_readable" type="checkbox"',
+        )
+        self.assertContains(
+            response,
+            '<input id="id_paid_until" name="paid_until" type="hidden">',
+            html=True,
+        )
+        self.assertContains(response, f"Validation pattern: {VALIDATION_RE.pattern}")
 
     def test_invalid_schema_name_shows_errors(self):
         response = self.client.post(
-            reverse('tcms_tenants:create-tenant'),
+            reverse("tcms_tenants:create-tenant"),
             {
-                'name': 'Dash Is Not Allowed',
-                'schema_name': 'kiwi-tcms',
-                'publicly_readable': False,
-                'paid_until': '',
-            })
+                "name": "Dash Is Not Allowed",
+                "schema_name": "kiwi-tcms",
+                "publicly_readable": False,
+                "paid_until": "",
+            },
+        )
 
-        self.assertContains(response, 'Invalid string')
-        self.assertContains(response,
-                            f"Validation pattern: {VALIDATION_RE.pattern}")
-        self.assertFalse(
-            Tenant.objects.filter(schema_name='kiwi-tcms').exists())
+        self.assertContains(response, "Invalid string")
+        self.assertContains(response, f"Validation pattern: {VALIDATION_RE.pattern}")
+        self.assertFalse(Tenant.objects.filter(schema_name="kiwi-tcms").exists())
 
     def test_invalid_domain_name_shows_errors(self):
         response = self.client.post(
-            reverse('tcms_tenants:create-tenant'),
+            reverse("tcms_tenants:create-tenant"),
             {
-                'name': 'Underscore is allowed in Postres but not in domains',
-                'schema_name': 'kiwi_tcms',
-                'publicly_readable': False,
-                'paid_until': '',
-            })
+                "name": "Underscore is allowed in Postres but not in domains",
+                "schema_name": "kiwi_tcms",
+                "publicly_readable": False,
+                "paid_until": "",
+            },
+        )
 
-        self.assertContains(response, 'Invalid string')
-        self.assertContains(response,
-                            f"Validation pattern: {VALIDATION_RE.pattern}")
-        self.assertFalse(
-            Tenant.objects.filter(schema_name='kiwi_tcms').exists())
+        self.assertContains(response, "Invalid string")
+        self.assertContains(response, f"Validation pattern: {VALIDATION_RE.pattern}")
+        self.assertFalse(Tenant.objects.filter(schema_name="kiwi_tcms").exists())
 
     def test_existing_schema_name_is_invalid(self):
         response = self.client.post(
-            reverse('tcms_tenants:create-tenant'),
+            reverse("tcms_tenants:create-tenant"),
             {
-                'name': 'Use an existing schema name',
-                'schema_name': self.tenant.schema_name,
-                'publicly_readable': False,
-                'paid_until': '',
-            })
+                "name": "Use an existing schema name",
+                "schema_name": self.tenant.schema_name,
+                "publicly_readable": False,
+                "paid_until": "",
+            },
+        )
 
-        self.assertContains(response, 'Schema name already in use')
-        self.assertContains(response,
-                            f"Validation pattern: {VALIDATION_RE.pattern}")
+        self.assertContains(response, "Schema name already in use")
+        self.assertContains(response, f"Validation pattern: {VALIDATION_RE.pattern}")
 
-    @patch('tcms.core.utils.mailto.send_mail')
+    @patch("tcms.core.utils.mailto.send_mail")
     def test_create_tenant_with_name_schema_only(self, send_mail):
         expected_url = f"https://tinc.{settings.KIWI_TENANTS_DOMAIN}"
         response = self.client.post(
-            reverse('tcms_tenants:create-tenant'),
+            reverse("tcms_tenants:create-tenant"),
             {
-                'name': 'Tenant, Inc.',
-                'schema_name': 'tinc',
+                "name": "Tenant, Inc.",
+                "schema_name": "tinc",
                 # this is what the default form view sends
-                'owner': self.tester.pk,
-                'publicly_readable': False,
-                'paid_until': '',
-            })
+                "owner": self.tester.pk,
+                "publicly_readable": False,
+                "paid_until": "",
+            },
+        )
 
         self.assertIsInstance(response, HttpResponseRedirect)
-        self.assertEqual(response['Location'], expected_url)
+        self.assertEqual(response["Location"], expected_url)
 
         # assert tenant was created
-        tenant = Tenant.objects.get(schema_name='tinc')
+        tenant = Tenant.objects.get(schema_name="tinc")
         self.assertFalse(tenant.publicly_readable)
         self.assertIsNone(tenant.paid_until)
 
@@ -145,46 +151,52 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
 
     def test_create_tenant_with_name_schema_publicly_readable_payment_date(self):
         """
-            Similar invocation will be used via inherited view in
-            GitHub Marketplace integration.
+        Similar invocation will be used via inherited view in
+        GitHub Marketplace integration.
         """
-        tenant = Tenant.objects.filter(schema_name='subscriber').first()
+        tenant = Tenant.objects.filter(schema_name="subscriber").first()
         self.assertIsNone(tenant)
 
         expected_url = f"https://subscriber.{settings.KIWI_TENANTS_DOMAIN}"
         paid_until = timezone.now().replace(microsecond=0) + timedelta(days=30)
 
         response = self.client.post(
-            reverse('tcms_tenants:create-tenant'),
+            reverse("tcms_tenants:create-tenant"),
             {
-                'name': 'Subscriber LLC',
-                'schema_name': 'subscriber',
-                'publicly_readable': False,
-                'paid_until': paid_until.strftime('%Y-%m-%d %H:%M:%S'),
+                "name": "Subscriber LLC",
+                "schema_name": "subscriber",
+                "publicly_readable": False,
+                "paid_until": paid_until.strftime("%Y-%m-%d %H:%M:%S"),
                 # this is what the default form view sends
-                'owner': self.tester.pk,
-            })
+                "owner": self.tester.pk,
+            },
+        )
 
         self.assertIsInstance(response, HttpResponseRedirect)
-        self.assertEqual(response['Location'], expected_url)
+        self.assertEqual(response["Location"], expected_url)
 
-        tenant = Tenant.objects.get(schema_name='subscriber')
+        tenant = Tenant.objects.get(schema_name="subscriber")
         self.assertFalse(tenant.publicly_readable)
         self.assertEqual(tenant.paid_until, paid_until)
 
         # assert tenant owner was added to default groups
         with tenant_context(tenant):
-            self.assertTrue(tenant.owner.tenant_groups.filter(name="Administrator").exists())
+            self.assertTrue(
+                tenant.owner.tenant_groups.filter(name="Administrator").exists()
+            )
             self.assertTrue(tenant.owner.tenant_groups.filter(name="Tester").exists())
 
-    @patch('tcms.core.utils.mailto.send_mail')
+    @patch("tcms.core.utils.mailto.send_mail")
     def test_create_oss_tenant_with_helper_function(self, send_mail):
         tenant = create_oss_tenant(
-            self.tester.username, 'osstenant', 'osstenant', 'Free Organization')
+            self.tester.username, "osstenant", "osstenant", "Free Organization"
+        )
 
         # assert tenant owner was added to default groups
         with tenant_context(tenant):
-            self.assertTrue(tenant.owner.tenant_groups.filter(name="Administrator").exists())
+            self.assertTrue(
+                tenant.owner.tenant_groups.filter(name="Administrator").exists()
+            )
             self.assertTrue(tenant.owner.tenant_groups.filter(name="Tester").exists())
 
         # assert tenant was created
@@ -200,28 +212,33 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
 
 class InviteUsersViewTestCase(TenantGroupsTestCase):
     @override_settings(DEFAULT_GROUPS=["InvitedUsers"])
-    @patch('tcms.core.utils.mailto.send_mail')
+    @patch("tcms.core.utils.mailto.send_mail")
     def test_invited_users_are_granted_access(self, send_mail):
         with tenant_context(self.tenant):
             TenantGroup.objects.create(name="InvitedUsers")
 
-        self.assertFalse(UserModel.objects.filter(username="invited-via-email").exists())
+        self.assertFalse(
+            UserModel.objects.filter(username="invited-via-email").exists()
+        )
 
         response = self.client.post(
-            reverse('tcms_tenants:invite-users'),
+            reverse("tcms_tenants:invite-users"),
             {
-                'email_0': 'invited-via-email@example.com',
-            })
+                "email_0": "invited-via-email@example.com",
+            },
+        )
 
         self.assertIsInstance(response, HttpResponseRedirect)
-        self.assertEqual(response['Location'], "/")
+        self.assertEqual(response["Location"], "/")
 
         self.assertTrue(send_mail.called)
         self.assertEqual(send_mail.call_count, 1)
 
         invited_user = UserModel.objects.get(username="invited-via-email")
         self.assertTrue(invited_user.is_active)
-        self.assertTrue(self.tenant.authorized_users.filter(pk=invited_user.pk).exists())
+        self.assertTrue(
+            self.tenant.authorized_users.filter(pk=invited_user.pk).exists()
+        )
 
         self.assertTrue(invited_user.tenant_groups.filter(name="InvitedUsers").exists())
         self.assertFalse(invited_user.tenant_groups.filter(name="Tester").exists())
@@ -233,12 +250,12 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
         super().setUpClass()
 
         cls.change_tenant = Permission.objects.get(
-            content_type__app_label='tcms_tenants',
-            codename='change_tenant')
+            content_type__app_label="tcms_tenants", codename="change_tenant"
+        )
         cls.tester.user_permissions.add(cls.change_tenant)
 
         # name required for edit operations below
-        cls.tenant.name = 'Fast Inc.'
+        cls.tenant.name = "Fast Inc."
         cls.tenant.save()
 
     def tearDown(self):
@@ -253,18 +270,18 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
 
     def update_and_assert_tenant(self):
         response = self.client.post(
-            reverse('tcms_tenants:edit-tenant'),
+            reverse("tcms_tenants:edit-tenant"),
             {
-                'name': self.tenant.name,
-                'schema_name': self.tenant.schema_name,
-                'publicly_readable': True,
-                'paid_until': '',
+                "name": self.tenant.name,
+                "schema_name": self.tenant.schema_name,
+                "publicly_readable": True,
+                "paid_until": "",
             },
-            follow=True
+            follow=True,
         )
 
         # Then
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, "/")
 
         self.tenant.refresh_from_db()
         self.assertTrue(self.tenant.publicly_readable)
@@ -277,29 +294,28 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
         self.assertFalse(self.tenant.publicly_readable)
 
         # When
-        response = self.client.get(reverse('tcms_tenants:edit-tenant'))
+        response = self.client.get(reverse("tcms_tenants:edit-tenant"))
 
         # Then
-        self.assertContains(response, _('Edit tenant'))
+        self.assertContains(response, _("Edit tenant"))
         self.update_and_assert_tenant()
 
     def test_owner_can_edit_own_tenant(self):
         # Given
-        self.tenant.owner.set_password('password')
+        self.tenant.owner.set_password("password")
         self.tenant.owner.save()
         self.tenant.owner.user_permissions.add(self.change_tenant)
         self.assertFalse(self.tenant.publicly_readable)
 
         self.client.logout()
-        self.client.login(username=self.tenant.owner.username,
-                          password='password')
+        self.client.login(username=self.tenant.owner.username, password="password")
         self.assertFalse(self.tenant.publicly_readable)
 
         # When
-        response = self.client.get(reverse('tcms_tenants:edit-tenant'))
+        response = self.client.get(reverse("tcms_tenants:edit-tenant"))
 
         # Then
-        self.assertContains(response, _('Edit tenant'))
+        self.assertContains(response, _("Edit tenant"))
         self.update_and_assert_tenant()
 
     def test_non_owner_cant_edit_tenant(self):
@@ -309,36 +325,33 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
         self.assertFalse(self.tenant.publicly_readable)
 
         # When: get
-        response = self.client.get(
-            reverse('tcms_tenants:edit-tenant'),
-            follow=True
-        )
+        response = self.client.get(reverse("tcms_tenants:edit-tenant"), follow=True)
 
         # Then
         self.assertContains(
             response,
-            _('Only super-user and tenant owner are allowed to edit tenant properties')
+            _("Only super-user and tenant owner are allowed to edit tenant properties"),
         )
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, "/")
 
         # When: post
         response = self.client.post(
-            reverse('tcms_tenants:edit-tenant'),
+            reverse("tcms_tenants:edit-tenant"),
             {
-                'name': self.tenant.name,
-                'schema_name': self.tenant.schema_name,
-                'publicly_readable': True,
-                'paid_until': '',
+                "name": self.tenant.name,
+                "schema_name": self.tenant.schema_name,
+                "publicly_readable": True,
+                "paid_until": "",
             },
-            follow=True
+            follow=True,
         )
 
         # Then
         self.assertContains(
             response,
-            _('Only super-user and tenant owner are allowed to edit tenant properties')
+            _("Only super-user and tenant owner are allowed to edit tenant properties"),
         )
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, "/")
 
         self.tenant.refresh_from_db()
         self.assertFalse(self.tenant.publicly_readable)

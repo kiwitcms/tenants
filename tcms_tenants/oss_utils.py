@@ -12,9 +12,10 @@ from tcms_tenants.utils import create_tenant
 
 def create_oss_tenant(owner, name, schema_name, organization):
     """
-        Used to create tenants for our OSS program. Executed by the
-        instance administrator!
+    Used to create tenants for our OSS program. Executed by the
+    instance administrator!
     """
+
     class FakeRequest:  # pylint: disable=too-few-public-methods,nested-class-found
         is_secure = True
         user = None
@@ -24,14 +25,16 @@ def create_oss_tenant(owner, name, schema_name, organization):
 
     request = FakeRequest(owner)
 
-    form = NewTenantForm({
-        'owner': request.user.pk,
-        'name': name,
-        'schema_name': schema_name.lower(),
-        'organization': organization,
-        'publicly_readable': False,
-        'paid_until': datetime.datetime(2999, 12, 31),
-    })
+    form = NewTenantForm(
+        {
+            "owner": request.user.pk,
+            "name": name,
+            "schema_name": schema_name.lower(),
+            "organization": organization,
+            "publicly_readable": False,
+            "paid_until": datetime.datetime(2999, 12, 31),
+        }
+    )
     if form.is_valid():
         return create_tenant(form, request)
 

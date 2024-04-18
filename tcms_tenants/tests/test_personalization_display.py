@@ -14,16 +14,16 @@ class WhenOrganizationValueIsSet(LoggedInTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        with schema_context('public'):
+        with schema_context("public"):
             cls.tenant.organization = "Demo Instance"
             cls.tenant.name = "demonstration"
             cls.tenant.save()
 
     def test_display(self):
-        response = self.client.get(reverse('tcms-login'))
+        response = self.client.get(reverse("tcms-login"))
 
-        self.assertContains(response, '<span>Demo Instance</span>')
-        self.assertNotContains(response, 'demonstration')
+        self.assertContains(response, "<span>Demo Instance</span>")
+        self.assertNotContains(response, "demonstration")
         self.assertNotContains(response, self.tenant.schema_name)
 
 
@@ -32,16 +32,16 @@ class WhenNameValueIsSetAndOrganizationValueIsNotSet(LoggedInTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        with schema_context('public'):
+        with schema_context("public"):
             cls.tenant.organization = ""
             cls.tenant.name = "demonstration"
             cls.tenant.save()
 
     def test_display(self):
-        response = self.client.get(reverse('tcms-login'))
+        response = self.client.get(reverse("tcms-login"))
 
-        self.assertNotContains(response, 'Demo Instance')
-        self.assertContains(response, '<span>demonstration</span>')
+        self.assertNotContains(response, "Demo Instance")
+        self.assertContains(response, "<span>demonstration</span>")
         self.assertNotContains(response, self.tenant.schema_name)
 
 
@@ -50,14 +50,14 @@ class WhenNameAndOrganizationValuesAreNotSet(LoggedInTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-        with schema_context('public'):
+        with schema_context("public"):
             cls.tenant.organization = ""
             cls.tenant.name = ""
             cls.tenant.save()
 
     def test_display(self):
-        response = self.client.get(reverse('tcms-login'))
+        response = self.client.get(reverse("tcms-login"))
 
-        self.assertNotContains(response, 'Demo Instance')
-        self.assertNotContains(response, 'demonstration')
+        self.assertNotContains(response, "Demo Instance")
+        self.assertNotContains(response, "demonstration")
         self.assertContains(response, self.tenant.schema_name)

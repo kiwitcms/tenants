@@ -43,20 +43,20 @@ class LoggedInTestCase(FastTenantTestCase):
 
         tenant.publicly_readable = False
         tenant.owner = UserFactory()
-        tenant.owner.set_password('password')
+        tenant.owner.set_password("password")
         tenant.owner.save()
 
     @classmethod
     def setUpClass(cls):
         # b/c it may create a new tenant
-        with schema_context('public'):
+        with schema_context("public"):
             super().setUpClass()
 
         # authorize tenant owner
         cls.tenant.authorized_users.add(cls.tenant.owner)
 
         cls.tester = UserFactory()
-        cls.tester.set_password('password')
+        cls.tester.set_password("password")
         cls.tester.save()
 
         # authorize this user
@@ -70,8 +70,10 @@ class LoggedInTestCase(FastTenantTestCase):
         super().setUp()
 
         self.client = TenantClient(self.tenant)
-        self.client.login(username=self.tester.username,  # nosec:B106:hardcoded_password_funcarg
-                          password='password')
+        self.client.login(
+            username=self.tester.username,  # nosec:B106:hardcoded_password_funcarg
+            password="password",
+        )
 
 
 class TenantGroupsTestCase(LoggedInTestCase):
@@ -98,7 +100,7 @@ class TenantGroupsTestCase(LoggedInTestCase):
         get_tenant_model().auto_create_schema = True
 
         # execute before calling the parent class which will start a DB transaction
-        with schema_context('public'):
+        with schema_context("public"):
             cursor = connection.cursor()
 
             try:

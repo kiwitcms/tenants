@@ -25,7 +25,7 @@ class TestPermissions(TenantGroupsTestCase):
         super().setUpClass()
 
         cls.regular_user = UserFactory()
-        cls.regular_user.set_password('password')
+        cls.regular_user.set_password("password")
         cls.regular_user.save()
 
         with tenant_context(cls.tenant):
@@ -41,8 +41,7 @@ class TestPermissions(TenantGroupsTestCase):
 
         # perform all operations not as the tenant owner
         self.client.logout()
-        self.client.login(username=self.regular_user.username,
-                          password='password')
+        self.client.login(username=self.regular_user.username, password="password")
 
     def test_can_view_bug(self):
         with tenant_context(self.tenant):
@@ -163,7 +162,9 @@ class TestPermissions(TenantGroupsTestCase):
                 "default_tester": self.regular_user.pk,
                 "product": category.product.pk,
                 "category": category.pk,
-                "case_status": TestCaseStatus.objects.filter(is_confirmed=True).first().pk,
+                "case_status": TestCaseStatus.objects.filter(is_confirmed=True)
+                .first()
+                .pk,
                 "priority": Priority.objects.first().pk,
                 # specify in human readable format
                 "setup_duration": "2 20:10:00",
