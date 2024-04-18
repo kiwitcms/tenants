@@ -31,32 +31,35 @@ KIWI_TENANTS_DOMAIN = os.environ.get("KIWI_TENANTS_DOMAIN")
 
 # TenantMainMiddleware always needs to be first
 if (
-    "django_tenants.middleware.main.TenantMainMiddleware" not in MIDDLEWARE
-):  # noqa: F821
-    MIDDLEWARE.insert(
+    "django_tenants.middleware.main.TenantMainMiddleware"
+    not in MIDDLEWARE  # noqa: F821
+):
+    MIDDLEWARE.insert(  # noqa: F821
         0, "django_tenants.middleware.main.TenantMainMiddleware"
-    )  # noqa: F821
+    )
 
 if (
-    "tcms_tenants.middleware.BlockUnauthorizedUserMiddleware" not in MIDDLEWARE
-):  # noqa: F821
-    MIDDLEWARE.append(
+    "tcms_tenants.middleware.BlockUnauthorizedUserMiddleware"
+    not in MIDDLEWARE  # noqa: F821
+):
+    MIDDLEWARE.append(  # noqa: F821
         "tcms_tenants.middleware.BlockUnauthorizedUserMiddleware"
-    )  # noqa: F821
+    )
 
 # replace ModelBackend with GroupsBackend
 if "django.contrib.auth.backends.ModelBackend" in AUTHENTICATION_BACKENDS:  # noqa: F821
-    idx = AUTHENTICATION_BACKENDS.index(
+    idx = AUTHENTICATION_BACKENDS.index(  # noqa: F821
         "django.contrib.auth.backends.ModelBackend"
-    )  # noqa: F821
+    )
     AUTHENTICATION_BACKENDS[idx] = "tenant_groups.backends.GroupsBackend"  # noqa: F821
 
 if (
-    "tcms_tenants.backends.PubliclyReadableBackend" not in AUTHENTICATION_BACKENDS
-):  # noqa: F821
-    AUTHENTICATION_BACKENDS.append(
+    "tcms_tenants.backends.PubliclyReadableBackend"
+    not in AUTHENTICATION_BACKENDS  # noqa: F821
+):
+    AUTHENTICATION_BACKENDS.append(  # noqa: F821
         "tcms_tenants.backends.PubliclyReadableBackend"
-    )  # noqa: F821
+    )
 
 
 TENANT_MODEL = "tcms_tenants.Tenant"
@@ -73,8 +76,8 @@ SHARED_APPS = INSTALLED_APPS  # noqa: F821
 # add tennants context processor
 if (
     "tcms_tenants.context_processors.tenant_navbar_processor"
-    not in TEMPLATES[0]["OPTIONS"]["context_processors"]
-):  # noqa: F821
+    not in TEMPLATES[0]["OPTIONS"]["context_processors"]  # noqa: F821
+):
     TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa: F821
         "tcms_tenants.context_processors.tenant_navbar_processor"
     )  # noqa: F821
