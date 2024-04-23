@@ -45,6 +45,9 @@ class NewTenantForm(forms.ModelForm):
     organization = forms.CharField(
         max_length=64, required=False, widget=forms.HiddenInput
     )
+    extra_emails = forms.CharField(
+        max_length=256, required=False, widget=forms.HiddenInput
+    )
 
 
 class InviteUsersForm(forms.Form):  # pylint: disable=must-inherit-from-model-form
@@ -75,6 +78,7 @@ class UpdateTenantForm(NewTenantForm):
     enabled_fields = (
         "name",
         "publicly_readable",
+        "extra_emails",
     )
 
     def __init__(  # pylint: disable=too-many-arguments
