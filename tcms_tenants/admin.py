@@ -31,6 +31,7 @@ class TenantAdmin(admin.ModelAdmin):
         "publicly_readable",
         "paid_until",
         "owner",
+        "extra_emails",
         "organization",
     )
     search_fields = ("name", "schema_name", "organization")
