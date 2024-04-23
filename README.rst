@@ -132,7 +132,7 @@ development server. To workaround this issue, first generate an SSL certificate:
 
 Then use the ``runerver_plus`` command to start Kiwi TCMS development server with HTTPS::
 
-    PYTHONPATH=../Kiwi/ KIWI_TENANTS_DOMAIN=tenant.example.bg ./manage.py runserver_plus --cert-file ssl/host.crt
+    PYTHONPATH=../Kiwi/ KIWI_TENANTS_DOMAIN=tenant.example.bg ./manage.py runserver_plus --cert-file ssl/host.crt  --key-file ssl/host.key
 
 Then point your browser to https://tenant.example.bg:8000/.
 The SSL warning from the browser is expected!
