@@ -6,3 +6,5 @@ factory_boy
 pylint-django==2.5.5
 textdistance
 kiwitcms-django-plugin
+Werkzeug
+django-extensions
