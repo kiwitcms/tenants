@@ -145,6 +145,19 @@ You can use ``/etc/hosts`` to configure DNS resolution during development::
 Changelog
 ---------
 
+v2.7.0 (24 Apr 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Add the ``Tenant.extra_emails`` field for storing information like
+  technical email, billing email, etc. To be used by add-on tools
+- Add the ``initialize_tenants`` management command
+- Update local development instructions
+- Enable code formatting with ``black``
+- Start testing using upstream Postgres container
+- Execute CodeQL on pull request and branches
+- Adjust tests for Django 5.0
+
+
 v2.6.1 (08 Mar 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
