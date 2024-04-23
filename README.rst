@@ -120,6 +120,28 @@ team and that was the procedure we've used to migrate the previous demo website 
 its new MT version!
 
 
+Local Development
+-----------------
+
+Starting with Kiwi TCMS v13.1 session and CSRF cookies are configured only on HTTPS
+connections which will prevent browsers from sending cookies over a plain text HTTP
+connection. This will result in not being able to login if you are using a local
+development server. To workaround this issue, first generate an SSL certificate::
+
+    /usr/bin/sscg -v -f --country BG --locality Sofia --organization "Kiwi TCMS" --organizational-unit "QA" --ca-file ssl/ca.crt --cert-file ssl/host.crt --cert-key-file ssl/host.key
+
+Then use the ``runerver_plus`` command to start Kiwi TCMS development server with HTTPS::
+
+    PYTHONPATH=../Kiwi/ KIWI_TENANTS_DOMAIN=tenant.example.bg ./manage.py runserver_plus --cert-file ssl/host.crt
+
+Then point your browser to https://tenant.example.bg:8000/.
+The SSL warning from the browser is expected!
+
+You can use ``/etc/hosts`` to configure DNS resolution during development::
+
+    127.0.0.1   localhost tenant.example.bg empty.tenant.example.bg
+
+
 Changelog
 ---------
 
