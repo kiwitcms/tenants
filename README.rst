@@ -137,7 +137,8 @@ Then use the ``runerver_plus`` command to start Kiwi TCMS development server wit
 Then point your browser to https://tenant.example.bg:8000/.
 The SSL warning from the browser is expected!
 
-You can use ``/etc/hosts`` to configure DNS resolution during development::
+You can use your `OS hosts file <https://en.wikipedia.org/wiki/Hosts_(file)>`_
+to configure DNS resolution during development::
 
     127.0.0.1   localhost tenant.example.bg empty.tenant.example.bg
 
