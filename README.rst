@@ -62,8 +62,10 @@ default tenant on which your application runs::
 
     ./manage.py initial_setup
 
-Your tenant will be available at https://public.$KIWI_TENANTS_DOMAIN!
-Other tenants can also be created via the web interface as well.
+Your tenant will be available at https://$KIWI_TENANTS_DOMAIN!
+Other tenants can be created via the web interface and will be available
+under team-01.$KIWI_TENANTS_DOMAIN, product-02.$KIWI_TENANTS_DOMAIN, etc
+depnding on the actual ``schema name`` you give them.
 
 
 DNS configuration
