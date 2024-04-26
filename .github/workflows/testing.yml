@@ -73,7 +73,7 @@ jobs:
           sed -i "s/raise NotRunningInTTYException/pass/" "${DJANGO_PATH}/contrib/auth/management/commands/createsuperuser.py"
           sed -i "s/getpass.getpass/input/"               "${DJANGO_PATH}/contrib/auth/management/commands/createsuperuser.py"
 
-          echo -e "admin\nroot@example.com\nsecret-2a9a34cd-e51d-4039-b709-b45f629a5595\nsecret-2a9a34cd-e51d-4039-b709-b45f629a5595\npublic.test.com" | PYTHONPATH=.:../Kiwi/ KIWI_TENANTS_DOMAIN='test.com' ./manage.py initial_setup
+          echo -e "admin\nroot@example.com\nsecret-2a9a34cd-e51d-4039-b709-b45f629a5595\nsecret-2a9a34cd-e51d-4039-b709-b45f629a5595\n" | PYTHONPATH=.:../Kiwi/ KIWI_TENANTS_DOMAIN='test.com' ./manage.py initial_setup
 
           PYTHONPATH=.:../Kiwi/ KIWI_TENANTS_DOMAIN='test.com' ./manage.py execute_integration_tests
 
