@@ -148,6 +148,16 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v2.8.0 (28 Apr 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Refactor HTML template for Invite Users page to display form field errors
+- When inviting users validate addresses taking into account the value of
+  ``settings.EMAIL_VALIDATORS``
+- Updated documentation
+- Adjust tests for newer version of django-grappelli
+
+
 v2.7.0 (24 Apr 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
