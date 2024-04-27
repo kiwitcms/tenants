@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2022 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2020-2024 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -73,9 +73,8 @@ class TenantAdminTestCase(LoggedInTestCase):
         url = reverse("admin:tcms_tenants_tenant_delete", args=[self.tenant.pk])
         response = self.client.get(url)
 
-        # verify there's the Yes, I'm certain button
         self.assertEqual(HTTPStatus.OK, response.status_code)
-        self.assertContains(response, _("Yes, I'm sure"))
+        self.assertContains(response, _("Yes, I’m sure"))
 
         # not simulating actual deletion b/c we don't seem to be able to switch
         # to tenant schema or to public schema witin the tests and the deletion
