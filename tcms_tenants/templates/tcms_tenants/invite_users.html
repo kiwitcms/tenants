@@ -15,11 +15,13 @@
         <form class="form-horizontal" action="{% url 'tcms_tenants:invite-users' %}" method="post">
         {% csrf_token %}
 
-        {% for i in form.range %}
+        {% for field in form %}
             <div class="form-group">
-                <label class="col-md-1 col-lg-1" for="email_{{ i }}">{% trans "Email" %}</label>
-                <div class="col-sm-4 col-md-4 col-lg-4">
-                    <input type="text" id="email_{{ i }}" name="email_{{ i }}" class="form-control">
+                <label class="col-md-1 col-lg-1" for="{{ field.name }}">{% trans "Email" %}</label>
+                <div class="col-sm-4 col-md-4 col-lg-4" {% if field.errors %}has-error{% endif %}">
+                    <input type="text" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}" class="form-control">
+
+                    {{ field.errors }}
                 </div>
             </div>
         {% endfor %}
