@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2022 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2024 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
@@ -15,6 +15,8 @@ from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 
 from django_tenants.utils import tenant_context
+
+from tcms.tests import deny_certain_email_addresses
 
 from tcms_tenants.models import Tenant
 from tcms_tenants.forms import VALIDATION_RE
@@ -242,6 +244,37 @@ class InviteUsersViewTestCase(TenantGroupsTestCase):
 
         self.assertTrue(invited_user.tenant_groups.filter(name="InvitedUsers").exists())
         self.assertFalse(invited_user.tenant_groups.filter(name="Tester").exists())
+
+    @override_settings(
+        EMAIL_VALIDATORS=(deny_certain_email_addresses,),
+    )
+    @patch("tcms.core.utils.mailto.send_mail")
+    def test_no_invites_sent_when_form_validation_fails(self, send_mail):
+        invitation_data = {
+            "email_0": "via-email@example.com",
+            "email_1": "invalid@yahoo.com",
+            "email_2": "tester-555@example.bg",
+        }
+
+        for address in invitation_data.values():
+            self.assertFalse(UserModel.objects.filter(username=address).exists())
+
+        response = self.client.post(
+            reverse("tcms_tenants:invite-users"),
+            {
+                "email_0": "via-email@example.com",
+                "email_1": "invalid@yahoo.com",
+                "email_2": "tester-555@example.bg",
+            },
+        )
+
+        send_mail.assert_not_called()
+        self.assertNotIsInstance(response, HttpResponseRedirect)
+        self.assertContains(response, "@yahoo email address has been denied")
+
+        for address in invitation_data.values():
+            self.assertContains(response, address)
+            self.assertFalse(UserModel.objects.filter(username=address).exists())
 
 
 class UpdateTenantViewTestCase(LoggedInTestCase):

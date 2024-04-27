@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2019-2024 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 import re
@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from django_tenants.postgresql_backend import base as validators
 
+from tcms.core.utils.mailto import custom_email_validators
 from tcms_tenants import models
 from tcms_tenants import utils
 
@@ -57,13 +58,16 @@ class InviteUsersForm(forms.Form):  # pylint: disable=must-inherit-from-model-fo
         super().__init__(*args, **kwargs)
 
         for i in self.range:
-            self.fields[f"email_{i}"] = forms.CharField(required=False)
+            self.fields[f"email_{i}"] = forms.EmailField(
+                required=False,
+                validators=[custom_email_validators],
+            )
 
     def clean(self):
         emails = set()
 
         for i in self.range:
-            email = self.cleaned_data[f"email_{i}"]
+            email = self.cleaned_data.get(f"email_{i}")
             if email:
                 emails.add(email)
 
