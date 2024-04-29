@@ -1,9 +1,12 @@
-# Copyright (c) 2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2021-2024 Alexander Todorov <atodorov@MrSenko.com>
 
 # Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=too-many-ancestors
+
 from django.test import override_settings
 from django_tenants import utils as django_tenant_utils
+
+from tcms.tests import deny_certain_email_addresses
 
 from tcms_tenants import utils
 from tcms_tenants.tests import LoggedInTestCase
@@ -34,3 +37,17 @@ class TenantDomainTestCase(LoggedInTestCase):
         with override_settings(KIWI_TENANTS_DOMAIN="qa.kiwitcms.org"):
             result = utils.tenant_domain("public")
             self.assertEqual(result, "public.qa.kiwitcms.org")
+
+
+class CreateUserAccountTestCase(LoggedInTestCase):
+    def test_should_throw_validation_error_when_used_with_blacklisted_email_address(
+        self,
+    ):
+        with override_settings(
+            EMAIL_VALIDATORS=(deny_certain_email_addresses,),
+        ):
+            with self.assertRaisesRegex(
+                ValueError,
+                "The User could not be created because the data didn't validate",
+            ):
+                utils.create_user_account("invalid@yahoo.com")
