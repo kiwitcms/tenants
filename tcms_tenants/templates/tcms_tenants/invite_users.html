@@ -19,7 +19,7 @@
             <div class="form-group">
                 <label class="col-md-1 col-lg-1" for="{{ field.name }}">{% trans "Email" %}</label>
                 <div class="col-sm-4 col-md-4 col-lg-4" {% if field.errors %}has-error{% endif %}">
-                    <input type="text" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}" class="form-control">
+                    <input type="text" id="{{ field.name }}" name="{{ field.name }}" value="{{ field.value|default:'' }}" class="form-control">
 
                     {{ field.errors }}
                 </div>
