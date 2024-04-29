@@ -148,6 +148,14 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v2.8.1 (29 Apr 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Bug-fix: display empty string instead of ``None`` on Invite users page
+- Add test for utils function with an email which won't validate according to
+  ``settings.EMAIL_VALIDATORS``
+
+
 v2.8.0 (28 Apr 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
