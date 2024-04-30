@@ -62,8 +62,10 @@ class NewTenantView(FormView):
 class UpdateTenantView(UpdateView):
     model = Tenant
     form_class = UpdateTenantForm
-    template_name = "tcms_tenants/new.html"
     success_url = "/"
+
+    def get_template_names(self):
+        return ["tcms_tenants/override_edit.html", "tcms_tenants/new.html"]
 
     @staticmethod
     def check_owner(request):
