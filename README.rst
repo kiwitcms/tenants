@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v2.8.2 (01 May 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Allow downstream installations to override Edit tenant page template
+
+
 v2.8.1 (29 Apr 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
