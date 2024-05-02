@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v2.8.3 (02 May 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Make sure to populate the ``extra_emails`` field when cloning a tenant
+
+
 v2.8.2 (01 May 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
