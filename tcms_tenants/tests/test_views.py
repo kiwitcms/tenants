@@ -135,6 +135,8 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
                 # this is what the default form view sends
                 "owner": self.tester.pk,
                 "publicly_readable": False,
+                # note: not shown in the UI b/c it' meant for override templates
+                "extra_emails": "billing@example.org; admin@example.net",
                 "paid_until": "",
             },
         )
@@ -146,6 +148,7 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
         tenant = Tenant.objects.get(schema_name="tinc")
         self.assertFalse(tenant.publicly_readable)
         self.assertIsNone(tenant.paid_until)
+        self.assertEqual(tenant.extra_emails, "billing@example.org; admin@example.net")
 
         # assert email was sent
         self.assertTrue(send_mail.called)
