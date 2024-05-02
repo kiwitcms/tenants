@@ -114,6 +114,8 @@ def create_tenant(form, request):
                 request.user.pk,
                 "--organization",
                 form.cleaned_data["organization"] or "-",
+                "--extra_emails",
+                form.cleaned_data["extra_emails"] or "-",
                 "--domain-domain",
                 tenant_domain(schema_name),
                 "--domain-is_primary",

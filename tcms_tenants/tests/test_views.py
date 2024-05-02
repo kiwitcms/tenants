@@ -183,6 +183,7 @@ class NewTenantViewTestCase(TenantGroupsTestCase):
         tenant = Tenant.objects.get(schema_name="subscriber")
         self.assertFalse(tenant.publicly_readable)
         self.assertEqual(tenant.paid_until, paid_until)
+        self.assertEqual(tenant.extra_emails, "-")
 
         # assert tenant owner was added to default groups
         with tenant_context(tenant):
