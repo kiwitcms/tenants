@@ -312,6 +312,8 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
                 "schema_name": self.tenant.schema_name,
                 "publicly_readable": True,
                 "paid_until": "",
+                # note: not shown in the UI b/c it' meant for override templates
+                "extra_emails": "billing@example.org; admin@example.net",
             },
             follow=True,
         )
@@ -321,6 +323,9 @@ class UpdateTenantViewTestCase(LoggedInTestCase):
 
         self.tenant.refresh_from_db()
         self.assertTrue(self.tenant.publicly_readable)
+        self.assertEqual(
+            self.tenant.extra_emails, "billing@example.org; admin@example.net"
+        )
 
     def test_super_user_can_edit_any_tenant(self):
         # Given
