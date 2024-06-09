@@ -1,8 +1,9 @@
+# Copyright (c) 2019-2024 Alexander Todorov <atodorov@otb.bg>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
+
 # pylint: disable=missing-docstring
-
-# Copyright (c) 2019-2023 Alexander Todorov <atodorov@MrSenko.com>
-
-# Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 
 from setuptools import setup, find_packages
 
@@ -31,7 +32,7 @@ setup(
     author="Kiwi TCMS",
     author_email="info@kiwitcms.org",
     url="https://github.com/kiwitcms/tenants/",
-    license="GPLv3+",
+    license="AGPLv3+",
     install_requires=get_install_requires("requirements.txt"),
     include_package_data=True,
     packages=find_packages(exclude=["test_project*", "*.tests"]),
@@ -44,7 +45,7 @@ setup(
         "Topic :: Software Development :: Testing",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
