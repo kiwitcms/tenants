@@ -148,6 +148,13 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v3.0.0 (09 Jun 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Relicense this package under GNU Affero General Public License v3 or later
+- Prior versions are still licensed under GNU General Public License v3
+
+
 v2.8.3 (02 May 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
