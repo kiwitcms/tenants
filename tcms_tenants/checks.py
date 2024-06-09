@@ -1,7 +1,7 @@
-# Copyright (c) 2021-2022 Ivajlo Karabojkov <karabojkov@kit.bg>
-
-# Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
-
+# Copyright (c) 2021 Ivajlo Karabojkov <karabojkov@kitbg.com>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
 
 import os
 

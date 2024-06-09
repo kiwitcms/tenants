@@ -1,3 +1,9 @@
+# Copyright (c) 2022 Ivajlo Karabojkov <karabojkov@kitbg.com>
+# Copyright (c) 2022 Alexander Todorov <atodorov@otb.bg>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
+
 from attachments.models import Attachment
 from django.template.loader import render_to_string
 

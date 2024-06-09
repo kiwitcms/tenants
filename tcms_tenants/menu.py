@@ -1,6 +1,7 @@
-# Copyright (c) 2020 Alexander Todorov <atodorov@MrSenko.com>
-
-# Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
+# Copyright (c) 2020-2022 Alexander Todorov <atodorov@otb.bg>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
 
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _

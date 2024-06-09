@@ -1,6 +1,9 @@
-# Copyright (c) 2020-2021 Alexander Todorov <atodorov@MrSenko.com>
+# Copyright (c) 2020-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022 Ivajlo Karabojkov <karabojkov@kitbg.com>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
 
-# Licensed under the GPL 3.0: https://www.gnu.org/licenses/gpl-3.0.txt
 # pylint: disable=undefined-variable
 import os
 
