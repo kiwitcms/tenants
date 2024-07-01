@@ -1,5 +1,5 @@
 # Copyright (c) 2022 Ivajlo Karabojkov <karabojkov@kitbg.com>
-# Copyright (c) 2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -29,3 +29,14 @@ def tenant_navbar_processor(request):
         {"tenant_name": tenant_name, "tenant_logo": tenant_logo},
     )
     return {"CUSTOMIZED_LOGO_CONTENTS": customized_logo_contents}
+
+
+def schema_name_processor(request):
+    """
+    Provide tenant.schema_name for use in templates
+    """
+    return {
+        "TENANT_SCHEMA_NAME": getattr(
+            getattr(request, "tenant", None), "schema_name", ""
+        )
+    }

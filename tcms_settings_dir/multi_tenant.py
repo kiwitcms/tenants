@@ -76,11 +76,12 @@ SESSION_COOKIE_DOMAIN = f".{KIWI_TENANTS_DOMAIN}"
 # everybody can access the main instance
 SHARED_APPS = INSTALLED_APPS  # noqa: F821
 
-# add tennants context processor
-if (
-    "tcms_tenants.context_processors.tenant_navbar_processor"
-    not in TEMPLATES[0]["OPTIONS"]["context_processors"]  # noqa: F821
+# extra context processors
+for processor in (
+    "tcms_tenants.context_processors.schema_name_processor",
+    "tcms_tenants.context_processors.tenant_navbar_processor",
 ):
-    TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa: F821
-        "tcms_tenants.context_processors.tenant_navbar_processor"
-    )  # noqa: F821
+    if processor not in TEMPLATES[0]["OPTIONS"]["context_processors"]:  # noqa: F821
+        TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa: F821
+            processor
+        )  # noqa: F821

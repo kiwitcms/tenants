@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2024 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -14,11 +14,12 @@ from django.utils import timezone
 from django.http import HttpResponseForbidden, HttpResponseNotFound
 
 from tcms_tenants.tests import LoggedInTestCase
+from tcms_tenants.context_processors import schema_name_processor
 from tcms_tenants.context_processors import tenant_navbar_processor
 
 
 class ContextProcessor(TestCase):
-    def test_without_tenant(self):
+    def test_navbar_processor_without_tenant(self):
         """
         This simulates the case where TenantMainMiddleware returns a 404 for
         non-existing tenant but there's no request.tenant attribute and the
@@ -29,6 +30,13 @@ class ContextProcessor(TestCase):
 
         result = tenant_navbar_processor(request)
         self.assertEqual(result, {"CUSTOMIZED_LOGO_CONTENTS": ""})
+
+    def test_schema_name_processor_without_tenant(self):
+        factory = RequestFactory()
+        request = factory.get("/robots.txt", HTTP_HOST="non-existing.tenant.bg")
+
+        result = schema_name_processor(request)
+        self.assertEqual(result, {"TENANT_SCHEMA_NAME": ""})
 
 
 class BlockUnauthorizedUserMiddlewareTestCase(LoggedInTestCase):
