@@ -23,8 +23,8 @@ jobs:
 
       - name: Create database
         run: |
-          docker-compose pull db
-          docker-compose up -d
+          docker compose pull db
+          docker compose up -d
 
       - name: Configure ~/.tcms.conf for ${{ matrix.kiwitcms-url }}
         run: |
@@ -50,10 +50,10 @@ jobs:
 
           make check
 
-          docker-compose down --volumes
+          docker compose down --volumes
 
           # restart database for integration tests
-          docker-compose up -d
+          docker compose up -d
 
       - name: Local coverage report
         run: |
