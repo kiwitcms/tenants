@@ -148,10 +148,16 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v3.2.0 (28 Aug 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.6.1 to 3.7.0
+
+
 v3.1.0 (02 Jul 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
-- Add context processor for the TENANT_SCHEMA_NAME template variable
+- Add context processor for the ``TENANT_SCHEMA_NAME`` template variable
 - Update test suite for changes related to Django 5
 
 
