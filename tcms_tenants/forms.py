@@ -87,7 +87,7 @@ class UpdateTenantForm(NewTenantForm):
         "extra_emails",
     )
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         data=None,
         files=None,
