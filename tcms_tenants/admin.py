@@ -86,7 +86,7 @@ class AuthorizedUsersChangeForm(forms.ModelForm):
         help_text=_("Existing username, email or user ID")
     )
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         data=None,
         files=None,
@@ -169,7 +169,7 @@ class AuthorizedUsersAdmin(admin.ModelAdmin):
         """
         return super().get_queryset(request).filter(tenant=request.tenant)
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def render_change_form(
         self, request, context, add=False, change=False, form_url="", obj=None
     ):
