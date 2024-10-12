@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v3.2.1 (12 Oct 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update email template for invited users
+
+
 v3.2.0 (28 Aug 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
