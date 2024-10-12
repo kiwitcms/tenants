@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-14 20:50+0000\n"
+"POT-Creation-Date: 2024-10-12 11:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,57 +18,57 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: tcms_tenants/admin.py:42 tcms_tenants/admin.py:49
-#: tcms_tenants/middleware.py:32
+#: tcms_tenants/admin.py:55 tcms_tenants/admin.py:62
+#: tcms_tenants/middleware.py:35
 msgid "Unauthorized"
 msgstr ""
 
-#: tcms_tenants/admin.py:72
+#: tcms_tenants/admin.py:86
 msgid "Existing username, email or user ID"
 msgstr ""
 
-#: tcms_tenants/admin.py:113
+#: tcms_tenants/admin.py:153
 msgid "Username"
 msgstr ""
 
-#: tcms_tenants/admin.py:118
+#: tcms_tenants/admin.py:159
 msgid "Full name"
 msgstr ""
 
-#: tcms_tenants/admin.py:122 tcms_tenants/menu.py:15
+#: tcms_tenants/admin.py:164 tcms_tenants/menu.py:18
 msgid "Groups"
 msgstr ""
 
-#: tcms_tenants/forms.py:27
+#: tcms_tenants/forms.py:30
 msgid "Invalid string"
 msgstr ""
 
-#: tcms_tenants/menu.py:11
+#: tcms_tenants/menu.py:13
 msgid "Tenant"
 msgstr ""
 
-#: tcms_tenants/menu.py:12
+#: tcms_tenants/menu.py:15
 msgid "Create"
 msgstr ""
 
-#: tcms_tenants/menu.py:13
+#: tcms_tenants/menu.py:16
 msgid "Edit"
 msgstr ""
 
-#: tcms_tenants/menu.py:17
-#: tcms_tenants/templates/tcms_tenants/invite_users.html:9
+#: tcms_tenants/menu.py:20
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:17
 msgid "Invite users"
 msgstr ""
 
-#: tcms_tenants/menu.py:18
+#: tcms_tenants/menu.py:21
 msgid "Authorized users"
 msgstr ""
 
-#: tcms_tenants/middleware.py:54
+#: tcms_tenants/middleware.py:59
 msgid "Unpaid"
 msgstr ""
 
-#: tcms_tenants/middleware.py:64
+#: tcms_tenants/middleware.py:70
 msgid "Tenant expires in less than 7 days"
 msgstr ""
 
@@ -80,7 +80,9 @@ msgid ""
 "%(tenant_url)s\n"
 "\n"
 "In case you have never logged in before an account was created for you\n"
-"automatically. You will have to reset your password before you can login!"
+"automatically. You can login with a social account which has the same email\n"
+"address or go to %(password_reset_url)s to reset your password.\n"
+"The password reset email message also contains your username!"
 msgstr ""
 
 #: tcms_tenants/templates/tcms_tenants/email/new.txt:1
@@ -92,96 +94,96 @@ msgid ""
 "If you have troubles please contact support!"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/invite_users.html:20
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:28
 msgid "Email"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/invite_users.html:26
-#: tcms_tenants/templates/tcms_tenants/new.html:65
+#: tcms_tenants/templates/tcms_tenants/invite_users.html:36
+#: tcms_tenants/templates/tcms_tenants/new.html:74
 msgid "Save"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:9
+#: tcms_tenants/templates/tcms_tenants/new.html:18
 msgid "New tenant"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:23
+#: tcms_tenants/templates/tcms_tenants/new.html:32
 msgid "Name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:26
+#: tcms_tenants/templates/tcms_tenants/new.html:35
 msgid "Company, team or project name"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:34
+#: tcms_tenants/templates/tcms_tenants/new.html:43
 msgid "Schema"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:47
+#: tcms_tenants/templates/tcms_tenants/new.html:56
 msgid "Validation pattern"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:52
+#: tcms_tenants/templates/tcms_tenants/new.html:61
 msgid "Publicly readable"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:57
+#: tcms_tenants/templates/tcms_tenants/new.html:66
 msgid "Yes"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:57
+#: tcms_tenants/templates/tcms_tenants/new.html:66
 msgid "No"
 msgstr ""
 
-#: tcms_tenants/templates/tcms_tenants/new.html:71
+#: tcms_tenants/templates/tcms_tenants/new.html:80
 msgid "Tenant logo"
 msgstr ""
 
-#: tcms_tenants/utils.py:62
+#: tcms_tenants/utils.py:66
 msgid "Schema name already in use"
 msgstr ""
 
-#: tcms_tenants/utils.py:150
+#: tcms_tenants/utils.py:170
 msgid "New Kiwi TCMS tenant created"
 msgstr ""
 
-#: tcms_tenants/utils.py:205
+#: tcms_tenants/utils.py:230
 #, python-brace-format
 msgid "User {user.username} added to tenant group {group.name}"
 msgstr ""
 
-#: tcms_tenants/utils.py:229
+#: tcms_tenants/utils.py:262
 msgid "Invitation to join Kiwi TCMS"
 msgstr ""
 
-#: tcms_tenants/views.py:80
+#: tcms_tenants/views.py:84
 msgid "Only super-user and tenant owner are allowed to edit tenant properties"
 msgstr ""
 
-#: tcms_tenants/views.py:98
+#: tcms_tenants/views.py:102
 msgid "Edit tenant"
 msgstr ""
 
-#: tcms_tenants/views.py:147
+#: tcms_tenants/views.py:153
 msgid "Only users who are authorized for this tenant can invite others"
 msgstr ""
 
-#: tenant_groups/admin.py:29
+#: tenant_groups/admin.py:30
 msgid "users"
 msgstr ""
 
-#: tenant_groups/models.py:31
+#: tenant_groups/models.py:34
 msgid "name"
 msgstr ""
 
-#: tenant_groups/models.py:34
+#: tenant_groups/models.py:37
 msgid "permissions"
 msgstr ""
 
-#: tenant_groups/models.py:42
+#: tenant_groups/models.py:47
 msgid "group"
 msgstr ""
 
-#: tenant_groups/models.py:43
+#: tenant_groups/models.py:48
 msgid "groups"
 msgstr ""

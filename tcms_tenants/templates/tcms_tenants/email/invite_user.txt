@@ -3,4 +3,6 @@
 {{ tenant_url }}
 
 In case you have never logged in before an account was created for you
-automatically. You will have to reset your password before you can login!{% endblocktrans %}
+automatically. You can login with a social account which has the same email
+address or go to {{ password_reset_url }} to reset your password.
+The password reset email message also contains your username!{% endblocktrans %}

@@ -13,6 +13,7 @@ from django.contrib.sites.models import Site
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
@@ -231,6 +232,14 @@ def add_to_default_groups(user, request=None):
 
 
 def invite_users(request, email_addresses):
+    the_tenant_url = tenant_url(request, request.tenant.schema_name).strip("/")
+    pwd_reset_path = reverse_lazy("tcms-password_reset").rstrip("/")
+    email_context = {
+        "invited_by": request.user.get_full_name() or request.user.username,
+        "tenant_url": the_tenant_url,
+        "password_reset_url": f"{the_tenant_url}/{pwd_reset_path}",
+    }
+
     for email in email_addresses:
         # note: users are on public_schema
         user = UserModel.objects.filter(email=email).first()
@@ -251,8 +260,5 @@ def invite_users(request, email_addresses):
             template_name="tcms_tenants/email/invite_user.txt",
             recipients=[user.email],
             subject=str(_("Invitation to join Kiwi TCMS")),
-            context={
-                "invited_by": request.user.get_full_name() or request.user.username,
-                "tenant_url": tenant_url(request, request.tenant.schema_name),
-            },
+            context=email_context,
         )
