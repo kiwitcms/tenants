@@ -148,6 +148,13 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v3.2.2 (11 Dec 2024)
+~~~~~~~~~~~~~~~~~~~~
+
+- Show the 'Tenant expires' message in the last 24 hrs
+  to minimize annoyance
+
+
 v3.2.1 (12 Oct 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
