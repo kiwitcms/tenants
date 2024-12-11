@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2024 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -58,7 +58,7 @@ class BlockUnpaidTenantMiddleware:
         ):
             return HttpResponseForbidden(_("Unpaid"))
 
-        if request.tenant.paid_until <= timezone.now() + timedelta(days=7):
+        if request.tenant.paid_until <= timezone.now() + timedelta(days=1):
             for msg in messages.get_messages(request):
                 if msg.level_tag == "warning":
                     break
@@ -67,7 +67,7 @@ class BlockUnpaidTenantMiddleware:
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    _("Tenant expires in less than 7 days"),
+                    _("Tenant expires soon"),
                     fail_silently=True,
                 )
 

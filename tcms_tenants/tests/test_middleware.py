@@ -92,12 +92,12 @@ class BlockUnpaidTenantMiddlewareTestCase(LoggedInTestCase):
         }
     )
     def test_paid_until_expires_within_week_warning_shown(self):
-        self.tenant.paid_until = timezone.now() + timedelta(days=3)
+        self.tenant.paid_until = timezone.now() + timedelta(hours=23)
         self.tenant.save()
 
         response = self.client.get("/")
 
-        self.assertContains(response, "Tenant expires in less than 7 days")
+        self.assertContains(response, "Tenant expires soon")
 
     @modify_settings(
         MIDDLEWARE={
