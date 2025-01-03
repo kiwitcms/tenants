@@ -48,7 +48,7 @@ jobs:
               export TCMS_BUILD=$(echo $GITHUB_SHA | cut -c1-7)
           fi
 
-          make check
+          make test
 
           docker compose down --volumes
 
