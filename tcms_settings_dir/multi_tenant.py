@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2020-2025 Alexander Todorov <atodorov@otb.bg>
 # Copyright (c) 2022 Ivajlo Karabojkov <karabojkov@kitbg.com>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
@@ -16,7 +16,11 @@ DATABASE_ROUTERS = [
 
 
 # attachments storage
-DEFAULT_FILE_STORAGE = "tcms_tenants.storage.TenantFileSystemStorage"
+STORAGES["default"][  # noqa: F821
+    "BACKEND"
+] = "tcms_tenants.storage.TenantFileSystemStorage"
+
+
 MULTITENANT_RELATIVE_MEDIA_ROOT = "tenant/%s"
 
 
