@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2025 Alexander Todorov <atodorov@otb.bg>
 # Copyright (c) 2021 Ivajlo Karabojkov <karabojkov@kitbg.com>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
@@ -25,6 +25,9 @@ test:
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
 
+	# explicitly upgrade Django to 5.1.x
+	pip install -U Django
+
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) EXECUTOR=standard PYTHONWARNINGS=d AUTO_CREATE_SCHEMA='' \
         KIWI_TENANTS_DOMAIN='test.com' \
 	    coverage run --include "*/*.py" \
@@ -47,6 +50,9 @@ pylint:
 	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
+
+	# explicitly upgrade Django to 5.1.x
+	pip install -U Django
 
 	PYTHONPATH=.:$(KIWI_INCLUDE_PATH) pylint \
 	    --load-plugins=pylint.extensions.no_self_use \
