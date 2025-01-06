@@ -148,6 +148,14 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.0.0 (06 Jan 2025)
+~~~~~~~~~~~~~~~~~~~~
+
+- Remove the ``DEFAULT_FILE_STORAGE`` setting and replace it with
+  ``STORAGES["default"]["BACKEND"]`` for Django 5.1 compatibility
+- Add test case for default storage class
+
+
 v3.2.2 (11 Dec 2024)
 ~~~~~~~~~~~~~~~~~~~~
 
