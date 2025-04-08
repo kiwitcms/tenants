@@ -148,6 +148,15 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.1.0 (09 Apr 2025)
+~~~~~~~~~~~~~~~~~~~~
+
+- Add the ``tcms_tenants.email_validators.blacklist_non_authorized`` function
+  which prevents sending emails to non-authorized addresses!
+  IMPORTANT: this must be explictly configured via the ``EMAIL_VALIDATORS``
+  setting in order to take effect!
+
+
 v4.0.0 (06 Jan 2025)
 ~~~~~~~~~~~~~~~~~~~~
 
