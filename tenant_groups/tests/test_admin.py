@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2025 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -7,6 +7,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth.models import Permission
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
@@ -91,13 +92,13 @@ class TestGroupAdmin(TenantGroupsTestCase):
         _capfirst = capfirst(_("users"))
         self.assertContains(response, f'<label for="id_users">{_capfirst}')
 
+    @override_settings(LANGUAGE_CODE="en")
     def test_user_with_perms_should_be_able_to_delete_a_non_default_group(self):
         response = self.client.get(
             reverse("admin:tenant_groups_group_delete", args=[self.group.id]),
             follow=True,
         )
-        _are_you_sure = _("Are you sure?")
-        self.assertContains(response, f"<h1>{_are_you_sure}</h1>")
+        self.assertContains(response, "<h2>Are you sure you want to delete")
 
     def test_user_with_perms_should_be_able_to_edit_a_non_default_group(self):
         response = self.client.get(
