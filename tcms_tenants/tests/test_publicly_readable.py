@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2021-2025 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -79,8 +79,7 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
 
     def test_unauthorized_user_can_view(self):
         response = self.client.get(
-            reverse("test_plan_url_short", args=[self.test_plan_by_owner.pk]),
-            follow=True,
+            reverse("test_plan_url", args=[self.test_plan_by_owner.pk]),
         )
 
         self.assertContains(response, self.test_plan_by_owner.name)
@@ -109,8 +108,7 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
         self.client.logout()
 
         response = self.client.get(
-            reverse("test_plan_url_short", args=[self.test_plan_by_owner.pk]),
-            follow=True,
+            reverse("test_plan_url", args=[self.test_plan_by_owner.pk]),
         )
 
         self.assertContains(response, self.test_plan_by_owner.name)
@@ -145,8 +143,7 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
         self.client.login(username=self.regular_user.username, password="password")
 
         response = self.client.get(
-            reverse("test_plan_url_short", args=[self.test_plan_by_owner.pk]),
-            follow=True,
+            reverse("test_plan_url", args=[self.test_plan_by_owner.pk]),
         )
 
         self.assertContains(response, self.test_plan_by_owner.name)
