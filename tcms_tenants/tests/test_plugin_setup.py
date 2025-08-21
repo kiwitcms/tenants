@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2020-2025 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -18,13 +18,13 @@ class PluginSetupTestCase(LoggedInTestCase):
 
     def test_menu_is_updated(self):
         for name, target in settings.MENU_ITEMS:
-            if name == _("PLUGINS"):
+            if name == _("MORE"):
                 for menu_item in menu.MENU_ITEMS:
                     self.assertIn(menu_item, target)
 
                 return
 
-        self.fail("PLUGINS not found in settings.MENU_ITEMS")
+        self.fail("MORE not found in settings.MENU_ITEMS")
 
     def test_menu_rendering(self):
         response = self.client.get("/", follow=True)
