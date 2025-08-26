@@ -148,6 +148,14 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.2.0 (26 Aug 2025)
+~~~~~~~~~~~~~~~~~~~~
+
+- Update django-tenants from 3.7.0 to kiwitcms-django-tenants==3.8.0
+- Compatible with Django 5.2
+- Update tests
+
+
 v4.1.0 (09 Apr 2025)
 ~~~~~~~~~~~~~~~~~~~~
 
