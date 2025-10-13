@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2020-2025 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -6,12 +6,15 @@
 # pylint: disable=too-many-ancestors
 from http import HTTPStatus
 
+from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from django_tenants import utils
 
+from tcms.utils.user import deactivate
+from tcms_tenants.models import Tenant
 from tcms_tenants.tests import LoggedInTestCase, TenantGroupsTestCase
 from tcms_tenants.tests import UserFactory
 from tenant_groups.models import Group as TenantGroup
@@ -257,3 +260,120 @@ class AuthorizedUsersAdminAndTenantGroups(TenantGroupsTestCase):
             .user_set.filter(pk=user_to_be_deleted.pk)
             .exists()
         )
+
+
+class DeactivateUserTestCase(TenantGroupsTestCase):
+    @classmethod
+    def setUpClass(cls):
+        """
+        cls.tester:
+            - authorized for: cls.tenant
+            - tenant groups:  Tester, ProductManager
+            - permissions: []
+
+        cls.user2:
+            - authorized for: cls.tenant, cls.t2
+            - tenant groups:  cls.tenant[], cls.t2[Tester, Administrator]
+            - permissions: cls.tenant(set), cls.t2([])
+        """
+        super().setUpClass()
+
+        cls.user2 = UserFactory()
+
+        with utils.tenant_context(cls.tenant):
+            product_manager = TenantGroup.objects.create(name="ProductManager")
+            product_manager.user_set.add(cls.tester)
+
+            cls.tenant.authorized_users.add(cls.user2)
+            perms = Permission.objects.filter(
+                content_type__app_label__contains="management"
+            )
+            cls.user2.user_permissions.add(*perms)
+
+        cls.client.post(
+            reverse("tcms_tenants:create-tenant"),
+            {
+                "schema_name": "t2",
+                "owner": cls.tester.pk,
+                "publicly_readable": False,
+                "extra_emails": "",
+                "paid_until": "",
+            },
+        )
+        cls.t2 = Tenant.objects.get(schema_name="t2")
+
+        with utils.tenant_context(cls.t2):
+            cls.t2.authorized_users.add(cls.user2)
+            TenantGroup.objects.get(name="Administrator").user_set.add(cls.user2)
+            TenantGroup.objects.get(name="Tester").user_set.add(cls.user2)
+
+    def test_when_tester_is_deactivated_all_m2m_are_removed(self):
+        deactivate(self.tester)
+
+        with utils.tenant_context(self.tenant):
+            # SUT is not authorized
+            self.assertFalse(
+                self.tenant.authorized_users.filter(pk=self.tester.pk).exists()
+            )
+
+            # other users are still authorized
+            self.assertTrue(
+                self.tenant.authorized_users.filter(pk=self.tenant.owner.pk).exists()
+            )
+
+            self.assertEqual(self.tester.tenant_groups.count(), 0)
+            self.assertEqual(self.tester.user_permissions.count(), 0)
+
+            # haven't removed groups by accident
+            self.assertTrue(TenantGroup.objects.filter(name="Administrator").exists())
+            self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
+            self.assertTrue(TenantGroup.objects.filter(name="ProductManager").exists())
+
+        with utils.tenant_context(self.t2):
+            # SUT is not authorized
+            self.assertFalse(
+                self.tenant.authorized_users.filter(pk=self.tester.pk).exists()
+            )
+
+            # other users are still authorized
+            self.assertTrue(
+                self.tenant.authorized_users.filter(pk=self.user2.pk).exists()
+            )
+
+            self.assertEqual(self.tester.tenant_groups.count(), 0)
+            self.assertEqual(self.tester.user_permissions.count(), 0)
+
+            # haven't removed groups by accident
+            self.assertTrue(TenantGroup.objects.filter(name="Administrator").exists())
+            self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
+
+    def test_when_user2_is_deactivated_all_m2m_are_removed(self):
+        deactivate(self.user2)
+
+        for tenant in [self.tenant, self.t2]:
+            with utils.tenant_context(tenant):
+                # SUT is not authorized
+                self.assertFalse(
+                    tenant.authorized_users.filter(pk=self.user2.pk).exists()
+                )
+
+                # other users are still authorized
+                self.assertTrue(
+                    tenant.authorized_users.filter(pk=tenant.owner.pk).exists()
+                )
+                self.assertTrue(
+                    tenant.authorized_users.filter(pk=self.tester.pk).exists()
+                )
+
+                self.assertEqual(self.user2.tenant_groups.count(), 0)
+                self.assertEqual(self.user2.user_permissions.count(), 0)
+
+                # haven't removed groups by accident
+                self.assertTrue(
+                    TenantGroup.objects.filter(name="Administrator").exists()
+                )
+                self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
+
+        # haven't removed group by accident
+        with utils.tenant_context(self.tenant):
+            self.assertTrue(TenantGroup.objects.filter(name="ProductManager").exists())
