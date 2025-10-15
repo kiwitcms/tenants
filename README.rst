@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.3.0 (15 Oct 2025)
+~~~~~~~~~~~~~~~~~~~~
+
+- Remove user from Authorized Tenants & Tenant Groups when deactivated
+
+
 v4.2.0 (26 Aug 2025)
 ~~~~~~~~~~~~~~~~~~~~
 
