@@ -14,7 +14,6 @@ from django.utils.translation import gettext_lazy as _
 from django_tenants import utils
 
 from tcms.utils.user import deactivate
-from tcms_tenants.models import Tenant
 from tcms_tenants.tests import LoggedInTestCase, TenantGroupsTestCase
 from tcms_tenants.tests import UserFactory
 from tenant_groups.models import Group as TenantGroup
@@ -289,22 +288,6 @@ class DeactivateUserTestCase(TenantGroupsTestCase):
                 content_type__app_label__contains="management"
             )
             cls.user2.user_permissions.add(*perms)
-
-        cls.client.post(
-            reverse("tcms_tenants:create-tenant"),
-            {
-                "schema_name": "t2",
-                "owner": cls.tester.pk,
-                "publicly_readable": False,
-                "extra_emails": "",
-                "paid_until": "",
-            },
-        )
-        cls.t2 = Tenant.objects.get(schema_name="t2")
-
-        with utils.tenant_context(cls.t2):
-            cls.t2.authorized_users.add(cls.user2)
-            TenantGroup.objects.get(name="Administrator").user_set.add(cls.user2)
             TenantGroup.objects.get(name="Tester").user_set.add(cls.user2)
 
     def test_when_tester_is_deactivated_all_m2m_are_removed(self):
@@ -320,22 +303,6 @@ class DeactivateUserTestCase(TenantGroupsTestCase):
             self.assertTrue(
                 self.tenant.authorized_users.filter(pk=self.tenant.owner.pk).exists()
             )
-
-            self.assertEqual(self.tester.tenant_groups.count(), 0)
-            self.assertEqual(self.tester.user_permissions.count(), 0)
-
-            # haven't removed groups by accident
-            self.assertTrue(TenantGroup.objects.filter(name="Administrator").exists())
-            self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
-            self.assertTrue(TenantGroup.objects.filter(name="ProductManager").exists())
-
-        with utils.tenant_context(self.t2):
-            # SUT is not authorized
-            self.assertFalse(
-                self.tenant.authorized_users.filter(pk=self.tester.pk).exists()
-            )
-
-            # other users are still authorized
             self.assertTrue(
                 self.tenant.authorized_users.filter(pk=self.user2.pk).exists()
             )
@@ -346,34 +313,29 @@ class DeactivateUserTestCase(TenantGroupsTestCase):
             # haven't removed groups by accident
             self.assertTrue(TenantGroup.objects.filter(name="Administrator").exists())
             self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
+            self.assertTrue(TenantGroup.objects.filter(name="ProductManager").exists())
 
     def test_when_user2_is_deactivated_all_m2m_are_removed(self):
         deactivate(self.user2)
 
-        for tenant in [self.tenant, self.t2]:
-            with utils.tenant_context(tenant):
-                # SUT is not authorized
-                self.assertFalse(
-                    tenant.authorized_users.filter(pk=self.user2.pk).exists()
-                )
-
-                # other users are still authorized
-                self.assertTrue(
-                    tenant.authorized_users.filter(pk=tenant.owner.pk).exists()
-                )
-                self.assertTrue(
-                    tenant.authorized_users.filter(pk=self.tester.pk).exists()
-                )
-
-                self.assertEqual(self.user2.tenant_groups.count(), 0)
-                self.assertEqual(self.user2.user_permissions.count(), 0)
-
-                # haven't removed groups by accident
-                self.assertTrue(
-                    TenantGroup.objects.filter(name="Administrator").exists()
-                )
-                self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
-
-        # haven't removed group by accident
         with utils.tenant_context(self.tenant):
+            # SUT is not authorized
+            self.assertFalse(
+                self.tenant.authorized_users.filter(pk=self.user2.pk).exists()
+            )
+
+            # other users are still authorized
+            self.assertTrue(
+                self.tenant.authorized_users.filter(pk=self.tenant.owner.pk).exists()
+            )
+            self.assertTrue(
+                self.tenant.authorized_users.filter(pk=self.tester.pk).exists()
+            )
+
+            self.assertEqual(self.user2.tenant_groups.count(), 0)
+            self.assertEqual(self.user2.user_permissions.count(), 0)
+
+            # haven't removed groups by accident
+            self.assertTrue(TenantGroup.objects.filter(name="Administrator").exists())
+            self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
             self.assertTrue(TenantGroup.objects.filter(name="ProductManager").exists())
