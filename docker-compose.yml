@@ -8,7 +8,7 @@ services:
         ports:
             - 5432:5432
         volumes:
-            - postgresql_database_data:/var/lib/postgresql/data
+            - postgresql_database_data:/var/lib/postgresql
         environment:
             POSTGRES_DB: test_project
             POSTGRES_USER: kiwi
