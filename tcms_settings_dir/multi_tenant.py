@@ -89,3 +89,7 @@ for processor in (
         TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa: F821
             processor
         )  # noqa: F821
+
+
+if "tcms_tenants.api" not in MODERNRPC_METHODS_MODULES:  # noqa: F821
+    MODERNRPC_METHODS_MODULES.append("tcms_tenants.api")  # noqa: F821

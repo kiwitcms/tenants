@@ -231,7 +231,7 @@ def add_to_default_groups(user, request=None):
             )
 
 
-def invite_users(request, email_addresses, notify_via_email = True):
+def invite_users(request, email_addresses, notify_via_email=True):
     the_tenant_url = tenant_url(request, request.tenant.schema_name).strip("/")
     pwd_reset_path = reverse_lazy("tcms-password_reset").rstrip("/")
     email_context = {
