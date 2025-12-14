@@ -231,7 +231,7 @@ def add_to_default_groups(user, request=None):
             )
 
 
-def invite_users(request, email_addresses):
+def invite_users(request, email_addresses, notify_via_email = True):
     the_tenant_url = tenant_url(request, request.tenant.schema_name).strip("/")
     pwd_reset_path = reverse_lazy("tcms-password_reset").rstrip("/")
     email_context = {
@@ -258,9 +258,10 @@ def invite_users(request, email_addresses):
         with tenant_context(request.tenant):
             add_to_default_groups(user)
 
-        mailto(
-            template_name="tcms_tenants/email/invite_user.txt",
-            recipients=[user.email],
-            subject=str(_("Invitation to join Kiwi TCMS")),
-            context=email_context,
-        )
+        if notify_via_email:
+            mailto(
+                template_name="tcms_tenants/email/invite_user.txt",
+                recipients=[user.email],
+                subject=str(_("Invitation to join Kiwi TCMS")),
+                context=email_context,
+            )
