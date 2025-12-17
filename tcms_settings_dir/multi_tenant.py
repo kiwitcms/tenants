@@ -93,3 +93,6 @@ for processor in (
 
 if "tcms_tenants.api" not in MODERNRPC_METHODS_MODULES:  # noqa: F821
     MODERNRPC_METHODS_MODULES.append("tcms_tenants.api")  # noqa: F821
+
+if "tenant_groups.api" not in MODERNRPC_METHODS_MODULES:  # noqa: F821
+    MODERNRPC_METHODS_MODULES.append("tenant_groups.api")  # noqa: F821
