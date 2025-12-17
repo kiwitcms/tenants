@@ -1,0 +1,37 @@
+# Copyright (c) 2025 Alexander Todorov <atodorov@otb.bg>
+#
+# Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
+# https://www.gnu.org/licenses/agpl-3.0.html
+
+# pylint: disable=missing-permission-required, no-self-use
+
+from modernrpc.core import rpc_method
+
+from tcms.rpc.decorators import permissions_required
+from tenant_groups.models import Group
+
+
+@permissions_required("tenant_groups.view_group")
+@rpc_method(name="TenantGroup.filter")
+def filter(query):  # pylint: disable=redefined-builtin
+    """
+    .. function:: RPC TenantGroup.filter(query)
+
+        Search and return the resulting list of tenant groups.
+
+        :param query: Field lookups for :class:`tenant_groups.models.Group`
+        :type query: dict
+        :return: Serialized list of :class:`tenant_groups.models.Group` objects
+        :rtype: list(dict)
+        :raises PermissionDenied: if missing the *tenant_groups.view_group* permission
+
+    .. versionadded:: 15.3
+    """
+    return list(
+        Group.objects.filter(**query)
+        .values(
+            "id",
+            "name",
+        )
+        .distinct()
+    )
