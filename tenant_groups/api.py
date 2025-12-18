@@ -5,6 +5,7 @@
 
 # pylint: disable=missing-permission-required, no-self-use
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from modernrpc.core import rpc_method
 
@@ -69,3 +70,26 @@ def add_permission(group_id, perm):
     group.permissions.add(
         Permission.objects.get(content_type__app_label=app_label, codename=codename)
     )
+
+
+@permissions_required("tenant_groups.change_group")
+@rpc_method(name="TenantGroup.add_user")
+def add_user(group_id, user_id):
+    """
+    .. function:: RPC TenantGroup.add_user(group_id, user_id)
+
+        Add the specified user to a tenant group.
+
+        :param group_id: PK for a :class:`tenant_groups.models.Group` object
+        :type group_id: int
+        :param user_id: PK for a :class:`django.contrib.auth.models.User` object
+        :type user_id: int
+        :raises PermissionDenied: if missing the *tenant_groups.change_group* permission
+        :raises DoesNotExist: if group or user doesn't exist
+
+    .. versionadded:: 15.3
+    """
+    group = Group.objects.get(pk=group_id)
+    user = get_user_model().objects.get(pk=user_id)
+
+    group.user_set.add(user)

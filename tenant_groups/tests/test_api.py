@@ -151,3 +151,92 @@ class TenantGroupAddPermission(TenantGroupsTestCase):
             '"management_view_product" should be: app_label.perm_codename',
             data["message"],
         )
+
+
+class TenantGroupAddUser(TenantGroupsTestCase):
+    def test_with_permission(self):
+        with tenant_context(self.tenant):
+            user_should_have_perm(self.tester, "tenant_groups.change_group")
+            group = TenantGroup.objects.create(name="EmptyGroup")
+            self.assertEqual(0, group.user_set.count())
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.add_user",
+                "params": [group.pk, self.tester.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+
+        with tenant_context(self.tenant):
+            group.refresh_from_db()
+            self.assertEqual(1, group.user_set.count())
+
+    def test_without_permission(self):
+        with tenant_context(self.tenant):
+            remove_perm_from_user(self.tester, "tenant_groups.change_group")
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.add_user",
+                "params": [1, self.tester.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+
+        data = json.loads(response.content)["error"]
+
+        self.assertEqual(
+            'Authentication failed when calling "TenantGroup.add_user"',
+            data["message"],
+        )
+
+    def test_with_missing_group_id(self):
+        with tenant_context(self.tenant):
+            user_should_have_perm(self.tester, "tenant_groups.change_group")
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.add_user",
+                "params": [99999, self.tester.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+
+        data = json.loads(response.content)["error"]
+
+        self.assertIn("Group matching query does not exist", data["message"])
+
+    def test_with_missing_user_id(self):
+        with tenant_context(self.tenant):
+            user_should_have_perm(self.tester, "tenant_groups.change_group")
+            group = TenantGroup.objects.create(name="EmptyGroup")
+            self.assertEqual(0, group.user_set.count())
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.add_user",
+                "params": [group.pk, 99999],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+
+        data = json.loads(response.content)["error"]
+
+        self.assertIn("User matching query does not exist", data["message"])
