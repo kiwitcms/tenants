@@ -5,6 +5,7 @@
 
 # pylint: disable=missing-permission-required, no-self-use
 
+from django.contrib.auth.models import Permission
 from modernrpc.core import rpc_method
 
 from tcms.rpc.decorators import permissions_required
@@ -34,4 +35,37 @@ def filter(query):  # pylint: disable=redefined-builtin
             "name",
         )
         .distinct()
+    )
+
+
+@permissions_required("tenant_groups.change_group")
+@rpc_method(name="TenantGroup.add_permission")
+def add_permission(group_id, perm):
+    """
+    .. function:: RPC TenantGroup.add_permission(group_id, permission_label)
+
+        Add the specified permission label to a tenant group.
+
+        :param group_id: PK for a :class:`tenant_groups.models.Group` object
+        :type group_id: int
+        :param perm: A permission label string
+        :type perm: str
+        :raises PermissionDenied: if missing the *tenant_groups.change_group* permission
+        :raises DoesNotExist: if group doesn't exist
+        :raises ValueError: if permission label is invalid
+
+    .. versionadded:: 15.3
+    """
+    group = Group.objects.get(pk=group_id)
+
+    try:
+        app_label, codename = perm.split(".")
+    except ValueError:
+        raise ValueError(f'"{perm}" should be: app_label.perm_codename') from None
+
+    if not app_label or not codename:
+        raise ValueError("Invalid app_label or codename")
+
+    group.permissions.add(
+        Permission.objects.get(content_type__app_label=app_label, codename=codename)
     )
