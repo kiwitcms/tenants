@@ -240,3 +240,82 @@ class TenantGroupAddUser(TenantGroupsTestCase):
         data = json.loads(response.content)["error"]
 
         self.assertIn("User matching query does not exist", data["message"])
+
+
+class TenantGroupCreate(TenantGroupsTestCase):
+    def test_with_permission(self):
+        with tenant_context(self.tenant):
+            user_should_have_perm(self.tester, "tenant_groups.add_group")
+            self.assertFalse(TenantGroup.objects.filter(name="AddedViaApi").exists())
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.create",
+                "params": [{"name": "AddedViaApi"}],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)["result"]
+
+        self.assertIsInstance(data, dict)
+        self.assertIn("id", data)
+        self.assertIn("name", data)
+        self.assertEqual(data["name"], "AddedViaApi")
+
+        with tenant_context(self.tenant):
+            self.assertTrue(TenantGroup.objects.filter(name="AddedViaApi").exists())
+
+    def test_without_permission(self):
+        with tenant_context(self.tenant):
+            remove_perm_from_user(self.tester, "tenant_groups.add_group")
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.create",
+                "params": [{"name": "AddedWithoutPermission"}],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+
+        data = json.loads(response.content)["error"]
+
+        self.assertEqual(
+            'Authentication failed when calling "TenantGroup.create"',
+            data["message"],
+        )
+
+        with tenant_context(self.tenant):
+            self.assertFalse(
+                TenantGroup.objects.filter(name="AddedWithoutPermission").exists()
+            )
+
+    def test_with_invalid_input(self):
+        with tenant_context(self.tenant):
+            user_should_have_perm(self.tester, "tenant_groups.add_group")
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.create",
+                "params": [{}],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+
+        data = json.loads(response.content)["error"]
+
+        self.assertEqual(
+            "Internal error: [('name', ['This field is required.'])]",
+            data["message"],
+        )

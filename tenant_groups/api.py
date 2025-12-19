@@ -7,9 +7,11 @@
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.forms.models import model_to_dict
 from modernrpc.core import rpc_method
 
 from tcms.rpc.decorators import permissions_required
+from tenant_groups.forms import GroupForm
 from tenant_groups.models import Group
 
 
@@ -93,3 +95,29 @@ def add_user(group_id, user_id):
     user = get_user_model().objects.get(pk=user_id)
 
     group.user_set.add(user)
+
+
+@rpc_method(name="TenantGroup.create")
+@permissions_required("tenant_groups.add_group")
+def create(values):
+    """
+    .. function:: RPC TenantGroup.create(values)
+
+        Create a new tenant Group object and store it in the database.
+
+        :param values: Field values for :class:`tenant_groups.models.Group`
+        :type values: dict
+        :return: Serialized :class:`tenant_groups.models.Group` object
+        :rtype: dict
+        :raises ValueError: if input values don't validate
+        :raises PermissionDenied: if missing *tenant_groups.add_group* permission
+
+    .. versionadded:: 15.3
+    """
+    form = GroupForm(values)
+
+    if form.is_valid():
+        group = form.save()
+        return model_to_dict(group)
+
+    raise ValueError(list(form.errors.items()))
