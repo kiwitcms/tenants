@@ -148,6 +148,17 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.4.0 (22 Dec 2025)
+~~~~~~~~~~~~~~~~~~~~
+
+- Always convert email addresses to lower case when inviting users
+- Add ``Tenant.invite()`` API method
+- Add ``TenantGroup.filter()`` API method
+- Add ``TenantGroup.add_permission()`` API method
+- Add ``TenantGroup.add_user()`` API method
+- Add ``TenantGroup.create()`` API method
+
+
 v4.3.0 (15 Oct 2025)
 ~~~~~~~~~~~~~~~~~~~~
 
