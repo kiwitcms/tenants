@@ -16,7 +16,6 @@ from tcms.core.utils.mailto import custom_email_validators
 from tcms_tenants import models
 from tcms_tenants import utils
 
-
 VALIDATION_RE = re.compile(r"^[a-z0-9]{1,63}$")
 
 

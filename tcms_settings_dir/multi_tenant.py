@@ -7,7 +7,6 @@
 # pylint: disable=undefined-variable
 import os
 
-
 # start multi-tenant settings override
 DATABASES["default"]["ENGINE"] = "django_tenants.postgresql_backend"  # noqa: F821
 DATABASE_ROUTERS = [

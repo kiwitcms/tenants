@@ -17,7 +17,6 @@ from django_tenants.utils import tenant_context
 from tcms_tenants.tests import TenantGroupsTestCase
 from tenant_groups.models import Group as TenantGroup
 
-
 UserModel = get_user_model()
 
 
