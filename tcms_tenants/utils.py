@@ -29,7 +29,6 @@ from tcms.core.utils.mailto import mailto
 from tcms_tenants.models import Domain, Tenant
 from tenant_groups.models import Group as TenantGroup
 
-
 UserModel = get_user_model()
 
 

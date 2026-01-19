@@ -27,7 +27,6 @@ from tcms_tenants.oss_utils import create_oss_tenant
 
 from tenant_groups.models import Group as TenantGroup
 
-
 UserModel = get_user_model()
 
 
