@@ -148,6 +148,13 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.4.1 (21 Jan 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Case-insensitive check for existing accounts before creating new ones
+- Update expected values in test b/c of upstream change
+
+
 v4.4.0 (22 Dec 2025)
 ~~~~~~~~~~~~~~~~~~~~
 
