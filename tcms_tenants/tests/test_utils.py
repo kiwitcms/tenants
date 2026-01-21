@@ -1,10 +1,11 @@
-# Copyright (c) 2021-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2021-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 # pylint: disable=too-many-ancestors
 
+from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django_tenants import utils as django_tenant_utils
 
@@ -53,3 +54,29 @@ class CreateUserAccountTestCase(LoggedInTestCase):
                 "The User could not be created because the data didn't validate",
             ):
                 utils.create_user_account("invalid@yahoo.com")
+
+    def test_should_increment_username_when_email_address_exists(
+        self,
+    ):
+        self.assertTrue(
+            get_user_model().objects.filter(username="AnonymousUser").exists()
+        )
+
+        for email_address in (
+            "AnonymousUser@example.bg",
+            "anonymoususer@testing.example.bg",
+        ):
+            self.assertFalse(
+                get_user_model().objects.filter(email=email_address).exists()
+            )
+            utils.create_user_account(email_address)
+            self.assertTrue(
+                get_user_model().objects.filter(email=email_address).exists()
+            )
+
+        self.assertTrue(
+            get_user_model().objects.filter(username="AnonymousUser.1").exists()
+        )
+        self.assertTrue(
+            get_user_model().objects.filter(username="anonymoususer.2").exists()
+        )

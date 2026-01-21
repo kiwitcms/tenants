@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -192,7 +192,7 @@ def create_user_account(email_address):
     password = uuid.uuid4().hex
 
     i = 1
-    while UserModel.objects.filter(username=username).exists():
+    while UserModel.objects.filter(username__iexact=username).exists():
         username = f"{desired_username}.{i}"
         i += 1
 
