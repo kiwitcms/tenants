@@ -34,9 +34,13 @@ jobs:
           echo "password = ${{ secrets.TCMS_PASSWORD }}" >> ~/.tcms.conf
 
       - name: Execute tests
+        env:
+          PKG_TOKEN: ${{ secrets.GEMFURY_PULL_TOKEN }}
         run: |
           pip install -U pip wheel setuptools
-          pip install -r devel.txt
+          pip install -r devel.txt \
+            --index-url https://$PKG_TOKEN@pkg.kiwitcms.eu/pypi/ \
+            --extra-index-url https://pypi.org/simple/
           # workaround for https://github.com/tomturner/django-tenants/issues/336
           pip install psycopg>=3.1.17
 
