@@ -13,6 +13,26 @@ permissions: read-all
 
 
 jobs:
+  build-package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build me
+        run: |
+          pip install -U pip "setuptools<82" wheel twine
+
+          make package
+
   postgres:
     runs-on: ubuntu-latest
     strategy:
