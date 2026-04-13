@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 # Copyright (c) 2021 Ivajlo Karabojkov <karabojkov@kitbg.com>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
@@ -64,3 +64,16 @@ flake8:
 
 .PHONY: check
 check: flake8 pylint test_for_missing_migrations test
+
+.PHONY: package
+package:
+	rm -rf build/ dist/ kiwitcms_*.egg-info/
+	python setup.py sdist
+	python setup.py bdist_wheel
+	twine check dist/*
+
+.PHONY: upload
+upload: package
+	test -n "$(TWINE_USERNAME)" || exit 1
+	test -n "$(TWINE_PASSWORD)" || exit 2
+	twine upload dist/* --repository-url https://push.fury.io/kiwitcms
