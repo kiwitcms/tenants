@@ -1,6 +1,13 @@
 version: 2
+registries:
+  pkg-kiwitcms-eu:
+    type: python-index
+    replaces-base: false
+    url: https://${{ secrets.GEMFURY_PULL_TOKEN }}@pkg.kiwitcms.eu/pypi/
+
 updates:
   - package-ecosystem: pip
+    registries: "*"
     directory: "/"
     schedule:
       interval: daily
