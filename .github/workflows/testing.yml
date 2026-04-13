@@ -70,7 +70,7 @@ jobs:
           coverage report -m
 
       - name: Send coverage to CodeCov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v6
         with:
           fail_ci_if_error: false
           verbose: true
