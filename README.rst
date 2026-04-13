@@ -148,6 +148,16 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.4.2 (13 Apr 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Adjust minumum version requirements to reduce vulnerabilities
+- Update kiwitcms-django-tenants from 3.8.0 to 3.8.1
+- Update pylint-django from 2.6.1 to 2.7.0
+- Update multiple GitHub actions to newer versions
+- Build and publish PyPI package on git tags
+
+
 v4.4.1 (21 Jan 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
