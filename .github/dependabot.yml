@@ -4,8 +4,7 @@ registries:
     type: python-index
     replaces-base: false
     url: https://pkg.kiwitcms.eu/pypi/
-    username: kiwitcms
-    password: ${{ secrets.GEMFURY_PULL_TOKEN }}
+    token: ${{ secrets.GEMFURY_PULL_TOKEN }}
 
 updates:
   - package-ecosystem: pip
