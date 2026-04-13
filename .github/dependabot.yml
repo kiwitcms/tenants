@@ -3,7 +3,8 @@ registries:
   pkg-kiwitcms-eu:
     type: python-index
     replaces-base: false
-    url: https://${{ secrets.GEMFURY_PULL_TOKEN }}@pkg.kiwitcms.eu/pypi/
+    url: https://pkg.kiwitcms.eu/pypi/
+    token: ${{ secrets.GEMFURY_PULL_TOKEN }}
 
 updates:
   - package-ecosystem: pip
