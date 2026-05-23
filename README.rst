@@ -148,6 +148,13 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.4.3 (23 May 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Make this code compatible with setuptools>=82
+- Update black from 26.3.1 to 26.5.0
+
+
 v4.4.2 (13 Apr 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
