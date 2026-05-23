@@ -29,7 +29,7 @@ jobs:
 
       - name: Build me
         run: |
-          pip install -U pip "setuptools<82" wheel twine
+          pip install -U pip setuptools wheel twine
 
           make package
 
@@ -63,7 +63,7 @@ jobs:
         env:
           PKG_TOKEN: ${{ secrets.GEMFURY_PULL_TOKEN }}
         run: |
-          pip install -U pip wheel "setuptools<82"
+          pip install -U pip wheel setuptools
           pip install -r devel.txt \
             --index-url https://$PKG_TOKEN@pkg.kiwitcms.eu/pypi/ \
             --extra-index-url https://pypi.org/simple/

@@ -27,6 +27,6 @@ jobs:
           TWINE_USERNAME: ${{ secrets.GEMFURY_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.GEMFURY_PUSH_TOKEN }}
         run: |
-          pip install -U pip "setuptools<82" twine wheel
+          pip install -U pip setuptools twine wheel
 
           make upload
