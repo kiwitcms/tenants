@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -7,17 +7,35 @@
 # pylint: disable=invalid-name, protected-access, wrong-import-position
 import os
 import sys
-import pkg_resources
+from importlib.metadata import Distribution, DistributionFinder
+
 
 # pretend this is a plugin during testing & development
 # IT NEEDS TO BE BEFORE the wildcard import below !!!
 # .egg-info/ directory will mess up with this
-dist = pkg_resources.Distribution(__file__)
-entry_point = pkg_resources.EntryPoint.parse(
-    "kiwitcms_tenants_devel = tcms_tenants", dist=dist
-)
-dist._ep_map = {"kiwitcms.plugins": {"kiwitcms_tenants_devel": entry_point}}
-pkg_resources.working_set.add(dist)
+class FakePluginFinder(DistributionFinder):
+    class FakeDistribution(Distribution):  # pylint: disable=nested-class-found
+        def read_text(self, filename):
+            if filename == "METADATA":
+                return """Name: kiwitcms_tenants_devel
+Version: 0.1
+"""
+            if filename == "entry_points.txt":
+                return """
+[kiwitcms.plugins]
+kiwitcms_tenants_devel=tcms_tenants
+"""
+
+            return ""
+
+        def locate_file(self, path):
+            raise RuntimeError("This distribution has no file system")
+
+    def find_distributions(self, context=DistributionFinder.Context()):
+        yield self.FakeDistribution()
+
+
+sys.meta_path.append(FakePluginFinder())
 
 from tcms.settings.product import *  # noqa: E402, F403
 
