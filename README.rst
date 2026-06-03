@@ -148,6 +148,13 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.4.4 (03 Jun 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Build and test with Python 3.12
+- Update pre-commit CI config
+
+
 v4.4.3 (23 May 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
