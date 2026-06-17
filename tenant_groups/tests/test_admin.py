@@ -90,7 +90,7 @@ class TestGroupAdmin(TenantGroupsTestCase):
             'class="selectfilter" data-field-name="users" data-is-stacked="0">',
         )
         _capfirst = capfirst(_("users"))
-        self.assertContains(response, f'<label for="id_users">{_capfirst}')
+        self.assertContains(response, f'<legend for="id_users">{_capfirst}')
 
     @override_settings(LANGUAGE_CODE="en")
     def test_user_with_perms_should_be_able_to_delete_a_non_default_group(self):
