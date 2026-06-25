@@ -1,9 +1,10 @@
-# Copyright (c) 2019-2020 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 import os
+import shutil
 
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -39,3 +40,6 @@ class TenantFileSystemStorage(FileSystemStorage):
             super().location, utils.parse_tenant_config_path(self.relative_media_root)
         )
         return os.path.abspath(_location)
+
+    def delete_recursively(self, path):  # pylint: disable=no-self-use
+        shutil.rmtree(path)

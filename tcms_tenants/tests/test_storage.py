@@ -1,9 +1,11 @@
-# Copyright (c) 2019-2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 # pylint: disable=too-many-ancestors
+import os
+
 from django.db import connection
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -84,3 +86,36 @@ class DefaultStorageTestCase(TenantFileSystemStorageTestCase):
     """
 
     storage = default_storage
+
+
+class TenantDeleteTestCase(LoggedInTestCase):
+    @override_settings(
+        MEDIA_ROOT="apps_dir/media",
+        MEDIA_URL="/media/",
+        MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    )
+    def test_tenant_delete_removes_media_directory(self):
+        connection.set_schema_to_public()
+        tenant = utils.get_tenant_model()(
+            schema_name="tenant_to_delete", owner=UserFactory(), name="To Delete"
+        )
+        tenant.save()
+
+        # Save a file under this tenant schema's storage
+        with utils.tenant_context(tenant):
+            file_name = default_storage.save(
+                "hello_delete.txt", ContentFile("Hello Delete")
+            )
+            # convert to absolute path
+            file_name = default_storage.path(file_name)
+            self.assertTrue(default_storage.exists(file_name))
+
+            tenant_storage_dir = os.path.dirname(file_name)
+            self.assertTrue(default_storage.exists(tenant_storage_dir))
+
+        # Delete the tenant
+        tenant.delete()
+
+        # The tenant's storage directory (which includes the file) should be removed
+        self.assertFalse(os.path.exists(file_name))
+        self.assertFalse(os.path.exists(tenant_storage_dir))
