@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -7,8 +7,10 @@ import os
 
 from django.db import models
 from django.conf import settings
+from django.core.files.storage import default_storage
 
 from django_tenants.models import TenantMixin, DomainMixin
+from django_tenants.utils import schema_context
 
 
 class Tenant(TenantMixin):
@@ -30,6 +32,13 @@ class Tenant(TenantMixin):
 
     def __str__(self):
         return f"[{self.schema_name}] {self.name}"
+
+    def delete(self, *args, **kwargs):
+        with schema_context(self.schema_name):
+            # NOTE: .location is tenant/schema aware
+            default_storage.delete_recursively(default_storage.location)
+
+        super().delete(*args, **kwargs)
 
 
 def _authorized_user_str(self):
