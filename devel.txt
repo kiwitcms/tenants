@@ -8,3 +8,4 @@ textdistance
 kiwitcms-django-plugin
 Werkzeug
 django-extensions
+parameterized
