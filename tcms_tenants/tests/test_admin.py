@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2020-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -9,6 +9,7 @@ from http import HTTPStatus
 from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from django_tenants import utils
@@ -100,13 +101,15 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
             cls.tenant.name = "For testing purposes"
             cls.tenant.save()
 
+            ts = int(timezone.now().timestamp())
             cls.tenant2 = utils.get_tenant_model()(
-                schema_name="my_other_tenant", owner=cls.tester
+                schema_name=f"tenant_{ts}",
+                owner=cls.tester,
             )
             cls.tenant2.save()
 
             cls.domain2 = utils.get_tenant_domain_model()(
-                tenant=cls.tenant2, domain="other.example.com"
+                tenant=cls.tenant2, domain=f"second-{ts}.example.com"
             )
             cls.domain2.save()
 
@@ -339,3 +342,54 @@ class DeactivateUserTestCase(TenantGroupsTestCase):
             self.assertTrue(TenantGroup.objects.filter(name="Administrator").exists())
             self.assertTrue(TenantGroup.objects.filter(name="Tester").exists())
             self.assertTrue(TenantGroup.objects.filter(name="ProductManager").exists())
+
+
+class AddComponentAdmin(TenantGroupsTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Create users user_01..user_05 in public schema
+        cls.user_01 = UserFactory()
+        cls.user_02 = UserFactory()
+        # user_03 is not authorized for either tenant
+        cls.user_03 = UserFactory()
+        cls.user_04 = UserFactory()
+        cls.user_05 = UserFactory()
+
+        # Setup self.tester and users 01, 05 for self.tenant
+        with utils.tenant_context(cls.tenant):
+            TenantGroup.objects.get(name="Tester").user_set.add(cls.tester)
+            cls.tenant.authorized_users.add(cls.user_01)
+            cls.tenant.authorized_users.add(cls.user_05)
+
+        # Create second tenant
+        with utils.schema_context("public"):
+            ts = int(timezone.now().timestamp())
+            cls.tenant2 = utils.get_tenant_model()(
+                schema_name=f"tenant_{ts}",
+                owner=cls.user_02,
+            )
+            cls.tenant2.save()
+
+            cls.domain2 = utils.get_tenant_domain_model()(
+                tenant=cls.tenant2, domain=f"second-{ts}.example.com"
+            )
+            cls.domain2.save()
+
+        # User 02 is the owner of tenant2, user 04 is also authorized
+        with utils.tenant_context(cls.tenant2):
+            cls.tenant2.authorized_users.add(cls.user_02)
+            cls.tenant2.authorized_users.add(cls.user_04)
+
+    def test_initial_owner_dropdown_contains_only_authorized_users(self):
+        response = self.client.get(reverse("admin:management_component_add"))
+
+        self.assertContains(response, self.user_01.username)
+        self.assertContains(response, self.user_05.username)
+        self.assertContains(response, self.tester.username)
+        self.assertContains(response, self.tenant.owner.username)
+
+        self.assertNotContains(response, self.user_02.username)
+        self.assertNotContains(response, self.user_03.username)
+        self.assertNotContains(response, self.user_04.username)
