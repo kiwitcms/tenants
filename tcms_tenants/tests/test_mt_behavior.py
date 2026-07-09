@@ -13,7 +13,7 @@ from django.utils import timezone
 
 from django_tenants import utils
 from parameterized import parameterized
-from tcms.tests.factories import ProductFactory
+from tcms.tests.factories import ComponentFactory, ProductFactory
 
 from tcms_tenants.tests import TenantGroupsTestCase, UserFactory
 from tenant_groups.models import Group as TenantGroup
@@ -43,6 +43,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         # Setup self.tester and users 01, 05 for self.tenant
         with utils.tenant_context(cls.tenant):
             cls.product = ProductFactory()
+            cls.component = ComponentFactory(product=cls.product)
             TenantGroup.objects.get(name="Tester").user_set.add(cls.tester)
             cls.tenant.authorized_users.add(cls.user_01)
             cls.tenant.authorized_users.add(cls.user_05)
@@ -134,6 +135,69 @@ class MultiTenantBehavior(TenantGroupsTestCase):
                         "product": self.product.pk,
                         "initial_owner": initial_owner.pk,
                     }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(
+            data["error"]["message"], r"initial_owner.*Select a valid choice"
+        )
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_component_update_api_with_authorized_user_should_work(self, _, get_user):
+        new_owner = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "Component.update",
+                "params": [
+                    self.component.pk,
+                    {
+                        "initial_owner": new_owner.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["initial_owner"], new_owner.pk)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_component_update_api_with_unauthorized_user_should_fail(self, _, get_user):
+        new_owner = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "Component.update",
+                "params": [
+                    self.component.pk,
+                    {
+                        "initial_owner": new_owner.pk,
+                    },
                 ],
             },
             content_type="application/json",
