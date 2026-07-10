@@ -3,7 +3,7 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-# pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors, too-many-public-methods
 import json
 
 from http import HTTPStatus
@@ -16,10 +16,13 @@ from django_tenants import utils
 from parameterized import parameterized
 from tcms.bugs.models import Bug
 from tcms.bugs.tests.factory import BugFactory
+from tcms.testplans.models import TestPlan
 from tcms.tests.factories import (
     BuildFactory,
     ComponentFactory,
+    PlanTypeFactory,
     ProductFactory,
+    TestPlanFactory,
     VersionFactory,
 )
 
@@ -57,6 +60,13 @@ class MultiTenantBehavior(TenantGroupsTestCase):
             cls.bug = BugFactory(
                 reporter=cls.tester,
                 assignee=cls.tester,
+            )
+            cls.plan_type = PlanTypeFactory()
+            cls.test_plan = TestPlanFactory(
+                author=cls.tester,
+                product=cls.product,
+                product_version=cls.version,
+                type=cls.plan_type,
             )
             TenantGroup.objects.get(name="Tester").user_set.add(cls.tester)
             cls.tenant.authorized_users.add(cls.user_01)
@@ -477,3 +487,287 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         data = json.loads(response.content)
         self.assertIn("error", data)
         self.assertRegex(data["error"]["message"], r"reporter.*Select a valid choice")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_plans_new_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("plans-new"),
+            {
+                "author": user.pk,
+                "product": self.product.pk,
+                "product_version": self.version.pk,
+                "type": self.plan_type.pk,
+                "name": f"Test plan from {user.username}",
+                "email_settings-0-auto_to_plan_author": "on",
+                "email_settings-0-auto_to_case_owner": "on",
+                "email_settings-0-auto_to_case_default_tester": "on",
+                "email_settings-0-notify_on_case_update": "on",
+                "email_settings-0-notify_on_plan_update": "on",
+                "email_settings-0-id": self.test_plan.emailing.pk,
+                "email_settings-TOTAL_FORMS": "1",
+                "email_settings-INITIAL_FORMS": "1",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
+                "is_active": True,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, f"Test plan from {user.username}")
+
+        plan = TestPlan.objects.get(name=f"Test plan from {user.username}")
+        self.assertEqual(plan.author, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_plans_new_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        # author is a hidden field, no error reported
+        response = self.client.post(
+            reverse("plans-new"),
+            {
+                "author": user.pk,
+                "product": self.product.pk,
+                "product_version": self.version.pk,
+                "type": self.plan_type.pk,
+                "name": f"Test plan from {user.username}",
+                "email_settings-0-auto_to_plan_author": "on",
+                "email_settings-0-auto_to_case_owner": "on",
+                "email_settings-0-auto_to_case_default_tester": "on",
+                "email_settings-0-notify_on_case_update": "on",
+                "email_settings-0-notify_on_plan_update": "on",
+                "email_settings-0-id": self.test_plan.emailing.pk,
+                "email_settings-TOTAL_FORMS": "1",
+                "email_settings-INITIAL_FORMS": "1",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
+                "is_active": True,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, _("Create new TestPlan"))
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_plans_edit_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("plan-edit", args=[self.test_plan.pk]),
+            {
+                "author": user.pk,
+                "product": self.product.pk,
+                "product_version": self.version.pk,
+                "type": self.plan_type.pk,
+                "name": f"Updated by {user.username}",
+                "email_settings-0-auto_to_plan_author": "on",
+                "email_settings-0-auto_to_case_owner": "on",
+                "email_settings-0-auto_to_case_default_tester": "on",
+                "email_settings-0-notify_on_case_update": "on",
+                "email_settings-0-notify_on_plan_update": "on",
+                "email_settings-0-id": self.test_plan.emailing.pk,
+                "email_settings-TOTAL_FORMS": "1",
+                "email_settings-INITIAL_FORMS": "1",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
+                "is_active": True,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, f"Updated by {user.username}")
+
+        self.test_plan.refresh_from_db()
+        self.assertEqual(self.test_plan.author, user)
+        self.assertEqual(self.test_plan.name, f"Updated by {user.username}")
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_plans_edit_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        # author is a hidden field, no error reported
+        response = self.client.post(
+            reverse("plan-edit", args=[self.test_plan.pk]),
+            {
+                "author": user.pk,
+                "product": self.product.pk,
+                "product_version": self.version.pk,
+                "type": self.plan_type.pk,
+                "name": f"Updated by {user.username}",
+                "email_settings-0-auto_to_plan_author": "on",
+                "email_settings-0-auto_to_case_owner": "on",
+                "email_settings-0-auto_to_case_default_tester": "on",
+                "email_settings-0-notify_on_case_update": "on",
+                "email_settings-0-notify_on_plan_update": "on",
+                "email_settings-0-id": self.test_plan.emailing.pk,
+                "email_settings-TOTAL_FORMS": "1",
+                "email_settings-INITIAL_FORMS": "1",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
+                "is_active": True,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, _("Edit TestPlan"))
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_plans_create_api_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestPlan.create",
+                "params": [
+                    {
+                        "product": self.product.pk,
+                        "product_version": self.version.pk,
+                        "type": self.plan_type.pk,
+                        "name": f"TestPlan created via API by {user.username}",
+                        "author": user.pk,
+                        "is_active": True,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(
+            data["result"]["name"], f"TestPlan created via API by {user.username}"
+        )
+        self.assertEqual(data["result"]["author"], user.pk)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_plans_create_api_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestPlan.create",
+                "params": [
+                    {
+                        "product": self.product.pk,
+                        "product_version": self.version.pk,
+                        "type": self.plan_type.pk,
+                        "name": f"TestPlan created via API by {user.username}",
+                        "author": user.pk,
+                        "is_active": True,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"author.*Select a valid choice")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_plans_update_api_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestPlan.update",
+                "params": [
+                    self.test_plan.pk,
+                    {
+                        "author": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["author"], user.pk)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_plans_update_api_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestPlan.update",
+                "params": [
+                    self.test_plan.pk,
+                    {
+                        "author": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"author.*Select a valid choice")
