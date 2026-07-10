@@ -13,7 +13,14 @@ from django.utils import timezone
 
 from django_tenants import utils
 from parameterized import parameterized
-from tcms.tests.factories import ComponentFactory, ProductFactory
+from tcms.bugs.models import Bug
+from tcms.bugs.tests.factory import BugFactory
+from tcms.tests.factories import (
+    BuildFactory,
+    ComponentFactory,
+    ProductFactory,
+    VersionFactory,
+)
 
 from tcms_tenants.tests import TenantGroupsTestCase, UserFactory
 from tenant_groups.models import Group as TenantGroup
@@ -44,6 +51,15 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         with utils.tenant_context(cls.tenant):
             cls.product = ProductFactory()
             cls.component = ComponentFactory(product=cls.product)
+            cls.version = VersionFactory(product=cls.product)
+            cls.build = BuildFactory(version=cls.version)
+            cls.bug = BugFactory(
+                reporter=cls.tester,
+                assignee=cls.tester,
+                product=cls.product,
+                version=cls.version,
+                build=cls.build,
+            )
             TenantGroup.objects.get(name="Tester").user_set.add(cls.tester)
             cls.tenant.authorized_users.add(cls.user_01)
             cls.tenant.authorized_users.add(cls.user_05)
@@ -207,4 +223,198 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         self.assertIn("error", data)
         self.assertRegex(
             data["error"]["message"], r"initial_owner.*Select a valid choice"
+        )
+
+    #
+    # bugs-new URL
+    #
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_bugs_new_with_authorized_user_should_work(self, _, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("bugs-new"),
+            {
+                "summary": "Test bug",
+                "reporter": user.pk,
+                "assignee": user.pk,
+                "product": self.product.pk,
+                "version": self.version.pk,
+                "build": self.build.pk,
+            },
+        )
+        self.assertEqual(HTTPStatus.FOUND, response.status_code)
+
+        bug = Bug.objects.last()
+        self.assertEqual(bug.summary, "Test bug")
+        self.assertEqual(bug.reporter, user)
+        self.assertEqual(bug.assignee, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_bugs_new_with_unauthorized_user_should_fail(self, _, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("bugs-new"),
+            {
+                "summary": "Test bug",
+                "reporter": user.pk,
+                "assignee": user.pk,
+                "product": self.product.pk,
+                "version": self.version.pk,
+                "build": self.build.pk,
+            },
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(
+            response,
+            "Select a valid choice.",
+        )
+
+    #
+    # bugs-edit URL
+    #
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_bugs_edit_with_authorized_user_should_work(self, _, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("bugs-edit", args=[self.bug.pk]),
+            {
+                "summary": "Updated bug",
+                "reporter": user.pk,
+                "assignee": user.pk,
+                "product": self.product.pk,
+                "version": self.version.pk,
+                "build": self.build.pk,
+            },
+        )
+        self.assertEqual(HTTPStatus.FOUND, response.status_code)
+
+        self.bug.refresh_from_db()
+        self.assertEqual(self.bug.summary, "Updated bug")
+        self.assertEqual(self.bug.reporter, user)
+        self.assertEqual(self.bug.assignee, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_bugs_edit_with_unauthorized_user_should_fail(self, _, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("bugs-edit", args=[self.bug.pk]),
+            {
+                "summary": "Updated bug",
+                "reporter": user.pk,
+                "assignee": user.pk,
+                "product": self.product.pk,
+                "version": self.version.pk,
+                "build": self.build.pk,
+            },
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(
+            response,
+            "Select a valid choice.",
+        )
+
+    #
+    # Bugs.create API method
+    #
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_bugs_create_api_with_authorized_user_should_work(self, _, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "Bug.create",
+                "params": [
+                    {
+                        "summary": "Bug created via API",
+                        "reporter": user.pk,
+                        "assignee": user.pk,
+                        "product": self.product.pk,
+                        "version": self.version.pk,
+                        "build": self.build.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["summary"], "Bug created via API")
+        self.assertEqual(data["result"]["reporter"], user.pk)
+        self.assertEqual(data["result"]["assignee"], user.pk)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_bugs_create_api_with_unauthorized_user_should_fail(self, _, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "Bug.create",
+                "params": [
+                    {
+                        "summary": "Bug created via API",
+                        "reporter": user.pk,
+                        "assignee": user.pk,
+                        "product": self.product.pk,
+                        "version": self.version.pk,
+                        "build": self.build.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(
+            data["error"]["message"], r"reporter.*Select a valid choice"
         )
