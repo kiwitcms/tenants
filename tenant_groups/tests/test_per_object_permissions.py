@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -134,8 +134,9 @@ class TestPermissions(TenantGroupsTestCase):
                 "summary": summary_edit,
                 "version": version_edit.pk,
                 "build": build_edit.pk,
-                "reporter": self.existing.reporter.pk,
-                "assignee": self.existing.assignee.pk,
+                # self.tester is authorized on self.tenant
+                "reporter": self.tester.pk,
+                "assignee": self.tester.pk,
                 "product": self.existing.product.pk,
             },
             follow=True,
