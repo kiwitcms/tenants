@@ -24,9 +24,13 @@ from tcms.tests.factories import (
     GroupFactory,
     PlanTypeFactory,
     ProductFactory,
+    TestCaseFactory,
+    TestExecutionFactory,
     TestPlanFactory,
+    TestRunFactory,
     VersionFactory,
 )
+from tcms.testruns.models import TestExecutionStatus
 
 from tcms_tenants.tests import TenantGroupsTestCase, UserFactory
 from tenant_groups.models import Group as TenantGroup
@@ -69,6 +73,27 @@ class MultiTenantBehavior(TenantGroupsTestCase):
                 product=cls.product,
                 product_version=cls.version,
                 type=cls.plan_type,
+            )
+            cls.test_case = TestCaseFactory(
+                author=cls.tester,
+                default_tester=cls.tester,
+                reviewer=cls.tester,
+            )
+            cls.case_text_version = 0
+            cls.test_run = TestRunFactory(
+                plan=cls.test_plan,
+                build=cls.build,
+                manager=cls.tester,
+                default_tester=cls.tester,
+            )
+            cls.status = TestExecutionStatus.objects.order_by("pk").first()
+            cls.test_execution = TestExecutionFactory(
+                assignee=cls.tester,
+                tested_by=cls.tester,
+                run=cls.test_run,
+                case=cls.test_case,
+                build=cls.build,
+                status=cls.status,
             )
             TenantGroup.objects.get(name="Tester").user_set.add(cls.tester)
             cls.tenant.authorized_users.add(cls.user_01)
@@ -795,6 +820,202 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         data = json.loads(response.content)
         self.assertIn("error", data)
         self.assertRegex(data["error"]["message"], r"author.*Select a valid choice")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testexecution_create_api_with_authorized_user_should_work(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestExecution.create",
+                "params": [
+                    {
+                        "assignee": user.pk,
+                        "tested_by": user.pk,
+                        "run": self.test_run.pk,
+                        "case": self.test_case.pk,
+                        "case_text_version": self.case_text_version,
+                        "build": self.build.pk,
+                        "status": self.status.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["assignee"], user.pk)
+        self.assertEqual(data["result"]["tested_by"], user.pk)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testexecution_create_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        # assignee is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestExecution.create",
+                "params": [
+                    {
+                        "assignee": user.pk,
+                        "tested_by": self.tester.pk,
+                        "run": self.test_run.pk,
+                        "case": self.test_case.pk,
+                        "case_text_version": self.case_text_version,
+                        "build": self.build.pk,
+                        "status": self.status.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"assignee.*Unknown user_id")
+
+        # tested_by is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestExecution.create",
+                "params": [
+                    {
+                        "assignee": self.tester.pk,
+                        "tested_by": user.pk,
+                        "run": self.test_run.pk,
+                        "case": self.test_case.pk,
+                        "case_text_version": self.case_text_version,
+                        "build": self.build.pk,
+                        "status": self.status.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"tested_by.*Unknown user_id")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testexecution_update_api_with_authorized_user_should_work(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestExecution.update",
+                "params": [
+                    self.test_execution.pk,
+                    {
+                        "assignee": user.pk,
+                        "tested_by": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["assignee"], user.pk)
+        self.assertEqual(data["result"]["tested_by"], user.pk)
+
+        self.test_execution.refresh_from_db()
+        self.assertEqual(self.test_execution.assignee, user)
+        self.assertEqual(self.test_execution.tested_by, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testexecution_update_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        # assignee is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestExecution.update",
+                "params": [
+                    self.test_execution.pk,
+                    {
+                        "assignee": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"assignee.*Unknown user_id")
+
+        # tested_by is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestExecution.update",
+                "params": [
+                    self.test_execution.pk,
+                    {
+                        "tested_by": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"tested_by.*Unknown user_id")
 
     def test_user_filter_returns_only_authorized_users(self):
         response = self.client.post(
