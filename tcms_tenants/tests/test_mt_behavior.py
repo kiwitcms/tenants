@@ -3,11 +3,12 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-# pylint: disable=too-many-ancestors, too-many-public-methods
+# pylint: disable=too-many-ancestors, too-many-lines, too-many-public-methods
 import json
 
 from http import HTTPStatus
 
+from django.contrib.auth.models import Permission
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -20,6 +21,7 @@ from tcms.testplans.models import TestPlan
 from tcms.tests.factories import (
     BuildFactory,
     ComponentFactory,
+    GroupFactory,
     PlanTypeFactory,
     ProductFactory,
     TestPlanFactory,
@@ -90,6 +92,28 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         with utils.tenant_context(cls.tenant2):
             cls.tenant2.authorized_users.add(cls.user_02)
             cls.tenant2.authorized_users.add(cls.user_04)
+
+        # Grant auth.view_user and auth.change_user to self.tester
+        # for User.filter, User.update, etc.
+        for codename in ("view_user", "change_user"):
+            cls.tester.user_permissions.add(
+                Permission.objects.get(
+                    content_type__app_label="auth",
+                    codename=codename,
+                )
+            )
+
+        # Create a Django auth group for User.join_group tests
+        cls.auth_group = GroupFactory()
+
+    def setUp(self):
+        for user in (self.tester, self.tenant.owner, self.user_01, self.user_05):
+            user.is_active = True
+            user.is_staff = True
+            user.set_password("password")
+            user.save()
+
+        super().setUp()
 
     def test_component_admin_add_dropdown_contains_only_authorized_users(self):
         response = self.client.get(reverse("admin:management_component_add"))
@@ -771,3 +795,219 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         data = json.loads(response.content)
         self.assertIn("error", data)
         self.assertRegex(data["error"]["message"], r"author.*Select a valid choice")
+
+    def test_user_filter_returns_only_authorized_users(self):
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "User.filter",
+                "params": [{"is_active": True}],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+
+        result_ids = {user["id"] for user in data["result"]}
+
+        for user in (self.tester, self.tenant.owner, self.user_01, self.user_05):
+            self.assertIn(
+                user.pk,
+                result_ids,
+                f"Authorized user pk={user.pk} should be in User.filter result",
+            )
+
+        for user in (self.user_02, self.user_03, self.user_04):
+            self.assertNotIn(
+                user.pk,
+                result_ids,
+                f"Unauthorized user pk={user.pk} should NOT be in User.filter result",
+            )
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_user_update_api_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "User.update",
+                "params": [
+                    user.pk,
+                    {"first_name": f"Changed by {user.pk}"},
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["first_name"], f"Changed by {user.pk}")
+
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, f"Changed by {user.pk}")
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_user_update_api_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+        original_first_name = user.first_name
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "User.update",
+                "params": [
+                    user.pk,
+                    {"first_name": f"Changed by {user.pk}"},
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertIn("User matching query does not exist", data["error"]["message"])
+
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, original_first_name)
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_user_deactivate_api_with_authorized_user_should_work(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "User.deactivate",
+                "params": [{"pk": user.pk}],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(len(data["result"]), 1)
+        self.assertEqual(data["result"][0]["id"], user.pk)
+
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_user_deactivate_api_with_unauthorized_user_should_noop(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "User.deactivate",
+                "params": [{"pk": user.pk}],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertEqual(data["result"], [])
+
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_user_join_group_api_with_authorized_user_should_work(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "User.join_group",
+                "params": [user.username, self.auth_group.name],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+
+        user.refresh_from_db()
+        self.assertTrue(user.groups.filter(name=self.auth_group.name).exists())
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_user_join_group_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "User.join_group",
+                "params": [user.username, self.auth_group.name],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertIn("User matching query does not exist", data["error"]["message"])
+
+        user.refresh_from_db()
+        self.assertFalse(user.groups.filter(name=self.auth_group.name).exists())
