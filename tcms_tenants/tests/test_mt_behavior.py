@@ -30,7 +30,7 @@ from tcms.tests.factories import (
     TestRunFactory,
     VersionFactory,
 )
-from tcms.testruns.models import TestExecutionStatus
+from tcms.testruns.models import TestExecutionStatus, TestRun
 
 from tcms_tenants.tests import TenantGroupsTestCase, UserFactory
 from tenant_groups.models import Group as TenantGroup
@@ -1016,6 +1016,345 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         data = json.loads(response.content)
         self.assertIn("error", data)
         self.assertRegex(data["error"]["message"], r"tested_by.*Unknown user_id")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testrun_create_api_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.create",
+                "params": [
+                    {
+                        "build": self.build.pk,
+                        "plan": self.test_plan.pk,
+                        "summary": f"TestRun created via API by {user.username}",
+                        "manager": user.pk,
+                        "default_tester": user.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(
+            data["result"]["summary"],
+            f"TestRun created via API by {user.username}",
+        )
+        self.assertEqual(data["result"]["manager"], user.pk)
+        self.assertEqual(data["result"]["default_tester"], user.pk)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testrun_create_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        # manager is unauthorized, default_tester is authorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.create",
+                "params": [
+                    {
+                        "build": self.build.pk,
+                        "plan": self.test_plan.pk,
+                        "summary": f"TestRun created via API by {user.username}",
+                        "manager": user.pk,
+                        "default_tester": self.tester.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"manager.*Unknown user_id")
+
+        # default_tester is unauthorized, manager is authorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.create",
+                "params": [
+                    {
+                        "build": self.build.pk,
+                        "plan": self.test_plan.pk,
+                        "summary": f"TestRun created via API by {user.username}",
+                        "manager": self.tester.pk,
+                        "default_tester": user.pk,
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"default_tester.*Unknown user_id")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testrun_update_api_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.update",
+                "params": [
+                    self.test_run.pk,
+                    {
+                        "manager": user.pk,
+                        "default_tester": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["manager"], user.pk)
+        self.assertEqual(data["result"]["default_tester"], user.pk)
+
+        self.test_run.refresh_from_db()
+        self.assertEqual(self.test_run.manager, user)
+        self.assertEqual(self.test_run.default_tester, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testrun_update_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        # manager is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.update",
+                "params": [
+                    self.test_run.pk,
+                    {
+                        "manager": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"manager.*Unknown user_id")
+
+        # default_tester is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.update",
+                "params": [
+                    self.test_run.pk,
+                    {
+                        "default_tester": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"default_tester.*Unknown user_id")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testruns_new_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("testruns-new"),
+            {
+                "summary": f"Test run from {user.username}",
+                "manager": user.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "plan": self.test_plan.pk,
+                "build": self.build.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, f"Test run from {user.username}")
+
+        test_run = TestRun.objects.get(summary=f"Test run from {user.username}")
+        self.assertEqual(test_run.manager, user)
+        self.assertEqual(test_run.default_tester, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testruns_new_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        # manager is unauthorized, default_tester is authorized
+        response = self.client.post(
+            reverse("testruns-new"),
+            {
+                "summary": f"Test run from {user.username}",
+                "manager": user.pk,
+                "default_tester": self.tester.pk,
+                "product": self.product.pk,
+                "plan": self.test_plan.pk,
+                "build": self.build.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "id_manager_error")
+        self.assertContains(response, f'Unknown user_id: "{user.pk}"', html=True)
+
+        # default_tester is unauthorized, manager is authorized
+        response = self.client.post(
+            reverse("testruns-new"),
+            {
+                "summary": f"Test run from {user.username}",
+                "manager": self.tester.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "plan": self.test_plan.pk,
+                "build": self.build.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "id_default_tester_error")
+        self.assertContains(response, f'Unknown user_id: "{user.pk}"', html=True)
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testruns_edit_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("testruns-edit", args=[self.test_run.pk]),
+            {
+                "summary": f"Updated by {user.username}",
+                "manager": user.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "plan": self.test_plan.pk,
+                "build": self.build.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, f"Updated by {user.username}")
+
+        self.test_run.refresh_from_db()
+        self.assertEqual(self.test_run.summary, f"Updated by {user.username}")
+        self.assertEqual(self.test_run.manager, user)
+        self.assertEqual(self.test_run.default_tester, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testruns_edit_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        # manager is unauthorized
+        response = self.client.post(
+            reverse("testruns-edit", args=[self.test_run.pk]),
+            {
+                "summary": f"Updated by {user.username}",
+                "manager": user.pk,
+                "default_tester": self.tester.pk,
+                "product": self.product.pk,
+                "plan": self.test_plan.pk,
+                "build": self.build.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "id_manager_error")
+        self.assertContains(response, f'Unknown user_id: "{user.pk}"', html=True)
+
+        # default_tester is unauthorized
+        response = self.client.post(
+            reverse("testruns-edit", args=[self.test_run.pk]),
+            {
+                "summary": f"Updated by {user.username}",
+                "manager": self.tester.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "plan": self.test_plan.pk,
+                "build": self.build.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "id_default_tester_error")
+        self.assertContains(response, f'Unknown user_id: "{user.pk}"', html=True)
 
     def test_user_filter_returns_only_authorized_users(self):
         response = self.client.post(
