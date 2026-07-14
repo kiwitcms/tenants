@@ -17,9 +17,11 @@ from django_tenants import utils
 from parameterized import parameterized
 from tcms.bugs.models import Bug
 from tcms.bugs.tests.factory import BugFactory
+from tcms.testcases.models import TestCase
 from tcms.testplans.models import TestPlan
 from tcms.tests.factories import (
     BuildFactory,
+    CategoryFactory,
     ComponentFactory,
     GroupFactory,
     PlanTypeFactory,
@@ -61,6 +63,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         with utils.tenant_context(cls.tenant):
             cls.product = ProductFactory()
             cls.component = ComponentFactory(product=cls.product)
+            cls.category = CategoryFactory(product=cls.product)
             cls.version = VersionFactory(product=cls.product)
             cls.build = BuildFactory(version=cls.version)
             cls.bug = BugFactory(
@@ -78,6 +81,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
                 author=cls.tester,
                 default_tester=cls.tester,
                 reviewer=cls.tester,
+                category=cls.category,
             )
             cls.case_text_version = 0
             cls.test_run = TestRunFactory(
@@ -1353,6 +1357,481 @@ class MultiTenantBehavior(TenantGroupsTestCase):
                 "product": self.product.pk,
                 "plan": self.test_plan.pk,
                 "build": self.build.pk,
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "id_default_tester_error")
+        self.assertContains(response, f'Unknown user_id: "{user.pk}"', html=True)
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testcase_create_api_with_authorized_user_should_work(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestCase.create",
+                "params": [
+                    {
+                        "author": user.pk,
+                        "default_tester": user.pk,
+                        "product": self.product.pk,
+                        "category": self.category.pk,
+                        "priority": self.test_case.priority.pk,
+                        "case_status": self.test_case.case_status.pk,
+                        "summary": f"TestCase created via API by {user.username}",
+                        "text": "Given-When-Then",
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(
+            data["result"]["summary"], f"TestCase created via API by {user.username}"
+        )
+        self.assertEqual(data["result"]["author"], user.pk)
+        self.assertEqual(data["result"]["default_tester"], user.pk)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testcase_create_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        # author is unauthorized, default_tester is authorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestCase.create",
+                "params": [
+                    {
+                        "author": user.pk,
+                        "default_tester": self.tester.pk,
+                        "product": self.product.pk,
+                        "category": self.category.pk,
+                        "priority": self.test_case.priority.pk,
+                        "case_status": self.test_case.case_status.pk,
+                        "summary": f"TestCase created via API by {user.username}",
+                        "text": "Given-When-Then",
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"author.*Select a valid choice")
+
+        # default_tester is unauthorized, author is authorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestCase.create",
+                "params": [
+                    {
+                        "author": self.tester.pk,
+                        "default_tester": user.pk,
+                        "product": self.product.pk,
+                        "category": self.category.pk,
+                        "priority": self.test_case.priority.pk,
+                        "case_status": self.test_case.case_status.pk,
+                        "summary": f"TestCase created via API by {user.username}",
+                        "text": "Given-When-Then",
+                    }
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(
+            data["error"]["message"], r"default_tester.*Select a valid choice"
+        )
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testcase_update_api_with_authorized_user_should_work(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestCase.update",
+                "params": [
+                    self.test_case.pk,
+                    {
+                        "author": user.pk,
+                        "default_tester": user.pk,
+                        "reviewer": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+        self.assertEqual(data["result"]["author"], user.pk)
+        self.assertEqual(data["result"]["default_tester"], user.pk)
+        self.assertEqual(data["result"]["reviewer"], user.pk)
+
+        self.test_case.refresh_from_db()
+        self.assertEqual(self.test_case.author, user)
+        self.assertEqual(self.test_case.default_tester, user)
+        self.assertEqual(self.test_case.reviewer, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testcase_update_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        # author is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestCase.update",
+                "params": [
+                    self.test_case.pk,
+                    {
+                        "author": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"author.*Unknown user_id")
+
+        # default_tester is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestCase.update",
+                "params": [
+                    self.test_case.pk,
+                    {
+                        "default_tester": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"default_tester.*Unknown user_id")
+
+        # reviewer is unauthorized
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestCase.update",
+                "params": [
+                    self.test_case.pk,
+                    {
+                        "reviewer": user.pk,
+                    },
+                ],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"reviewer.*Unknown user_id")
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testcases_new_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("testcases-new"),
+            {
+                "author": user.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "category": self.category.pk,
+                "priority": self.test_case.priority.pk,
+                "case_status": self.test_case.case_status.pk,
+                "summary": f"Test case from {user.username}",
+                "setup_duration": "2 20:10:00",
+                "testing_duration": "00:00:00",
+                "text": "Given-When-Then",
+                "script": "some script",
+                "arguments": "args1, args2, args3",
+                "requirement": "requirement",
+                "extra_link": "http://somelink.net",
+                "notes": "notes",
+                "email_settings-TOTAL_FORMS": "0",
+                "email_settings-INITIAL_FORMS": "0",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, f"Test case from {user.username}")
+
+        test_case = TestCase.objects.get(summary=f"Test case from {user.username}")
+        self.assertEqual(test_case.author, user)
+        self.assertEqual(test_case.default_tester, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testcases_new_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        # author is a hidden field, no error reported
+        response = self.client.post(
+            reverse("testcases-new"),
+            {
+                "author": user.pk,
+                "default_tester": self.tester.pk,
+                "product": self.product.pk,
+                "category": self.category.pk,
+                "priority": self.test_case.priority.pk,
+                "case_status": self.test_case.case_status.pk,
+                "summary": f"Test case from {user.username}",
+                "setup_duration": "2 20:10:00",
+                "testing_duration": "00:00:00",
+                "text": "Given-When-Then",
+                "script": "some script",
+                "arguments": "args1, args2, args3",
+                "requirement": "requirement",
+                "extra_link": "http://somelink.net",
+                "notes": "notes",
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, _("New Test Case"))
+
+        # default_tester is a visible UserField
+        response = self.client.post(
+            reverse("testcases-new"),
+            {
+                "author": self.tester.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "category": self.category.pk,
+                "priority": self.test_case.priority.pk,
+                "case_status": self.test_case.case_status.pk,
+                "summary": f"Test case from {user.username}",
+                "setup_duration": "2 20:10:00",
+                "testing_duration": "00:00:00",
+                "text": "Given-When-Then",
+                "script": "some script",
+                "arguments": "args1, args2, args3",
+                "requirement": "requirement",
+                "extra_link": "http://somelink.net",
+                "notes": "notes",
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "id_default_tester_error")
+        self.assertContains(response, f'Unknown user_id: "{user.pk}"', html=True)
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testcases_edit_with_authorized_user_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            reverse("testcases-edit", args=[self.test_case.pk]),
+            {
+                "author": user.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "category": self.category.pk,
+                "priority": self.test_case.priority.pk,
+                "case_status": self.test_case.case_status.pk,
+                "summary": f"Updated by {user.username}",
+                "setup_duration": "2 20:10:00",
+                "testing_duration": "00:00:00",
+                "text": "Given-When-Then",
+                "script": "some script",
+                "arguments": "args1, args2, args3",
+                "requirement": "requirement",
+                "extra_link": "http://somelink.net",
+                "notes": "notes",
+                "email_settings-0-auto_to_case_author": "on",
+                "email_settings-0-auto_to_run_manager": "on",
+                "email_settings-0-auto_to_execution_assignee": "on",
+                "email_settings-0-auto_to_case_tester": "on",
+                "email_settings-0-auto_to_run_tester": "on",
+                "email_settings-0-notify_on_case_update": "on",
+                "email_settings-0-notify_on_case_delete": "on",
+                "email_settings-0-cc_list": "info@example.com",
+                "email_settings-0-case": self.test_case.pk,
+                "email_settings-0-id": self.test_case.emailing.pk,
+                "email_settings-TOTAL_FORMS": "1",
+                "email_settings-INITIAL_FORMS": "1",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, f"Updated by {user.username}")
+
+        self.test_case.refresh_from_db()
+        self.assertEqual(self.test_case.summary, f"Updated by {user.username}")
+        self.assertEqual(self.test_case.author, user)
+        self.assertEqual(self.test_case.default_tester, user)
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testcases_edit_with_unauthorized_user_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        # author is a hidden field, no error reported
+        response = self.client.post(
+            reverse("testcases-edit", args=[self.test_case.pk]),
+            {
+                "author": user.pk,
+                "default_tester": self.tester.pk,
+                "product": self.product.pk,
+                "category": self.category.pk,
+                "priority": self.test_case.priority.pk,
+                "case_status": self.test_case.case_status.pk,
+                "summary": f"Updated by {user.username}",
+                "setup_duration": "2 20:10:00",
+                "testing_duration": "00:00:00",
+                "text": "Given-When-Then",
+                "script": "some script",
+                "arguments": "args1, args2, args3",
+                "requirement": "requirement",
+                "extra_link": "http://somelink.net",
+                "notes": "notes",
+                "email_settings-0-auto_to_case_author": "on",
+                "email_settings-0-auto_to_run_manager": "on",
+                "email_settings-0-auto_to_execution_assignee": "on",
+                "email_settings-0-auto_to_case_tester": "on",
+                "email_settings-0-auto_to_run_tester": "on",
+                "email_settings-0-notify_on_case_update": "on",
+                "email_settings-0-notify_on_case_delete": "on",
+                "email_settings-0-cc_list": "info@example.com",
+                "email_settings-0-case": self.test_case.pk,
+                "email_settings-0-id": self.test_case.emailing.pk,
+                "email_settings-TOTAL_FORMS": "1",
+                "email_settings-INITIAL_FORMS": "1",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
+            },
+            follow=True,
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, _("Edit TestCase"))
+
+        # default_tester is a visible UserField
+        response = self.client.post(
+            reverse("testcases-edit", args=[self.test_case.pk]),
+            {
+                "author": self.tester.pk,
+                "default_tester": user.pk,
+                "product": self.product.pk,
+                "category": self.category.pk,
+                "priority": self.test_case.priority.pk,
+                "case_status": self.test_case.case_status.pk,
+                "summary": f"Updated by {user.username}",
+                "setup_duration": "2 20:10:00",
+                "testing_duration": "00:00:00",
+                "text": "Given-When-Then",
+                "script": "some script",
+                "arguments": "args1, args2, args3",
+                "requirement": "requirement",
+                "extra_link": "http://somelink.net",
+                "notes": "notes",
+                "email_settings-0-auto_to_case_author": "on",
+                "email_settings-0-auto_to_run_manager": "on",
+                "email_settings-0-auto_to_execution_assignee": "on",
+                "email_settings-0-auto_to_case_tester": "on",
+                "email_settings-0-auto_to_run_tester": "on",
+                "email_settings-0-notify_on_case_update": "on",
+                "email_settings-0-notify_on_case_delete": "on",
+                "email_settings-0-cc_list": "info@example.com",
+                "email_settings-0-case": self.test_case.pk,
+                "email_settings-0-id": self.test_case.emailing.pk,
+                "email_settings-TOTAL_FORMS": "1",
+                "email_settings-INITIAL_FORMS": "1",
+                "email_settings-MIN_NUM_FORMS": "0",
+                "email_settings-MAX_NUM_FORMS": "1",
             },
             follow=True,
         )

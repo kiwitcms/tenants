@@ -206,9 +206,9 @@ class TestPermissions(TenantGroupsTestCase):
 
             summary_edit = "An edited summary"
             data = {
-                "author": existing.author.pk,
+                "author": self.tester.pk,
                 "summary": summary_edit,
-                "default_tester": existing.default_tester.pk,
+                "default_tester": self.tester.pk,
                 "product": existing.category.product.pk,
                 "category": existing.category.pk,
                 "case_status": existing.case_status.pk,
