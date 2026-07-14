@@ -140,6 +140,10 @@ class MultiTenantBehavior(TenantGroupsTestCase):
 
         super().setUp()
 
+        # Start each test with a clean CC list
+        with utils.tenant_context(self.tenant):
+            self.test_run.cc.clear()
+
     def test_component_admin_add_dropdown_contains_only_authorized_users(self):
         response = self.client.get(reverse("admin:management_component_add"))
 
@@ -1571,3 +1575,124 @@ class MultiTenantBehavior(TenantGroupsTestCase):
 
         user.refresh_from_db()
         self.assertFalse(user.groups.filter(name=self.auth_group.name).exists())
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testrun_add_cc_with_authorized_users_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.add_cc",
+                "params": [self.test_run.pk, user.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+
+        self.test_run.refresh_from_db()
+        self.assertTrue(self.test_run.cc.filter(pk=user.pk).exists())
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testrun_add_cc_with_unauthorized_users_should_fail(self, _name, get_user):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.add_cc",
+                "params": [self.test_run.pk, user.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"user.*Unknown user_id")
+
+        self.test_run.refresh_from_db()
+        self.assertFalse(self.test_run.cc.filter(pk=user.pk).exists())
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_testrun_remove_cc_with_authorized_users_should_work(self, _name, get_user):
+        user = get_user(self)
+
+        # First add the user as CC so we have something to remove
+        self.test_run.add_cc(user)
+        self.test_run.refresh_from_db()
+        self.assertTrue(self.test_run.cc.filter(pk=user.pk).exists())
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.remove_cc",
+                "params": [self.test_run.pk, user.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+
+        self.test_run.refresh_from_db()
+        self.assertFalse(self.test_run.cc.filter(pk=user.pk).exists())
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_testrun_remove_cc_with_unauthorized_users_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        # cc list is already empty from setUp
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TestRun.remove_cc",
+                "params": [self.test_run.pk, user.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertRegex(data["error"]["message"], r"user.*Unknown user_id")
+
+        self.test_run.refresh_from_db()
+        self.assertFalse(self.test_run.cc.filter(pk=user.pk).exists())
