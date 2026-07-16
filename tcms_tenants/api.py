@@ -1,20 +1,32 @@
-# Copyright (c) 2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2025-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 # pylint: disable=missing-permission-required, no-self-use
 
-from django.core.exceptions import PermissionDenied
-
-from modernrpc.core import REQUEST_KEY, rpc_method
+from tcms.rpc.views import rpc_method
 from tcms_tenants.forms import InviteUsersForm
 from tcms_tenants import utils
 
 
-@rpc_method(name="Tenant.invite")
+def tenant_owner_required(request):
+    """
+    Authentication predicate: the user must own the current tenant.
+    Returns the user if authorized, None otherwise.
+    """
+    if utils.owns_tenant(request.user, request.tenant):
+        return request.user
+    return None
+
+
+@rpc_method(
+    name="Tenant.invite",
+    auth=tenant_owner_required,
+    context_target="rpc_context",
+)
 def invite(
-    email_addresses, notify_via_email, **kwargs
+    email_addresses, notify_via_email, rpc_context=None
 ):  # pylint: disable=missing-api-permissions-required
     """
     .. function:: RPC Tenant.invite(email_addresses, notify_via_email)
@@ -25,19 +37,16 @@ def invite(
         :type email_addresses: list(str)
         :param notify_via_email: Whether to send notification email or not
         :type notify_via_email: bool
-        :param \\**kwargs: Dict providing access to the current request, protocol,
+        :param rpc_context: Provides access to the current request, protocol,
                 entry point name and handler instance from the rpc method
+        :type rpc_context: modernrpc.core.RpcRequestContext
         :return: List of successfully invited or errored email addresses
         :rtype: dict
         :raises PermissionDenied: if caller isn't authorized to invite other users
 
     .. versionadded:: 15.3
     """
-    request = kwargs.get(REQUEST_KEY)
-
-    # currently any authorized user can invite others
-    if not utils.owns_tenant(request.user, request.tenant):
-        raise PermissionDenied("Permission denied")
+    request = rpc_context.request
 
     success = []
     errored = []

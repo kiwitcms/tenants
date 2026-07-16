@@ -7,7 +7,7 @@
 
 from django.contrib.auth.models import Permission
 from django.forms.models import model_to_dict
-from modernrpc.core import REQUEST_KEY, rpc_method
+from tcms.rpc.views import rpc_method
 
 from tcms.rpc.api.user import get_queryset
 from tcms.rpc.decorators import permissions_required
@@ -15,8 +15,10 @@ from tenant_groups.forms import GroupForm
 from tenant_groups.models import Group
 
 
-@permissions_required("tenant_groups.view_group")
-@rpc_method(name="TenantGroup.filter")
+@rpc_method(
+    name="TenantGroup.filter",
+    auth=permissions_required("tenant_groups.view_group"),
+)
 def filter(query):  # pylint: disable=redefined-builtin
     """
     .. function:: RPC TenantGroup.filter(query)
@@ -41,8 +43,10 @@ def filter(query):  # pylint: disable=redefined-builtin
     )
 
 
-@permissions_required("tenant_groups.change_group")
-@rpc_method(name="TenantGroup.add_permission")
+@rpc_method(
+    name="TenantGroup.add_permission",
+    auth=permissions_required("tenant_groups.change_group"),
+)
 def add_permission(group_id, perm):
     """
     .. function:: RPC TenantGroup.add_permission(group_id, permission_label)
@@ -74,9 +78,12 @@ def add_permission(group_id, perm):
     )
 
 
-@permissions_required("tenant_groups.change_group")
-@rpc_method(name="TenantGroup.add_user")
-def add_user(group_id, user_id, **kwargs):
+@rpc_method(
+    name="TenantGroup.add_user",
+    auth=permissions_required("tenant_groups.change_group"),
+    context_target="rpc_context",
+)
+def add_user(group_id, user_id, rpc_context=None):
     """
     .. function:: RPC TenantGroup.add_user(group_id, user_id)
 
@@ -86,22 +93,25 @@ def add_user(group_id, user_id, **kwargs):
         :type group_id: int
         :param user_id: PK for a :class:`django.contrib.auth.models.User` object
         :type user_id: int
-        :param \\**kwargs: Dict providing access to the current request, protocol,
+        :param rpc_context: Provides access to the current request, protocol,
                 entry point name and handler instance from the rpc method
+        :type rpc_context: modernrpc.core.RpcRequestContext
         :raises PermissionDenied: if missing the *tenant_groups.change_group* permission
         :raises DoesNotExist: if group or user doesn't exist
 
     .. versionadded:: 15.3
     """
-    request = kwargs.get(REQUEST_KEY)
+    request = rpc_context.request
     group = Group.objects.get(pk=group_id)
     user = get_queryset(request).get(pk=user_id)
 
     group.user_set.add(user)
 
 
-@rpc_method(name="TenantGroup.create")
-@permissions_required("tenant_groups.add_group")
+@rpc_method(
+    name="TenantGroup.create",
+    auth=permissions_required("tenant_groups.add_group"),
+)
 def create(values):
     """
     .. function:: RPC TenantGroup.create(values)
