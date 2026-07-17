@@ -1,15 +1,15 @@
-# Copyright (c) 2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2025-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 # pylint: disable=missing-permission-required, no-self-use
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.forms.models import model_to_dict
-from modernrpc.core import rpc_method
+from modernrpc.core import REQUEST_KEY, rpc_method
 
+from tcms.rpc.api.user import get_queryset
 from tcms.rpc.decorators import permissions_required
 from tenant_groups.forms import GroupForm
 from tenant_groups.models import Group
@@ -76,7 +76,7 @@ def add_permission(group_id, perm):
 
 @permissions_required("tenant_groups.change_group")
 @rpc_method(name="TenantGroup.add_user")
-def add_user(group_id, user_id):
+def add_user(group_id, user_id, **kwargs):
     """
     .. function:: RPC TenantGroup.add_user(group_id, user_id)
 
@@ -86,13 +86,16 @@ def add_user(group_id, user_id):
         :type group_id: int
         :param user_id: PK for a :class:`django.contrib.auth.models.User` object
         :type user_id: int
+        :param \\**kwargs: Dict providing access to the current request, protocol,
+                entry point name and handler instance from the rpc method
         :raises PermissionDenied: if missing the *tenant_groups.change_group* permission
         :raises DoesNotExist: if group or user doesn't exist
 
     .. versionadded:: 15.3
     """
+    request = kwargs.get(REQUEST_KEY)
     group = Group.objects.get(pk=group_id)
-    user = get_user_model().objects.get(pk=user_id)
+    user = get_queryset(request).get(pk=user_id)
 
     group.user_set.add(user)
 
