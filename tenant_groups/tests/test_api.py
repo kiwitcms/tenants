@@ -1,17 +1,19 @@
-# Copyright (c) 2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-# pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors, too-many-lines
 import json
 
 from http import HTTPStatus
 
+from django.contrib.auth.models import Permission
 from django_tenants.utils import tenant_context
+from parameterized import parameterized
 
 from tcms.tests import remove_perm_from_user, user_should_have_perm
-from tcms_tenants.tests import TenantGroupsTestCase
+from tcms_tenants.tests import TenantGroupsTestCase, UserFactory
 from tenant_groups.models import Group as TenantGroup
 
 
@@ -319,3 +321,107 @@ class TenantGroupCreate(TenantGroupsTestCase):
             "Internal error: [('name', ['This field is required.'])]",
             data["message"],
         )
+
+
+class MultiTenantAddUser(TenantGroupsTestCase):
+    """Multi-tenant tests for TenantGroup.add_user()."""
+
+    @classmethod
+    def get_test_schema_name(cls):
+        return "tenant_group"
+
+    @classmethod
+    def get_test_tenant_domain(cls):
+        return "tenant-group.test.com"
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Create users in public schema
+        cls.user_01 = UserFactory()
+        cls.user_02 = UserFactory()
+        cls.user_03 = UserFactory()
+        cls.user_04 = UserFactory()
+        cls.user_05 = UserFactory()
+
+        # Setup group and authorized users for the tenant
+        with tenant_context(cls.tenant):
+            cls.tenant_group = TenantGroup.objects.create(name="TestGroup")
+            cls.tenant.authorized_users.add(cls.user_01)
+            cls.tenant.authorized_users.add(cls.user_05)
+
+        # Grant tenant_groups permissions so tester can call TenantGroup.add_user
+        perms = Permission.objects.filter(
+            content_type__app_label__contains="tenant_groups"
+        )
+        cls.tester.user_permissions.add(*perms)
+
+    def setUp(self):
+        super().setUp()
+
+        # Ensure clean state for each test
+        with tenant_context(self.tenant):
+            self.tenant_group.user_set.clear()
+
+    @parameterized.expand(
+        [
+            ("user_01", lambda self: self.user_01),
+            ("user_05", lambda self: self.user_05),
+            ("tester", lambda self: self.tester),
+            ("tenant.owner", lambda self: self.tenant.owner),
+        ]
+    )
+    def test_tenantgroup_add_user_api_with_authorized_user_should_work(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.add_user",
+                "params": [self.tenant_group.pk, user.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("result", data)
+
+        with tenant_context(self.tenant):
+            self.tenant_group.refresh_from_db()
+            self.assertTrue(self.tenant_group.user_set.filter(pk=user.pk).exists())
+
+    @parameterized.expand(
+        [
+            ("user_02", lambda self: self.user_02),
+            ("user_03", lambda self: self.user_03),
+            ("user_04", lambda self: self.user_04),
+        ]
+    )
+    def test_tenantgroup_add_user_api_with_unauthorized_user_should_fail(
+        self, _name, get_user
+    ):
+        user = get_user(self)
+
+        response = self.client.post(
+            "/json-rpc/",
+            {
+                "id": "jsonrpc",
+                "jsonrpc": "2.0",
+                "method": "TenantGroup.add_user",
+                "params": [self.tenant_group.pk, user.pk],
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        data = json.loads(response.content)
+        self.assertIn("error", data)
+        self.assertIn("User matching query does not exist", data["error"]["message"])
+
+        with tenant_context(self.tenant):
+            self.tenant_group.refresh_from_db()
+            self.assertFalse(self.tenant_group.user_set.filter(pk=user.pk).exists())

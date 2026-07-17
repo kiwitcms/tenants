@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -246,6 +246,37 @@ class TestGroupAdmin(TenantGroupsTestCase):
         )
         self.assertTrue(
             self.random_user.tenant_groups.filter(name=self.group.name).exists()
+        )
+
+    def test_new_group_with_non_authorized_user_should_fail(self):
+        group_name = "GroupWithNonAuthUser"
+        self.assertFalse(TenantGroup.objects.filter(name=group_name).exists())
+
+        response = self.client.post(
+            reverse("admin:tenant_groups_group_add"),
+            {"name": group_name, "users": [self.non_authorized_user.id]},
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "Select a valid choice")
+        self.assertFalse(TenantGroup.objects.filter(name=group_name).exists())
+
+    def test_edit_group_with_non_authorized_user_should_fail(self):
+        self.assertFalse(
+            self.non_authorized_user.tenant_groups.filter(name=self.group.name).exists()
+        )
+
+        response = self.client.post(
+            reverse("admin:tenant_groups_group_change", args=[self.group.id]),
+            {
+                "name": self.group.name,
+                "users": [self.non_authorized_user.id],
+                "_continue": True,
+            },
+        )
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertContains(response, "Select a valid choice")
+        self.assertFalse(
+            self.non_authorized_user.tenant_groups.filter(name=self.group.name).exists()
         )
 
     def test_user_without_perms_should_not_be_able_to_delete_groups(self):
