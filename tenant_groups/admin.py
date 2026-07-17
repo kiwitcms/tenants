@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -10,7 +10,7 @@ from django.contrib import auth
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
-from tcms_tenants.utils import get_current_tenant
+from tcms.rpc.api.user import get_queryset
 from tenant_groups.models import Group
 
 
@@ -26,9 +26,10 @@ class GroupAdminForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
+        request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
         self.fields["users"].label = capfirst(_("users"))
-        self.fields["users"].queryset = get_current_tenant().authorized_users.all()
+        self.fields["users"].queryset = get_queryset(request)
         if self.instance.pk:
             self.fields["users"].initial = self.instance.user_set.all()
 
@@ -51,6 +52,18 @@ class GroupAdminForm(forms.ModelForm):
 
 class GroupAdmin(auth.admin.GroupAdmin):
     form = GroupAdminForm
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form_class = super().get_form(request, obj, change, **kwargs)
+
+        class RequestAwareForm(
+            form_class
+        ):  # pylint: disable=nested-class-found,too-few-public-methods
+            def __init__(self, *args, **kwargs):
+                kwargs["request"] = request
+                super().__init__(*args, **kwargs)
+
+        return RequestAwareForm
 
     def has_delete_permission(self, request, obj=None):
         if obj and obj.name in ["Tester", "Administrator"]:
