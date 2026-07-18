@@ -148,6 +148,14 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.7.0 (18 Jul 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Make ``TenantGroup.add_user()`` API method tenant-aware
+- Refactor API methods for compatibility with django-modern-rpc v2
+- Add multi-tenant behavior tests for Kiwi TCMS API methods
+
+
 v4.6.0 (01 Jul 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
