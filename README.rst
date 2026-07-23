@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.7.1 (23 Jul 2026)
+~~~~~~~~~~~~~~~~~~~~
+
+- Remove tenant's media directory only if it exists
+
+
 v4.7.0 (18 Jul 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
