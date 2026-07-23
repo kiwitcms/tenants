@@ -119,3 +119,20 @@ class TenantDeleteTestCase(LoggedInTestCase):
         # The tenant's storage directory (which includes the file) should be removed
         self.assertFalse(os.path.exists(file_name))
         self.assertFalse(os.path.exists(tenant_storage_dir))
+
+    @override_settings(
+        MEDIA_ROOT="apps_dir/media",
+        MEDIA_URL="/media/",
+        MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    )
+    def test_tenant_delete_doesnt_raise_when_media_dir_doesnt_exist(
+        self,
+    ):  # pylint: disable=no-self-use
+        connection.set_schema_to_public()
+        tenant = utils.get_tenant_model()(
+            schema_name="wo_uploads", owner=UserFactory(), name="Without Uploads"
+        )
+        tenant.save()
+
+        # no tenant relative dir, delete doesn't raise
+        tenant.delete()
