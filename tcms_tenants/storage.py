@@ -41,5 +41,6 @@ class TenantFileSystemStorage(FileSystemStorage):
         )
         return os.path.abspath(_location)
 
-    def delete_recursively(self, path):  # pylint: disable=no-self-use
-        shutil.rmtree(path)
+    def delete_recursively(self, path):
+        if self.exists(path):
+            shutil.rmtree(path)
