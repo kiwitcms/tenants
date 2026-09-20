@@ -133,7 +133,8 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
             reverse("admin:tcms_tenants_tenant_authorized_users_add")
         )
 
-        self.assertContains(response, "<option value=''>---------</option>", html=True)
+        # NOTE: don't assert the label of the blank choice, it is translated
+        self.assertContains(response, '<option value="">')
         self.assertContains(
             response,
             f"<option value='{self.tenant.pk}' selected>{self.tenant}</option>",
@@ -157,9 +158,8 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
 
         self.assertContains(response, "<ul class='errorlist'>", html=True)
         self.assertContains(response, "This field is required")
-        self.assertContains(
-            response, "<option value='' selected>---------</option>", html=True
-        )
+        # NOTE: don't assert the label of the blank choice, it is translated
+        self.assertContains(response, '<option value="" selected>')
         self.assertContains(
             response,
             f"<option value='{self.tenant.pk}'>{self.tenant}</option>",
@@ -187,7 +187,8 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
             )
         )
 
-        self.assertContains(response, "<option value=''>---------</option>", html=True)
+        # NOTE: don't assert the label of the blank choice, it is translated
+        self.assertContains(response, '<option value="">')
         self.assertContains(
             response,
             f"<option value='{self.tenant.pk}' selected>{self.tenant}</option>",
