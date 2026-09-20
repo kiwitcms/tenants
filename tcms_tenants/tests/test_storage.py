@@ -89,6 +89,8 @@ class DefaultStorageTestCase(TenantFileSystemStorageTestCase):
 
 
 class TenantDeleteTestCase(LoggedInTestCase):
+    storage = TenantFileSystemStorage()
+
     @override_settings(
         MEDIA_ROOT="apps_dir/media",
         MEDIA_URL="/media/",
@@ -103,15 +105,15 @@ class TenantDeleteTestCase(LoggedInTestCase):
 
         # Save a file under this tenant schema's storage
         with utils.tenant_context(tenant):
-            file_name = default_storage.save(
+            file_name = self.storage.save(
                 "hello_delete.txt", ContentFile("Hello Delete")
             )
             # convert to absolute path
-            file_name = default_storage.path(file_name)
-            self.assertTrue(default_storage.exists(file_name))
+            file_name = self.storage.path(file_name)
+            self.assertTrue(self.storage.exists(file_name))
 
             tenant_storage_dir = os.path.dirname(file_name)
-            self.assertTrue(default_storage.exists(tenant_storage_dir))
+            self.assertTrue(self.storage.exists(tenant_storage_dir))
 
         # Delete the tenant
         tenant.delete()
