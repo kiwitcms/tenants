@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2022-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -25,13 +25,13 @@ class Command(refresh_permissions.Command):
     }
 
     def handle(self, *args, **kwargs):
+        output = None
+        if kwargs["verbosity"]:
+            output = self.stdout
+
         for tenant in get_tenant_model().objects.exclude(
             schema_name=get_public_schema_name(),
         ):
-            output = None
-            if kwargs["verbosity"]:
-                output = self.stdout
-
             with tenant_context(tenant):
                 if output:
                     output.write(
