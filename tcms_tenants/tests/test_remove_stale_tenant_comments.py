@@ -25,7 +25,7 @@ from tcms_tenants.tests import TenantGroupsTestCase
 
 
 class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
-    comments_per_model = 100
+    comments_per_model = 1_000
     pk_offset = 1_000_000_000
 
     @staticmethod
