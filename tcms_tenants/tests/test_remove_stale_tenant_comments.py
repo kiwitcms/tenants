@@ -42,26 +42,26 @@ class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
         super().setUpClass()
 
         for tenant in cls.tenants_with_schema():
-            for _ in range(cls.comments_per_model):
-                cls.add_comments(tenant, TestCaseFactory)
-                cls.add_comments(tenant, TestExecutionFactory)
-                cls.add_comments(tenant, TestPlanFactory)
+            with tenant_context(tenant):
+                for _ in range(cls.comments_per_model):
+                    cls.add_comments(TestCaseFactory)
+                    cls.add_comments(TestExecutionFactory)
+                    cls.add_comments(TestPlanFactory)
 
     @classmethod
-    def add_comments(cls, tenant, factory_class):
-        with tenant_context(tenant):
-            obj = factory_class()
-            user = UserFactory()
+    def add_comments(cls, factory_class):
+        obj = factory_class()
+        user = UserFactory()
 
-            _ = add_comment([obj], "comment on a existing object", user)[0]
+        _ = add_comment([obj], "comment on a existing object", user)[0]
 
-            stale = add_comment([obj], "comment on a deleted object", user)[0]
-            stale.object_pk = str(int(obj.pk) + cls.pk_offset)
-            stale.save()
+        stale = add_comment([obj], "comment on a deleted object", user)[0]
+        stale.object_pk = str(int(obj.pk) + cls.pk_offset)
+        stale.save()
 
-            stale2 = add_comment([obj], "comment with object_pk=''", user)[0]
-            stale2.object_pk = ""
-            stale2.save()
+        stale2 = add_comment([obj], "comment with object_pk=''", user)[0]
+        stale2.object_pk = ""
+        stale2.save()
 
     def test_removes_only_comments_which_are_attached_to_missing_objects(self):
         tenants = self.tenants_with_schema()
