@@ -3,7 +3,10 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
+from django.db.models import TextField
+from django.db.models.functions import Cast
 from django_tenants.utils import get_tenant_model, tenant_context
 from django_comments.models import Comment
 
@@ -39,27 +42,38 @@ class Command(BaseCommand):
                 )
 
             with tenant_context(tenant):
-                for comment in Comment.objects.all():
-                    if not comment.object_pk or comment.content_object is None:
-                        if output:
-                            output.write(
-                                f"Comment `{comment}' to non-existing "
-                                f"`{comment.content_type.model}' with PK "
-                                f"`{comment.object_pk}'"
-                            )
+                stale_comments = Comment.objects.all()
 
-                        while answer not in "yn":
-                            answer = input("Do you wish to delete? [yN] ")
-                            if not answer:
-                                answer = "x"
-                                continue
-                            answer = answer[0].lower()
+                for content_type_id in (
+                    Comment.objects.values_list("content_type", flat=True)
+                    .order_by("content_type")
+                    .distinct("content_type")
+                ):
+                    content_type = ContentType.objects.get_for_id(content_type_id)
+                    model = content_type.model_class()
+                    if model is None:
+                        continue
 
-                        if answer == "y":
-                            comment.delete()
+                    stale_comments = stale_comments.exclude(
+                        content_type_id=content_type_id,
+                        object_pk__in=model.objects.annotate(
+                            pk_as_text=Cast("pk", TextField())
+                        ).values("pk_as_text"),
+                    )
 
-                            if output:
-                                output.write(f"Deleted comment `{comment}'")
+                if output:
+                    output.write(
+                        f"Will delete `{stale_comments.count()}` stale comments"
+                    )
+
+                while answer not in "yn":
+                    answer = input("Do you wish to continue? [yN] ")
+                    if not answer:
+                        continue
+                    answer = answer[0].lower()
+
+                if answer == "y":
+                    stale_comments.delete()
 
             if output:
                 output.write(
