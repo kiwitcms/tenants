@@ -43,9 +43,18 @@ class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
 
         for tenant in cls.tenants_with_schema():
             with tenant_context(tenant):
-                test_case = TestCaseFactory()
+                # note: sending emails is disabled
                 test_execution = TestExecutionFactory()
+
+                test_case = TestCaseFactory()
+                test_case.save()
+                test_case.emailing.notify_on_case_update = False
+                test_case.emailing.save()
+
                 test_plan = TestPlanFactory()
+                test_plan.save()
+                test_plan.emailing.notify_on_plan_update = False
+                test_plan.emailing.save()
 
                 for _ in range(cls.comments_per_model):
                     cls.add_comments(test_case)
