@@ -21,7 +21,7 @@ from django_comments.models import Comment
 from tcms.core.helpers.comments import add_comment
 from tcms.tests.factories import TestCaseFactory, TestExecutionFactory, TestPlanFactory
 
-from tcms_tenants.tests import TenantGroupsTestCase, UserFactory
+from tcms_tenants.tests import TenantGroupsTestCase
 
 
 class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
@@ -51,15 +51,14 @@ class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
     @classmethod
     def add_comments(cls, factory_class):
         obj = factory_class()
-        user = UserFactory()
 
-        _ = add_comment([obj], "comment on a existing object", user)[0]
+        _ = add_comment([obj], "comment on a existing object", self.tester)[0]
 
-        stale = add_comment([obj], "comment on a deleted object", user)[0]
+        stale = add_comment([obj], "comment on a deleted object", self.tester)[0]
         stale.object_pk = str(int(obj.pk) + cls.pk_offset)
         stale.save()
 
-        stale2 = add_comment([obj], "comment with object_pk=''", user)[0]
+        stale2 = add_comment([obj], "comment with object_pk=''", self.tenant.owner)[0]
         stale2.object_pk = ""
         stale2.save()
 
