@@ -43,22 +43,26 @@ class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
 
         for tenant in cls.tenants_with_schema():
             with tenant_context(tenant):
+                test_case = TestCaseFactory()
+                test_execution = TestExecutionFactory()
+                test_plan = TestPlanFactory()
+
                 for _ in range(cls.comments_per_model):
-                    cls.add_comments(TestCaseFactory)
-                    cls.add_comments(TestExecutionFactory)
-                    cls.add_comments(TestPlanFactory)
+                    cls.add_comments(test_case)
+                    cls.add_comments(test_execution)
+                    cls.add_comments(test_plan)
 
     @classmethod
-    def add_comments(cls, factory_class):
-        obj = factory_class()
+    def add_comments(cls, parent_obj):
+        _ = add_comment([parent_obj], "comment on a existing object", cls.tester)[0]
 
-        _ = add_comment([obj], "comment on a existing object", self.tester)[0]
-
-        stale = add_comment([obj], "comment on a deleted object", self.tester)[0]
-        stale.object_pk = str(int(obj.pk) + cls.pk_offset)
+        stale = add_comment([parent_obj], "comment on a deleted object", cls.tester)[0]
+        stale.object_pk = str(int(parent_obj.pk) + cls.pk_offset)
         stale.save()
 
-        stale2 = add_comment([obj], "comment with object_pk=''", self.tenant.owner)[0]
+        stale2 = add_comment(
+            [parent_obj], "comment with object_pk=''", cls.tenant.owner
+        )[0]
         stale2.object_pk = ""
         stale2.save()
 
