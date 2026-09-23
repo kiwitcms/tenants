@@ -7,7 +7,6 @@ import os
 import shutil
 
 from django.conf import settings
-from django.utils.functional import cached_property
 from django.core.files.storage import FileSystemStorage
 
 from django_tenants import utils
@@ -20,7 +19,7 @@ class TenantFileSystemStorage(FileSystemStorage):
     https://github.com/tomturner/django-tenants/pull/252 gets merged.
     """
 
-    @cached_property
+    @property  # not cached like in parent class
     def relative_media_root(self):  # pylint: disable=no-self-use
         return getattr(settings, "MULTITENANT_RELATIVE_MEDIA_ROOT", "%s")
 
