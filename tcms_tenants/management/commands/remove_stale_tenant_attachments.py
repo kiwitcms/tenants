@@ -26,9 +26,16 @@ class Command(BaseCommand):
             dest="answer",
             help="Automatically confirm deletion",
         )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            default=False,
+            help="Don't remove anything, just report what would be removed",
+        )
 
     def handle(self, *args, **kwargs):
         answer = kwargs["answer"]
+        dry_run = kwargs["dry_run"]
 
         output = None
         if kwargs["verbosity"]:
@@ -38,6 +45,7 @@ class Command(BaseCommand):
             if output:
                 output.write(
                     f"\n\n === Removing attachments for tenant '{tenant.schema_name}' ==="
+                    f" dry run: {dry_run} ==="
                 )
 
             with tenant_context(tenant):
@@ -49,6 +57,9 @@ class Command(BaseCommand):
                                 f"`{attachment.content_type.model}' with PK "
                                 f"`{attachment.object_id}'"
                             )
+
+                        if dry_run:
+                            continue
 
                         while answer not in "yn":
                             answer = input("Do you wish to delete? [yN] ")
