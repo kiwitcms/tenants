@@ -5,6 +5,7 @@
 
 # pylint: disable=too-many-ancestors
 
+import shutil
 from io import StringIO
 
 from django.contrib.contenttypes.models import ContentType
@@ -160,3 +161,48 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
                     f"=== {banner} for tenant '{tenant.schema_name}' ===",
                     output,
                 )
+
+    def test_removes_attachments_whose_file_is_missing(self):
+        with tenant_context(self.tenant):
+            test_case = TestCaseFactory()
+            content_type = ContentType.objects.get_for_model(test_case)
+
+            missing = Attachment.objects.create(
+                content_type=content_type,
+                object_id=test_case.pk,
+                attachment_file=SimpleUploadedFile(
+                    "missing.txt", b"attachment content"
+                ),
+                creator=self.tester,
+            )
+            kept = Attachment.objects.create(
+                content_type=content_type,
+                object_id=test_case.pk,
+                attachment_file=SimpleUploadedFile("kept.txt", b"attachment content"),
+                creator=self.tester,
+            )
+
+            # delete the file from disk, keep the object and its parent object
+            self.storage.delete(missing.attachment_file.name)
+            self.assertFalse(self.storage.exists(missing.attachment_file.name))
+            self.assertTrue(self.storage.exists(kept.attachment_file.name))
+
+            attachments_dir = f"attachments/testcases_testcase/{test_case.pk}"
+            directory = self.storage.path(attachments_dir)
+
+        self.addCleanup(shutil.rmtree, directory, True)
+
+        out = StringIO()
+        call_command(
+            "remove_stale_tenant_attachments",
+            answer="y",
+            verbosity=1,
+            stdout=out,
+        )
+
+        self.assertIn("with missing file", out.getvalue())
+
+        with tenant_context(self.tenant):
+            self.assertFalse(Attachment.objects.filter(pk=missing.pk).exists())
+            self.assertTrue(Attachment.objects.filter(pk=kept.pk).exists())
+            self.assertTrue(self.storage.exists(kept.attachment_file.name))

@@ -3,6 +3,7 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
+from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django_tenants.utils import get_tenant_model, tenant_context
@@ -34,6 +35,31 @@ class Command(BaseCommand):
             help="Don't remove anything, just report what would be removed",
         )
 
+    @staticmethod
+    def prompt_and_remove(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+        attachment, message, output, dry_run, answer, delete_file=True
+    ):
+        if output:
+            output.write(message)
+
+        if dry_run:
+            return
+
+        while answer not in "yn":
+            answer = input("Do you wish to delete? [yN] ")
+            if not answer:
+                answer = "x"
+                continue
+            answer = answer[0].lower()
+
+        if answer == "y":
+            if delete_file:
+                remove_file_from_disk(attachment.attachment_file)
+            attachment.delete()
+
+            if output:
+                output.write(f"Deleted attachment `{attachment}'")
+
     def handle(self, *args, **kwargs):
         answer = kwargs["answer"]
         dry_run = kwargs["dry_run"]
@@ -52,29 +78,24 @@ class Command(BaseCommand):
             with tenant_context(tenant):
                 for attachment in Attachment.objects.all():
                     if not attachment.object_id or attachment.content_object is None:
-                        if output:
-                            output.write(
-                                f"Attachment `{attachment}' to non-existing "
-                                f"`{attachment.content_type.model}' with PK "
-                                f"`{attachment.object_id}'"
-                            )
-
-                        if dry_run:
-                            continue
-
-                        while answer not in "yn":
-                            answer = input("Do you wish to delete? [yN] ")
-                            if not answer:
-                                answer = "x"
-                                continue
-                            answer = answer[0].lower()
-
-                        if answer == "y":
-                            remove_file_from_disk(attachment.attachment_file)
-                            attachment.delete()
-
-                            if output:
-                                output.write(f"Deleted attachment `{attachment}'")
+                        self.prompt_and_remove(
+                            attachment,
+                            f"Attachment `{attachment}' to non-existing "
+                            f"`{attachment.content_type.model}' with PK "
+                            f"`{attachment.object_id}'",
+                            output,
+                            dry_run,
+                            answer,
+                        )
+                    elif not default_storage.exists(attachment.attachment_file.name):
+                        self.prompt_and_remove(
+                            attachment,
+                            f"Attachment `{attachment}' with missing file",
+                            output,
+                            dry_run,
+                            answer,
+                            delete_file=False,
+                        )
 
             if output:
                 output.write(
