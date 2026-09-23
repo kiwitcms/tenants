@@ -4,6 +4,7 @@
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from django_tenants.utils import get_tenant_model, tenant_context
 from django_comments.models import Comment
 
@@ -42,8 +43,8 @@ class Command(BaseCommand):
         for tenant in get_tenant_model().objects.all():
             if output:
                 output.write(
-                    f"\n\n === Removing comments for tenant '{tenant.schema_name}' ==="
-                    f" dry run: {dry_run} ==="
+                    f"\n\n {timezone.now()} === Removing comments"
+                    f" for tenant '{tenant.schema_name}' === dry run: {dry_run} ==="
                 )
 
             with tenant_context(tenant):
@@ -74,5 +75,6 @@ class Command(BaseCommand):
 
             if output:
                 output.write(
-                    f"\n\n === End removing comments for tenant '{tenant.schema_name}' ==="
+                    f"\n\n {timezone.now()} === End removing comments"
+                    f" for tenant '{tenant.schema_name}' ==="
                 )
