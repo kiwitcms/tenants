@@ -8,3 +8,4 @@ apps_dir/
 ssl/*.crt
 ssl/*.key
 dhparams.pem
+uploads/
