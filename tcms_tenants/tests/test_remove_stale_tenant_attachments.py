@@ -196,6 +196,7 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
         call_command(
             "remove_stale_tenant_attachments",
             answer="y",
+            check_storage=True,
             verbosity=1,
             stdout=out,
         )
@@ -206,3 +207,36 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
             self.assertFalse(Attachment.objects.filter(pk=missing.pk).exists())
             self.assertTrue(Attachment.objects.filter(pk=kept.pk).exists())
             self.assertTrue(self.storage.exists(kept.attachment_file.name))
+
+    def test_keeps_attachments_with_missing_file_without_check_storage(self):
+        with tenant_context(self.tenant):
+            test_case = TestCaseFactory()
+            content_type = ContentType.objects.get_for_model(test_case)
+
+            missing = Attachment.objects.create(
+                content_type=content_type,
+                object_id=test_case.pk,
+                attachment_file=SimpleUploadedFile("missing.txt", b"content"),
+                creator=self.tester,
+            )
+            self.storage.delete(missing.attachment_file.name)
+            self.assertFalse(self.storage.exists(missing.attachment_file.name))
+
+            directory = self.storage.path(
+                f"attachments/testcases_testcase/{test_case.pk}"
+            )
+
+        self.addCleanup(shutil.rmtree, directory, True)
+
+        out = StringIO()
+        call_command(
+            "remove_stale_tenant_attachments",
+            answer="y",
+            verbosity=1,
+            stdout=out,
+        )
+
+        self.assertNotIn("with missing file", out.getvalue())
+
+        with tenant_context(self.tenant):
+            self.assertTrue(Attachment.objects.filter(pk=missing.pk).exists())

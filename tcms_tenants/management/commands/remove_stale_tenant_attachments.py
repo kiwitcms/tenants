@@ -34,6 +34,12 @@ class Command(BaseCommand):
             default=False,
             help="Don't remove anything, just report what would be removed",
         )
+        parser.add_argument(
+            "--check-storage",
+            action="store_true",
+            default=False,
+            help="Also remove attachments whose file is missing from storage",
+        )
 
     @staticmethod
     def prompt_and_remove(  # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -63,6 +69,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         answer = kwargs["answer"]
         dry_run = kwargs["dry_run"]
+        check_storage = kwargs["check_storage"]
 
         output = None
         if kwargs["verbosity"]:
@@ -87,7 +94,9 @@ class Command(BaseCommand):
                             dry_run,
                             answer,
                         )
-                    elif not default_storage.exists(attachment.attachment_file.name):
+                    elif check_storage and not default_storage.exists(
+                        attachment.attachment_file.name
+                    ):
                         self.prompt_and_remove(
                             attachment,
                             f"Attachment `{attachment}' with missing file",
