@@ -14,17 +14,13 @@ from django.core.management import call_command
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
 
-from django_tenants.utils import (
-    get_tenant_model,
-    schema_exists,
-    tenant_context,
-)
+from django_tenants.utils import tenant_context
 
 from attachments.models import Attachment
 from tcms.tests.factories import TestCaseFactory, TestExecutionFactory, TestPlanFactory
 
 from tcms_tenants.storage import TenantFileSystemStorage
-from tcms_tenants.tests import TenantGroupsTestCase
+from tcms_tenants.tests import TenantGroupsTestCase, tenants_with_schema
 
 
 class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
@@ -32,20 +28,11 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
     pk_offset = 1_000_000_000
     storage = TenantFileSystemStorage()
 
-    @staticmethod
-    def tenants_with_schema():
-        tenants = []
-        for tenant in get_tenant_model().objects.all():
-            if schema_exists(tenant.schema_name):
-                tenants.append(tenant)
-
-        return tenants
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        for tenant in cls.tenants_with_schema():
+        for tenant in tenants_with_schema():
             with tenant_context(tenant):
                 # note: sending emails is disabled
                 test_execution = TestExecutionFactory()
@@ -101,7 +88,7 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
         stale2.save()
 
     def test_removes_only_attachments_which_are_attached_to_missing_objects(self):
-        tenants = self.tenants_with_schema()
+        tenants = tenants_with_schema()
         self.assertGreaterEqual(len(tenants), 1)
 
         for tenant in tenants:

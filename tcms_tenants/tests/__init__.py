@@ -12,10 +12,24 @@ from factory.django import DjangoModelFactory
 from django_tenants.clone import CloneSchema
 from django_tenants.test.client import TenantClient
 from django_tenants.test.cases import FastTenantTestCase
-from django_tenants.utils import get_tenant_model, schema_context, tenant_context
+from django_tenants.utils import (
+    get_tenant_model,
+    schema_context,
+    schema_exists,
+    tenant_context,
+)
 
 from tcms.tests.factories import TestPlanFactory
 from tenant_groups.models import Group as TenantGroup
+
+
+def tenants_with_schema():
+    tenants = []
+    for tenant in get_tenant_model().objects.all():
+        if schema_exists(tenant.schema_name):
+            tenants.append(tenant)
+
+    return tenants
 
 
 class UserFactory(DjangoModelFactory):
