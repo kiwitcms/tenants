@@ -27,26 +27,34 @@ class Command(BaseCommand):
         self.stdout.write("""To finish the upgrade process, the following
 management commands will be executed:
 
+populate_tenant_history
 refresh_tenant_permissions
 remove_stale_tenant_attachments
 remove_stale_tenant_comments
             """)
 
-        self.stdout.write("\n1. Refreshing tenant permissions:")
+        self.stdout.write("\n1. Populating history:")
+        call_command(
+            "populate_tenant_history",
+            "--auto",
+            verbosity=kwargs["verbosity"],
+        )
+
+        self.stdout.write("\n2. Refreshing tenant permissions:")
         call_command(
             "refresh_tenant_permissions",
             verbosity=kwargs["verbosity"],
             interactive=kwargs["interactive"],
         )
 
-        self.stdout.write("\n2. Removing stale attachments:")
+        self.stdout.write("\n3. Removing stale attachments:")
         call_command(
             "remove_stale_tenant_attachments",
             verbosity=kwargs["verbosity"],
             answer=answer,
         )
 
-        self.stdout.write("\n3. Removing stale comments:")
+        self.stdout.write("\n4. Removing stale comments:")
         call_command(
             "remove_stale_tenant_comments",
             verbosity=kwargs["verbosity"],
