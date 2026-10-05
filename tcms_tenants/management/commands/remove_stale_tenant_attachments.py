@@ -4,30 +4,24 @@
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 from django.core.files.storage import default_storage
-from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django_tenants.utils import get_tenant_model, tenant_context
 
+from attachments.management.commands.delete_stale_attachments import (
+    Command as DeleteStaleAttachmentsCommand,
+)
 from attachments.models import Attachment
 from attachments.views import remove_file_from_disk
 
 
-class Command(BaseCommand):
+class Command(DeleteStaleAttachmentsCommand):
     help = (
         "Remove attachments for which the related objects don't exist anymore! "
         "Works on all tenants!"
     )
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "-y",
-            "--yes",
-            default="x",
-            action="store_const",
-            const="y",
-            dest="answer",
-            help="Automatically confirm deletion",
-        )
+        super().add_arguments(parser)
         parser.add_argument(
             "--dry-run",
             action="store_true",
@@ -75,6 +69,11 @@ class Command(BaseCommand):
         if kwargs["verbosity"]:
             output = self.stdout
 
+        if dry_run:
+            # the upstream command reports each match before prompting, so
+            # refusing to delete turns it into a dry run
+            kwargs["answer"] = "n"
+
         for tenant in get_tenant_model().objects.all():
             if output:
                 output.write(
@@ -83,28 +82,22 @@ class Command(BaseCommand):
                 )
 
             with tenant_context(tenant):
-                for attachment in Attachment.objects.all():
-                    if not attachment.object_id or attachment.content_object is None:
-                        self.prompt_and_remove(
-                            attachment,
-                            f"Attachment `{attachment}' to non-existing "
-                            f"`{attachment.content_type.model}' with PK "
-                            f"`{attachment.object_id}'",
-                            output,
-                            dry_run,
-                            answer,
-                        )
-                    elif check_storage and not default_storage.exists(
-                        attachment.attachment_file.name
-                    ):
-                        self.prompt_and_remove(
-                            attachment,
-                            f"Attachment `{attachment}' with missing file",
-                            output,
-                            dry_run,
-                            answer,
-                            delete_file=False,
-                        )
+                # upstream removes attachments whose related object is gone
+                super().handle(*args, **kwargs)
+
+                if check_storage:
+                    for attachment in Attachment.objects.all():
+                        if attachment.content_object and not (
+                            default_storage.exists(attachment.attachment_file.name)
+                        ):
+                            self.prompt_and_remove(
+                                attachment,
+                                f"Attachment `{attachment}' with missing file",
+                                output,
+                                dry_run,
+                                answer,
+                                delete_file=False,
+                            )
 
             if output:
                 output.write(

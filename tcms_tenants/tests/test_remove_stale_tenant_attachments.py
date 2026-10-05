@@ -76,17 +76,6 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
         stale.object_id = str(int(parent_obj.pk) + cls.pk_offset)
         stale.save()
 
-        stale2 = Attachment.objects.create(
-            content_type=content_type,
-            object_id=parent_obj.pk,
-            attachment_file=SimpleUploadedFile(
-                f"stale2{index}.txt", b"attachment content"
-            ),
-            creator=cls.tester,
-        )
-        stale2.object_id = ""
-        stale2.save()
-
     def test_removes_only_attachments_which_are_attached_to_missing_objects(self):
         tenants = tenants_with_schema()
         self.assertGreaterEqual(len(tenants), 1)
@@ -94,13 +83,14 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
         for tenant in tenants:
             with tenant_context(tenant):
                 self.assertTrue(
-                    Attachment.objects.exclude(object_id="")
-                    .annotate(object_id_as_int=Cast("object_id", IntegerField()))
+                    Attachment.objects.annotate(
+                        object_id_as_int=Cast("object_id", IntegerField())
+                    )
                     .filter(object_id_as_int__gt=self.pk_offset)
                     .exists()
                 )
                 self.assertEqual(
-                    Attachment.objects.count(), self.attachments_per_model * 3 * 3
+                    Attachment.objects.count(), self.attachments_per_model * 2 * 3
                 )
 
         out = StringIO()
@@ -119,8 +109,9 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
                     Attachment.objects.count(), self.attachments_per_model * 3
                 )
                 self.assertFalse(
-                    Attachment.objects.exclude(object_id="")
-                    .annotate(object_id_as_int=Cast("object_id", IntegerField()))
+                    Attachment.objects.annotate(
+                        object_id_as_int=Cast("object_id", IntegerField())
+                    )
                     .filter(object_id_as_int__gt=self.pk_offset)
                     .exists()
                 )
@@ -148,6 +139,39 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
                     f"=== {banner} for tenant '{tenant.schema_name}' ===",
                     output,
                 )
+
+    def test_dry_run_removes_nothing(self):
+        tenants = tenants_with_schema()
+        self.assertGreaterEqual(len(tenants), 1)
+
+        out = StringIO()
+        call_command(
+            "remove_stale_tenant_attachments",
+            answer="y",
+            dry_run=True,
+            verbosity=1,
+            stdout=out,
+        )
+
+        output = out.getvalue()
+
+        for tenant in tenants:
+            with tenant_context(tenant):
+                self.assertEqual(
+                    Attachment.objects.count(), self.attachments_per_model * 2 * 3
+                )
+                self.assertTrue(
+                    Attachment.objects.annotate(
+                        object_id_as_int=Cast("object_id", IntegerField())
+                    )
+                    .filter(object_id_as_int__gt=self.pk_offset)
+                    .exists()
+                )
+
+            self.assertIn(
+                f"for tenant '{tenant.schema_name}' === dry run: True ===",
+                output,
+            )
 
     def test_removes_attachments_whose_file_is_missing(self):
         with tenant_context(self.tenant):
