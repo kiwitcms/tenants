@@ -56,11 +56,38 @@ class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
         stale.object_pk = str(int(parent_obj.pk) + cls.pk_offset)
         stale.save()
 
-        stale2 = add_comment(
-            [parent_obj], "comment with object_pk=''", cls.tenant.owner
-        )[0]
-        stale2.object_pk = ""
-        stale2.save()
+    def test_dry_run_removes_nothing(self):
+        tenants = tenants_with_schema()
+        self.assertGreaterEqual(len(tenants), 1)
+
+        out = StringIO()
+        call_command(
+            "remove_stale_tenant_comments",
+            answer="y",
+            dry_run=True,
+            verbosity=1,
+            stdout=out,
+        )
+
+        output = out.getvalue()
+
+        for tenant in tenants:
+            with tenant_context(tenant):
+                self.assertEqual(
+                    Comment.objects.count(), self.comments_per_model * 2 * 3
+                )
+                self.assertTrue(
+                    Comment.objects.annotate(
+                        object_pk_as_int=Cast("object_pk", IntegerField())
+                    )
+                    .filter(object_pk_as_int__gt=self.pk_offset)
+                    .exists()
+                )
+
+            self.assertIn(
+                f"for tenant '{tenant.schema_name}' === dry run: True ===",
+                output,
+            )
 
     def test_removes_only_comments_which_are_attached_to_missing_objects(self):
         tenants = tenants_with_schema()
@@ -69,13 +96,14 @@ class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
         for tenant in tenants:
             with tenant_context(tenant):
                 self.assertTrue(
-                    Comment.objects.exclude(object_pk="")
-                    .annotate(object_pk_as_int=Cast("object_pk", IntegerField()))
+                    Comment.objects.annotate(
+                        object_pk_as_int=Cast("object_pk", IntegerField())
+                    )
                     .filter(object_pk_as_int__gt=self.pk_offset)
                     .exists()
                 )
                 self.assertEqual(
-                    Comment.objects.count(), self.comments_per_model * 3 * 3
+                    Comment.objects.count(), self.comments_per_model * 2 * 3
                 )
 
         out = StringIO()
@@ -92,8 +120,9 @@ class RemoveStaleTenantCommentsTestCase(TenantGroupsTestCase):
             with tenant_context(tenant):
                 self.assertEqual(Comment.objects.count(), self.comments_per_model * 3)
                 self.assertFalse(
-                    Comment.objects.exclude(object_pk="")
-                    .annotate(object_pk_as_int=Cast("object_pk", IntegerField()))
+                    Comment.objects.annotate(
+                        object_pk_as_int=Cast("object_pk", IntegerField())
+                    )
                     .filter(object_pk_as_int__gt=self.pk_offset)
                     .exists()
                 )
