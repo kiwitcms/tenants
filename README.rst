@@ -148,6 +148,14 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.10.0 (05 Oct 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Add populate_tenant_history management command
+- Refactor remove_stale_tenant_comments management command
+- Refactor remove_stale_tenant_attachments management command
+
+
 v4.9.0 (24 Sep 2026)
 ~~~~~~~~~~~~~~~~~~~~
 
