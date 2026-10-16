@@ -45,11 +45,6 @@ def can_access(user, tenant):
     if tenant.publicly_readable:
         return True
 
-    # anonymous users "can access" because they need to be able
-    # to reach the login page
-    if not user.is_authenticated:
-        return True
-
     return tenant.authorized_users.filter(pk=user.pk).exists()
 
 

@@ -31,6 +31,10 @@ class BlockUnauthorizedUserMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):  # pylint: disable=no-self-use
+        # anonymous users need to be able to reach the login page!
+        if request.path.startswith("/accounts/"):
+            return self.get_response(request)
+
         if not can_access(request.user, request.tenant):
             return HttpResponseForbidden(_("Unauthorized"))
 

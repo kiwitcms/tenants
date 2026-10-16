@@ -7,6 +7,7 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.test import modify_settings
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -16,6 +17,7 @@ from django.http import HttpResponseForbidden, HttpResponseNotFound
 from tcms_tenants.tests import LoggedInTestCase
 from tcms_tenants.context_processors import schema_name_processor
 from tcms_tenants.context_processors import tenant_navbar_processor
+from tcms_tenants.utils import can_access
 
 
 class ContextProcessor(TestCase):
@@ -50,6 +52,49 @@ class BlockUnauthorizedUserMiddlewareTestCase(LoggedInTestCase):
         self.assertIn(
             "Unauthorized", str(response.content, encoding=settings.DEFAULT_CHARSET)
         )
+
+    def test_anonymous_user_cant_access_tenant(self):
+        self.assertFalse(self.tenant.publicly_readable)
+
+        self.client.logout()
+        response = self.client.get("/")
+
+        self.assertIsInstance(response, HttpResponseForbidden)
+        self.assertIn(
+            "Unauthorized", str(response.content, encoding=settings.DEFAULT_CHARSET)
+        )
+
+    def test_anonymous_user_can_access_accounts_urls(self):
+        self.assertFalse(self.tenant.publicly_readable)
+
+        self.client.logout()
+        response = self.client.get("/accounts/login/")
+
+        self.assertNotIsInstance(response, HttpResponseForbidden)
+
+    def test_unauthorized_user_can_access_accounts_urls(self):
+        self.assertFalse(self.tenant.publicly_readable)
+
+        self.tenant.authorized_users.remove(self.tester)
+        response = self.client.get("/accounts/login/")
+
+        self.assertNotIsInstance(response, HttpResponseForbidden)
+
+
+class CanAccessTestCase(LoggedInTestCase):
+    def test_anonymous_user_cant_access(self):
+        self.assertFalse(self.tenant.publicly_readable)
+        self.assertFalse(can_access(AnonymousUser(), self.tenant))
+
+    def test_unauthorized_user_cant_access(self):
+        self.assertFalse(self.tenant.publicly_readable)
+
+        self.tenant.authorized_users.remove(self.tester)
+        self.assertFalse(can_access(self.tester, self.tenant))
+
+    def test_authorized_user_can_access(self):
+        self.assertFalse(self.tenant.publicly_readable)
+        self.assertTrue(can_access(self.tester, self.tenant))
 
 
 class BlockUnpaidTenantMiddlewareTestCase(LoggedInTestCase):
