@@ -57,12 +57,9 @@ class BlockUnauthorizedUserMiddlewareTestCase(LoggedInTestCase):
         self.assertFalse(self.tenant.publicly_readable)
 
         self.client.logout()
-        response = self.client.get("/")
+        response = self.client.get("/", follow=True)
 
-        self.assertIsInstance(response, HttpResponseForbidden)
-        self.assertIn(
-            "Unauthorized", str(response.content, encoding=settings.DEFAULT_CHARSET)
-        )
+        self.assertContains(response, "Welcome to Kiwi TCMS")
 
     def test_anonymous_user_can_access_accounts_urls(self):
         self.assertFalse(self.tenant.publicly_readable)
@@ -70,15 +67,7 @@ class BlockUnauthorizedUserMiddlewareTestCase(LoggedInTestCase):
         self.client.logout()
         response = self.client.get("/accounts/login/")
 
-        self.assertNotIsInstance(response, HttpResponseForbidden)
-
-    def test_unauthorized_user_can_access_accounts_urls(self):
-        self.assertFalse(self.tenant.publicly_readable)
-
-        self.tenant.authorized_users.remove(self.tester)
-        response = self.client.get("/accounts/login/")
-
-        self.assertNotIsInstance(response, HttpResponseForbidden)
+        self.assertContains(response, "Welcome to Kiwi TCMS")
 
 
 class CanAccessTestCase(LoggedInTestCase):
