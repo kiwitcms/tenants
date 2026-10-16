@@ -75,6 +75,11 @@ class CanAccessTestCase(LoggedInTestCase):
         self.assertFalse(self.tenant.publicly_readable)
         self.assertFalse(can_access(AnonymousUser(), self.tenant))
 
+    def test_anonymous_user_can_access_publicly_readable(self):
+        self.tenant.publicly_readable = True
+        self.tenant.save()
+        self.assertTrue(can_access(AnonymousUser(), self.tenant))
+
     def test_unauthorized_user_cant_access(self):
         self.assertFalse(self.tenant.publicly_readable)
 
