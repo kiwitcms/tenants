@@ -53,7 +53,7 @@ class BlockUnauthorizedUserMiddlewareTestCase(LoggedInTestCase):
             "Unauthorized", str(response.content, encoding=settings.DEFAULT_CHARSET)
         )
 
-    def test_anonymous_user_cant_access_tenant(self):
+    def test_anonymous_user_is_redirected_to_login(self):
         self.assertFalse(self.tenant.publicly_readable)
 
         self.client.logout()
