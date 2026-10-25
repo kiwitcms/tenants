@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.10.1 (25 Oct 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Forward the query string when redirecting to a tenant
+
+
 v4.10.0 (05 Oct 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
