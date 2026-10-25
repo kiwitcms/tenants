@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2025 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -53,6 +53,38 @@ class RedirectToTestCase(LoggedInTestCase):
 
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertEqual(response["Location"], expected_url)
+
+    def test_redirect_to_tenant_path_with_query_string(self):
+        expected_url = "https://tenant.fast-test.com/plans/search/?product=Kiwi%20TCMS&status=active"
+        response = self.client.get(
+            reverse(
+                "tcms_tenants:redirect-to",
+                args=[self.tenant.schema_name, "plans/search/"],
+            )
+            + "?product=Kiwi%20TCMS&status=active"
+        )
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response["Location"], expected_url)
+
+    def test_redirect_to_oauth_authorize_preserves_query_string(self):
+        query = (
+            "response_type=code&client_id=abc&scope=kiwitcms%3Aview+kiwitcms%3Aadd"
+            "&redirect_uri=http%3A%2F%2F127.0.0.1%3A8989%2Foauth%2Fcallback"
+        )
+        response = self.client.get(
+            reverse(
+                "tcms_tenants:redirect-to",
+                args=[self.tenant.schema_name, "o/authorize/"],
+            )
+            + f"?{query}"
+        )
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(
+            response["Location"],
+            f"https://tenant.fast-test.com/o/authorize/?{query}",
+        )
 
 
 class NewTenantViewTestCase(TenantGroupsTestCase):
