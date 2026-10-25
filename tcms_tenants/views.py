@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2024 Alexander Todorov <atodorov@otb.bg>
+# Copyright (c) 2019-2026 Alexander Todorov <atodorov@otb.bg>
 #
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
@@ -121,13 +121,19 @@ class RedirectTo(RedirectView):  # pylint: disable=missing-permission-required
     http://tenant.tenants.localdomain/login/github?next=path
 
     This is to prevent redirect_uri mismatch errors!
+
+    The query string is forwarded to the tenant URL, which lets callers
+    preserve the original destination (e.g. an OAuth authorization URL)
+    across the login redirect chain.
     """
 
     def get_redirect_url(self, *args, **kwargs):
         tenant = kwargs["tenant"]
         path = kwargs["path"]
+        query = self.request.META.get("QUERY_STRING", "")
         tenant_url = utils.tenant_url(self.request, tenant)
-        return f"{tenant_url}/{path}"
+
+        return f"{tenant_url}/{path}?{query}".rstrip("?")
 
 
 @method_decorator(login_required, name="dispatch")
