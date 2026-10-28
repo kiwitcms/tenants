@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.10.2 (28 Oct 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Annotate API method arguments with their types
+
+
 v4.10.1 (25 Oct 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
