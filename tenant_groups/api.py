@@ -5,21 +5,27 @@
 
 # pylint: disable=missing-permission-required, no-self-use
 
+from typing import Annotated, Any
+
 from django.contrib.auth.models import Permission
 from django.forms.models import model_to_dict
 from tcms.rpc.views import rpc_method
 
+from tcms.rpc.annotations import FormValues, ModelQuery
 from tcms.rpc.api.user import get_queryset
 from tcms.rpc.decorators import permissions_required
 from tenant_groups.forms import GroupForm
 from tenant_groups.models import Group
+
+GroupQuery = Annotated[dict[str, Any], ModelQuery(Group)]
+GroupValues = Annotated[dict[str, Any], FormValues(GroupForm)]
 
 
 @rpc_method(
     name="TenantGroup.filter",
     auth=permissions_required("tenant_groups.view_group"),
 )
-def filter(query):  # pylint: disable=redefined-builtin
+def filter(query: GroupQuery):  # pylint: disable=redefined-builtin
     """
     .. function:: RPC TenantGroup.filter(query)
 
@@ -112,7 +118,7 @@ def add_user(group_id, user_id, rpc_context=None):
     name="TenantGroup.create",
     auth=permissions_required("tenant_groups.add_group"),
 )
-def create(values):
+def create(values: GroupValues):
     """
     .. function:: RPC TenantGroup.create(values)
 
