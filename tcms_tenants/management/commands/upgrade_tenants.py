@@ -3,7 +3,7 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-from django.core.management import call_command
+from django.core.management import call_command, get_commands
 from django.core.management.base import BaseCommand
 
 
@@ -24,14 +24,20 @@ class Command(BaseCommand):
         if kwargs["interactive"]:
             answer = "n"
 
-        self.stdout.write("""To finish the upgrade process, the following
-management commands will be executed:
+        commands = [
+            "populate_tenant_history",
+            "refresh_tenant_permissions",
+            "remove_stale_tenant_attachments",
+            "remove_stale_tenant_comments",
+        ]
+        has_token_cleanup = "remove_stale_tenant_tokens" in get_commands()
+        if has_token_cleanup:
+            commands.append("remove_stale_tenant_tokens")
 
-populate_tenant_history
-refresh_tenant_permissions
-remove_stale_tenant_attachments
-remove_stale_tenant_comments
-            """)
+        self.stdout.write(
+            "To finish the upgrade process, the following\n"
+            "management commands will be executed:\n\n" + "\n".join(commands)
+        )
 
         self.stdout.write("\n1. Populating history:")
         call_command(
@@ -60,5 +66,12 @@ remove_stale_tenant_comments
             verbosity=kwargs["verbosity"],
             answer=answer,
         )
+
+        if has_token_cleanup:
+            self.stdout.write("\n5. Removing stale tokens:")
+            call_command(
+                "remove_stale_tenant_tokens",
+                verbosity=kwargs["verbosity"],
+            )
 
         self.stdout.write("Done.")
