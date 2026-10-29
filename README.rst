@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.10.3 (29 Oct 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Execute ``remove_stale_tenant_tokens`` command in ``upgrade_tenants``
+
+
 v4.10.2 (28 Oct 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
