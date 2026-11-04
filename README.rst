@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.10.4 (04 Nov 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Order tenants by primary key in management commands
+
+
 v4.10.3 (29 Oct 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
