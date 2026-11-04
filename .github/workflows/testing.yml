@@ -14,7 +14,7 @@ permissions: read-all
 
 jobs:
   build-package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         python-version: [3.14]
@@ -34,7 +34,7 @@ jobs:
           make package
 
   postgres:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         python-version: [3.14]
