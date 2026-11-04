@@ -38,7 +38,7 @@ class Command(DeleteStaleCommentsCommand):
             # refusing to delete turns it into a dry run
             kwargs["answer"] = "n"
 
-        for tenant in get_tenant_model().objects.all():
+        for tenant in get_tenant_model().objects.order_by("pk"):
             if output:
                 output.write(
                     f"\n\n {timezone.now()} === Removing comments"
