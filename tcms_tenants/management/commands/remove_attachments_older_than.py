@@ -52,7 +52,7 @@ class Command(BaseCommand):
         if kwargs["verbosity"]:
             output = self.stdout
 
-        tenants = get_tenant_model().objects.all()
+        tenants = get_tenant_model().objects.order_by("pk")
         if kwargs["tenant"]:
             tenants = tenants.filter(schema_name=kwargs["tenant"])
 
