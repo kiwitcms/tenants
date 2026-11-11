@@ -9,7 +9,7 @@ KIWI_INCLUDE_PATH="../Kiwi/"
 .PHONY: messages
 messages:
 	if [ ! -d "$(KIWI_INCLUDE_PATH)/kiwi_lint" ]; then \
-	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
+	    git clone --depth 1 https://github.com/kiwitcms/kiwitcms.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
 
@@ -21,7 +21,7 @@ messages:
 .PHONY: test
 test:
 	if [ ! -d "$(KIWI_INCLUDE_PATH)/kiwi_lint" ]; then \
-	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
+	    git clone --depth 1 https://github.com/kiwitcms/kiwitcms.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
 
@@ -44,7 +44,7 @@ test_for_missing_migrations:
 .PHONY: pylint
 pylint:
 	if [ ! -d "$(KIWI_INCLUDE_PATH)/kiwi_lint" ]; then \
-	    git clone --depth 1 https://github.com/kiwitcms/Kiwi.git $(KIWI_INCLUDE_PATH); \
+	    git clone --depth 1 https://github.com/kiwitcms/kiwitcms.git $(KIWI_INCLUDE_PATH); \
 	    pip install -U -r $(KIWI_INCLUDE_PATH)/requirements/base.txt; \
 	fi
 
