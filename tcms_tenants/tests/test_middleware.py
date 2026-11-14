@@ -122,7 +122,7 @@ class InvalidHostname(LoggedInTestCase):
     @classmethod
     def get_test_schema_name(cls):
         # we need a different schema name here so that it gets created
-        return "_underscore"
+        return "underscore"
 
     def test_invalid_hostname_should_return_404(self):
         response = self.client.get("/")

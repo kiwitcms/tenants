@@ -103,7 +103,7 @@ class AuthorizedUsersAdminTestCase(LoggedInTestCase):
 
             ts = int(timezone.now().timestamp())
             cls.tenant2 = utils.get_tenant_model()(
-                schema_name=f"tenant_{ts}",
+                schema_name=f"tenant{ts}",
                 owner=cls.tester,
             )
             cls.tenant2.save()
