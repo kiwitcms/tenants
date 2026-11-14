@@ -328,7 +328,7 @@ class MultiTenantAddUser(TenantGroupsTestCase):
 
     @classmethod
     def get_test_schema_name(cls):
-        return "tenant_group"
+        return "tenantgroup"
 
     @classmethod
     def get_test_tenant_domain(cls):

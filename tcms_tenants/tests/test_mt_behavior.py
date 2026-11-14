@@ -107,7 +107,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         with utils.schema_context("public"):
             ts = int(timezone.now().timestamp())
             cls.tenant2 = utils.get_tenant_model()(
-                schema_name=f"tenant_{ts}",
+                schema_name=f"tenant{ts}",
                 owner=cls.user_02,
             )
             cls.tenant2.save()
