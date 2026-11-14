@@ -64,6 +64,14 @@ jobs:
           echo "username = kiwitcms-bot" >> ~/.tcms.conf
           echo "password = ${{ secrets.TCMS_PASSWORD }}" >> ~/.tcms.conf
 
+      - name: Install kiwitcms-django-tenants from PR branch
+        run: |
+          git clone --depth 1 --branch escape-schema-names \
+            https://github.com/kiwitcms/django-tenants.git /tmp/dt-fork
+          pip install -U pip wheel setuptools
+          pip wheel --no-deps --wheel-dir /tmp/dt-wheel /tmp/dt-fork
+          pip install --no-deps /tmp/dt-wheel/*.whl
+
       - name: Execute tests
         env:
           PKG_TOKEN: ${{ secrets.GEMFURY_PULL_TOKEN }}
@@ -74,6 +82,9 @@ jobs:
             --extra-index-url https://pypi.org/simple/
           # workaround for https://github.com/tomturner/django-tenants/issues/336
           pip install psycopg>=3.1.17
+
+          # prove the fork, not the released package, is installed
+          python -c "import pathlib, django_tenants; p = pathlib.Path(django_tenants.__file__).parent / 'utils.py'; assert 'return sql.Identifier(schema_name)' in p.read_text()"
 
           # report to Kiwi TCMS only if we have access to secrets
           if [ -n "${{ secrets.TCMS_PASSWORD }}" ]; then
