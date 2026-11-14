@@ -99,7 +99,7 @@ class TenantDeleteTestCase(LoggedInTestCase):
     def test_tenant_delete_removes_media_directory(self):
         connection.set_schema_to_public()
         tenant = utils.get_tenant_model()(
-            schema_name="tenant_to_delete", owner=UserFactory(), name="To Delete"
+            schema_name="tenant2delete", owner=UserFactory(), name="To Delete"
         )
         tenant.save()
 
@@ -132,7 +132,7 @@ class TenantDeleteTestCase(LoggedInTestCase):
     ):  # pylint: disable=no-self-use
         connection.set_schema_to_public()
         tenant = utils.get_tenant_model()(
-            schema_name="wo_uploads", owner=UserFactory(), name="Without Uploads"
+            schema_name="w0uploads", owner=UserFactory(), name="Without Uploads"
         )
         tenant.save()
 

@@ -116,6 +116,6 @@ jobs:
         run: |
           PYTHONPATH=.:../Kiwi/ KIWI_TENANTS_DOMAIN='test.com' ./manage.py clone_tenant \
             --clone_from empty --clone_tenant_fields False \
-            --schema_name a-cloned-tenant --name "A cloned tenant" --organization "QA department" \
+            --schema_name aclonedtenant --name "A cloned tenant" --organization "QA department" \
             --paid_until 3000-03-31 --publicly_readable False --owner_id 1 \
-            --domain-domain a-cloned-tenant.test.com --domain-is_primary True
+            --domain-domain aclonedtenant.test.com --domain-is_primary True
