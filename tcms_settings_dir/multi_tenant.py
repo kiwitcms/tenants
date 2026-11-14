@@ -22,6 +22,12 @@ STORAGES["default"][  # noqa: F821
 
 MULTITENANT_RELATIVE_MEDIA_ROOT = "tenant/%s"
 
+# Do not let a tenant attach to a PostgreSQL schema that already exists under
+# that name (another application's schema, PG_EXTRA_SEARCH_PATHS, etc).
+# Schema names accepted by NewTenantForm are already restricted to
+# [a-z0-9]{1,63}, but this makes django-tenants enforce it as well.
+TENANT_REJECT_EXISTING_SCHEMA = True
+
 
 # this always needs to be the first app
 if "django_tenants" not in INSTALLED_APPS:  # noqa: F821
