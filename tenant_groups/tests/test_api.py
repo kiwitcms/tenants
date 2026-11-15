@@ -318,7 +318,7 @@ class TenantGroupCreate(TenantGroupsTestCase):
         data = json.loads(response.content)["error"]
 
         self.assertEqual(
-            "Internal error: [('name', ['This field is required.'])]",
+            "[('name', ['This field is required.'])]",
             data["message"],
         )
 

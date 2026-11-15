@@ -9,6 +9,7 @@ from typing import Annotated, Any
 
 from django.contrib.auth.models import Permission
 from django.forms.models import model_to_dict
+from modernrpc.exceptions import RPC_INTERNAL_ERROR, RPCException, RPCInvalidParams
 from tcms.rpc.views import rpc_method
 
 from tcms.rpc.annotations import FormValues, ModelQuery
@@ -65,7 +66,7 @@ def add_permission(group_id, perm):
         :type perm: str
         :raises PermissionDenied: if missing the *tenant_groups.change_group* permission
         :raises DoesNotExist: if group doesn't exist
-        :raises ValueError: if permission label is invalid
+        :raises RPCInvalidParams: if permission label is invalid
 
     .. versionadded:: 15.3
     """
@@ -74,10 +75,10 @@ def add_permission(group_id, perm):
     try:
         app_label, codename = perm.split(".")
     except ValueError:
-        raise ValueError(f'"{perm}" should be: app_label.perm_codename') from None
+        raise RPCInvalidParams(f'"{perm}" should be: app_label.perm_codename') from None
 
     if not app_label or not codename:
-        raise ValueError("Invalid app_label or codename")
+        raise RPCInvalidParams("Invalid app_label or codename")
 
     group.permissions.add(
         Permission.objects.get(content_type__app_label=app_label, codename=codename)
@@ -128,7 +129,7 @@ def create(values: GroupValues):
         :type values: dict
         :return: Serialized :class:`tenant_groups.models.Group` object
         :rtype: dict
-        :raises ValueError: if input values don't validate
+        :raises RPCException: if input values don't validate
         :raises PermissionDenied: if missing *tenant_groups.add_group* permission
 
     .. versionadded:: 15.3
@@ -139,4 +140,4 @@ def create(values: GroupValues):
         group = form.save()
         return model_to_dict(group)
 
-    raise ValueError(list(form.errors.items()))
+    raise RPCException(RPC_INTERNAL_ERROR, str(list(form.errors.items())))
