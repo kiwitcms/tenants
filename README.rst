@@ -148,6 +148,14 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.11.0 (15 Nov 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Update kiwitcms-django-tenants from 3.8.3 to 3.8.5
+- Explicitly configure setting ``TENANT_REJECT_EXISTING_SCHEMA=True``
+  which rejects attaching a new tenant to an already existing DB schema
+
+
 v4.10.4 (04 Nov 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
