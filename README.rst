@@ -148,6 +148,13 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.12.0 (16 Nov 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Convert API errors to RPCException for compatibility with
+  newer versions of django-modern-rpc
+
+
 v4.11.0 (15 Nov 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
