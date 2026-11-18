@@ -22,5 +22,18 @@ services:
             PGADMIN_DEFAULT_EMAIL: pgadmin@kiwitcms.org
             PGADMIN_DEFAULT_PASSWORD: kiwi
 
+    rustfs:
+        container_name: rustfs
+        image: rustfs/rustfs:1.0.6
+        restart: always
+        ports:
+            - 9000:9000
+        volumes:
+            - rustfs_data:/data
+        environment:
+            RUSTFS_ACCESS_KEY: rustfsadmin
+            RUSTFS_SECRET_KEY: rustfsadmin
+
 volumes:
     postgresql_database_data:
+    rustfs_data:
