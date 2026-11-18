@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from django_tenants import utils
+from modernrpc.exceptions import RPC_INTERNAL_ERROR
 from parameterized import parameterized
 from tcms.bugs.models import Bug
 from tcms.bugs.tests.factory import BugFactory
@@ -518,7 +519,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         self.assertEqual(HTTPStatus.OK, response.status_code)
         data = json.loads(response.content)
         self.assertIn("error", data)
-        self.assertRegex(data["error"]["message"], r"assignee.*Unknown user_id")
+        self.assertEqual(RPC_INTERNAL_ERROR, data["error"]["code"])
 
         # reporter is unauthorized, assignee is authorized
         response = self.client.post(
@@ -543,7 +544,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         self.assertEqual(HTTPStatus.OK, response.status_code)
         data = json.loads(response.content)
         self.assertIn("error", data)
-        self.assertRegex(data["error"]["message"], r"reporter.*Select a valid choice")
+        self.assertEqual(RPC_INTERNAL_ERROR, data["error"]["code"])
 
     @parameterized.expand(
         [
@@ -1929,7 +1930,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         self.assertEqual(HTTPStatus.OK, response.status_code)
         data = json.loads(response.content)
         self.assertIn("error", data)
-        self.assertIn("User matching query does not exist", data["error"]["message"])
+        self.assertEqual(RPC_INTERNAL_ERROR, data["error"]["code"])
 
         user.refresh_from_db()
         self.assertEqual(user.first_name, original_first_name)
@@ -2050,7 +2051,7 @@ class MultiTenantBehavior(TenantGroupsTestCase):
         self.assertEqual(HTTPStatus.OK, response.status_code)
         data = json.loads(response.content)
         self.assertIn("error", data)
-        self.assertIn("User matching query does not exist", data["error"]["message"])
+        self.assertEqual(RPC_INTERNAL_ERROR, data["error"]["code"])
 
         user.refresh_from_db()
         self.assertFalse(user.groups.filter(name=self.auth_group.name).exists())

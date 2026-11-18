@@ -10,6 +10,7 @@ from http import HTTPStatus
 
 from django.contrib.auth.models import Permission
 from django_tenants.utils import tenant_context
+from modernrpc.exceptions import RPC_INTERNAL_ERROR
 from parameterized import parameterized
 
 from tcms.tests import remove_perm_from_user, user_should_have_perm
@@ -129,7 +130,7 @@ class TenantGroupAddPermission(TenantGroupsTestCase):
 
         data = json.loads(response.content)["error"]
 
-        self.assertIn("Group matching query does not exist", data["message"])
+        self.assertEqual(RPC_INTERNAL_ERROR, data["code"])
 
     def test_with_invalid_permission_label(self):
         with tenant_context(self.tenant):
@@ -219,7 +220,7 @@ class TenantGroupAddUser(TenantGroupsTestCase):
 
         data = json.loads(response.content)["error"]
 
-        self.assertIn("Group matching query does not exist", data["message"])
+        self.assertEqual(RPC_INTERNAL_ERROR, data["code"])
 
     def test_with_missing_user_id(self):
         with tenant_context(self.tenant):
@@ -241,7 +242,7 @@ class TenantGroupAddUser(TenantGroupsTestCase):
 
         data = json.loads(response.content)["error"]
 
-        self.assertIn("User matching query does not exist", data["message"])
+        self.assertEqual(RPC_INTERNAL_ERROR, data["code"])
 
 
 class TenantGroupCreate(TenantGroupsTestCase):
@@ -420,7 +421,7 @@ class MultiTenantAddUser(TenantGroupsTestCase):
         self.assertEqual(HTTPStatus.OK, response.status_code)
         data = json.loads(response.content)
         self.assertIn("error", data)
-        self.assertIn("User matching query does not exist", data["error"]["message"])
+        self.assertEqual(RPC_INTERNAL_ERROR, data["error"]["code"])
 
         with tenant_context(self.tenant):
             self.tenant_group.refresh_from_db()
