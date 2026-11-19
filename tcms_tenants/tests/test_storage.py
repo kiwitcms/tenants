@@ -4,11 +4,15 @@
 # https://www.gnu.org/licenses/agpl-3.0.html
 
 # pylint: disable=too-many-ancestors
+import json
 import os
 import unittest
+from urllib.parse import urlparse
 
 import requests
 from botocore.exceptions import ClientError
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
 from django.db import connection
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -183,11 +187,14 @@ class S3StorageTests(SimpleTestCase):
             ):
                 raise
 
+    def _get(self, url):  # pylint: disable=no-self-use
+        return requests.get(url, timeout=10)
+
     def test_upload_and_read_via_s3_endpoint(self):
         file_name = f"hello_world_{timezone.now().timestamp()}.txt"
         self.storage.save(file_name, ContentFile(b"Hello World"))
 
-        response = requests.get(self.storage.url(file_name), timeout=10)
+        response = self._get(self.storage.url(file_name))
 
         self.assertEqual(200, response.status_code)
         self.assertEqual("Hello World", response.text)
@@ -198,7 +205,52 @@ class S3StorageTests(SimpleTestCase):
 
         self.storage.delete(file_name)
 
-        response = requests.get(self.storage.url(file_name), timeout=10)
+        response = self._get(self.storage.url(file_name))
 
         self.assertEqual(404, response.status_code)
         self.assertIn("<Code>NoSuchKey</Code>", response.text)
+
+
+class CloudFrontSignedURLTests(S3StorageTests):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        cls.cloudfront_key = key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8,
+            serialization.NoEncryption(),
+        ).decode()
+
+        endpoint = urlparse(cls.endpoint_url)
+        cls.storage = S3Storage(
+            bucket_name=cls.bucket_name,
+            endpoint_url=cls.endpoint_url,
+            region_name=cls.region_name,
+            addressing_style="path",
+            custom_domain=f"{endpoint.netloc}/{cls.bucket_name}",
+            url_protocol=f"{endpoint.scheme}:",
+            cloudfront_key_id="test-key",
+            cloudfront_key=cls.cloudfront_key,
+        )
+
+        policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": "s3:GetObject",
+                    "Resource": f"arn:aws:s3:::{cls.bucket_name}/*",
+                }
+            ],
+        }
+        cls.storage.connection.meta.client.put_bucket_policy(
+            Bucket=cls.bucket_name, Policy=json.dumps(policy)
+        )
+
+    def _get(self, url):
+        self.assertIn("Key-Pair-Id=test-key", url)
+        # CloudFront validates the signature and forwards only the path to the origin
+        return super()._get(url.split("?", 1)[0])

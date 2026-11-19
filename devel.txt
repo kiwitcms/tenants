@@ -9,4 +9,5 @@ kiwitcms-django-plugin
 Werkzeug
 django-extensions
 django-storages[s3]
+cryptography
 parameterized
