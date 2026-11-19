@@ -5,11 +5,16 @@
 
 # pylint: disable=too-many-ancestors
 import os
+import unittest
 
+import requests
+from botocore.exceptions import ClientError
 from django.db import connection
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.test import override_settings
+from django.test import SimpleTestCase, override_settings
+from django.utils import timezone
+from storages.backends.s3 import S3Storage
 
 from django_tenants import utils
 
@@ -138,3 +143,62 @@ class TenantDeleteTestCase(LoggedInTestCase):
 
         # no tenant relative dir, delete doesn't raise
         tenant.delete()
+
+
+class S3StorageTests(SimpleTestCase):
+    access_key = os.environ.get("AWS_S3_ACCESS_KEY_ID")
+    secret_key = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
+    bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
+    region_name = os.environ.get("AWS_S3_REGION_NAME")
+
+    @classmethod
+    def setUpClass(cls):
+        if not all(
+            (
+                cls.access_key,
+                cls.secret_key,
+                cls.bucket_name,
+                cls.endpoint_url,
+                cls.region_name,
+            )
+        ):
+            raise unittest.SkipTest("S3 environment variables are not configured")
+
+        super().setUpClass()
+
+        cls.storage = S3Storage(
+            bucket_name=cls.bucket_name,
+            endpoint_url=cls.endpoint_url,
+            region_name=cls.region_name,
+            addressing_style="path",
+        )
+
+        try:
+            cls.storage.bucket.create()
+        except ClientError as error:
+            if error.response["Error"]["Code"] not in (
+                "BucketAlreadyOwnedByYou",
+                "BucketAlreadyExists",
+            ):
+                raise
+
+    def test_upload_and_read_via_s3_endpoint(self):
+        file_name = f"hello_world_{timezone.now().timestamp()}.txt"
+        self.storage.save(file_name, ContentFile(b"Hello World"))
+
+        response = requests.get(self.storage.url(file_name), timeout=10)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("Hello World", response.text)
+
+    def test_delete_then_read_via_s3_endpoint(self):
+        file_name = f"hello_world_{timezone.now().timestamp()}.txt"
+        self.storage.save(file_name, ContentFile(b"Hello World"))
+
+        self.storage.delete(file_name)
+
+        response = requests.get(self.storage.url(file_name), timeout=10)
+
+        self.assertEqual(404, response.status_code)
+        self.assertIn("<Code>NoSuchKey</Code>", response.text)
