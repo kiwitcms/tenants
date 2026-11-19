@@ -175,9 +175,13 @@ class S3StorageTests(SimpleTestCase):
         )
 
         try:
-            cls.storage.bucket.creation_date
-        except ClientError:
             cls.storage.bucket.create()
+        except ClientError as error:
+            if error.response["Error"]["Code"] not in (
+                "BucketAlreadyOwnedByYou",
+                "BucketAlreadyExists",
+            ):
+                raise
 
     def test_upload_and_read_via_s3_endpoint(self):
         file_name = f"hello_world_{timezone.now().timestamp()}.txt"
