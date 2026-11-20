@@ -109,6 +109,9 @@ class DefaultStorageTestCase(TenantFileSystemStorageTestCase):
     },
 )
 class TenantDeleteTestCase(LoggedInTestCase):
+    def absolute_path(self, path):
+        return default_storage.path(path)
+
     def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
         self, path, expected
     ):
@@ -132,7 +135,7 @@ class TenantDeleteTestCase(LoggedInTestCase):
                 "hello_delete.txt", ContentFile("Hello Delete")
             )
             # convert to absolute path
-            file_name = default_storage.path(file_name)
+            file_name = self.absolute_path(file_name)
             self.assertPathExistsViaStorageBackend(file_name, True)
 
             tenant_storage_dir = os.path.dirname(file_name)
