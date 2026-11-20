@@ -87,6 +87,10 @@ jobs:
           # workaround for https://github.com/tomturner/django-tenants/issues/336
           pip install psycopg>=3.1.17
 
+          # temporary: test against kiwitcms/django-tenants PR #44
+          pip install --force-reinstall --no-deps \
+            "git+https://github.com/kiwitcms/django-tenants.git@fix/tenant-testcase-super-setupclass"
+
           # report to Kiwi TCMS only if we have access to secrets
           if [ -n "${{ secrets.TCMS_PASSWORD }}" ]; then
               export DJANGO_TEST_RUNNER="tcms_django_plugin.TestRunner"
