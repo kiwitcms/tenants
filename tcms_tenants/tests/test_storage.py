@@ -373,6 +373,8 @@ class TenantS3StorageTestCase(LoggedInTestCase):
         "default": {
             "BACKEND": "tcms_tenants.storage.TenantS3Storage",
             "OPTIONS": {
+                "access_key": os.environ.get("AWS_S3_ACCESS_KEY_ID"),
+                "secret_key": os.environ.get("AWS_S3_SECRET_ACCESS_KEY"),
                 "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
                 "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
                 "region_name": os.environ.get("AWS_S3_REGION_NAME"),
@@ -412,6 +414,8 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
         cls.enterClassContext(override_settings(**cls._overridden_settings))
 
         cls.storage = TenantS3Storage(
+            access_key=cls.access_key,
+            secret_key=cls.secret_key,
             bucket_name=cls.bucket_name,
             endpoint_url=cls.endpoint_url,
             region_name=cls.region_name,
