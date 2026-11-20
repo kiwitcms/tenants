@@ -413,18 +413,8 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
         # pylint: disable-next=not-a-mapping
         cls.enterClassContext(override_settings(**cls._overridden_settings))
 
-        cls.storage = TenantS3Storage(
-            access_key=cls.access_key,
-            secret_key=cls.secret_key,
-            bucket_name=cls.bucket_name,
-            endpoint_url=cls.endpoint_url,
-            region_name=cls.region_name,
-            addressing_style="path",
-            verify=cls.verify,
-        )
-
         try:
-            cls.storage.bucket.create()
+            default_storage.bucket.create()
         except ClientError as error:
             if error.response["Error"]["Code"] not in (
                 "BucketAlreadyOwnedByYou",
@@ -435,14 +425,17 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
     def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
         self, path, expected
     ):
+        if path.rstrip("/") == default_storage.location.rstrip("/"):
+            path = "./"
+
         if path.endswith("/"):
             # S3 has no directories. A non-empty key prefix is the closest
             # equivalent. listdir() returns ([], []) for a non-existing prefix.
-            directories, files = self.storage.listdir(path)
+            directories, files = default_storage.listdir(path)
             exists = bool(directories or files)
         else:
             try:
-                self.storage.size(path)
+                default_storage.size(path)
             except FileNotFoundError:
                 exists = False
             else:
@@ -453,6 +446,11 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
     def assertPathExistsViaExternalCheck(  # pylint: disable=invalid-name
         self, path, expected
     ):
-        response = requests.get(self.storage.url(path), timeout=10, verify=self.verify)
+        if path.rstrip("/") == default_storage.location.rstrip("/"):
+            path = "./"
+
+        response = requests.get(
+            default_storage.url(path), timeout=10, verify=self.verify
+        )
         self.assertIn(response.status_code, (HTTPStatus.OK, HTTPStatus.NOT_FOUND))
         self.assertEqual(expected, response.status_code == HTTPStatus.OK)
