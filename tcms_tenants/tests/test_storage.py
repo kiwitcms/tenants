@@ -446,6 +446,13 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
 
         self.assertEqual(expected, exists)
 
+    def assertPathExistsViaExternalCheck(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        response = requests.get(self.storage.url(path), timeout=10, verify=self.verify)
+        self.assertIn(response.status_code, (HTTPStatus.OK, HTTPStatus.NOT_FOUND))
+        self.assertEqual(expected, response.status_code == HTTPStatus.OK)
+
     def test_tenant_delete_removes_media_directory(self):
         connection.set_schema_to_public()
         tenant = utils.get_tenant_model()(
@@ -459,7 +466,6 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
                 "hello_delete.txt", ContentFile("Hello Delete")
             )
             directory = "./"
-            prefix = self.storage.location.rstrip("/") + "/"
 
             self.assertPathExistsViaStorageBackend(file_name, True)
             self.assertPathExistsViaStorageBackend(directory, True)
@@ -467,8 +473,9 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
         # Delete the tenant
         tenant.delete()
 
-        # All objects under the tenant's storage prefix should be removed
-        self.assertFalse(list(self.storage.bucket.objects.filter(Prefix=prefix)))
+        with utils.tenant_context(tenant):
+            self.assertPathExistsViaExternalCheck(file_name, False)
+            self.assertPathExistsViaExternalCheck(directory, False)
 
     def test_tenant_delete_doesnt_raise_when_media_dir_doesnt_exist(self):
         connection.set_schema_to_public()
