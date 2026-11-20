@@ -7,6 +7,7 @@
 import json
 import os
 import unittest
+from http import HTTPStatus
 from urllib.parse import urlparse
 
 import requests
@@ -22,7 +23,7 @@ from storages.backends.s3 import S3Storage
 
 from django_tenants import utils
 
-from tcms_tenants.storage import TenantFileSystemStorage
+from tcms_tenants.storage import TenantFileSystemStorage, TenantS3Storage
 from tcms_tenants.tests import LoggedInTestCase, UserFactory
 
 
@@ -198,7 +199,7 @@ class S3StorageTests(SimpleTestCase):
 
         response = self._get(self.storage.url(file_name))
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(HTTPStatus.OK, response.status_code)
         self.assertEqual("Hello World", response.text)
 
     def test_delete_then_read_via_s3_endpoint(self):
@@ -209,7 +210,7 @@ class S3StorageTests(SimpleTestCase):
 
         response = self._get(self.storage.url(file_name))
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(HTTPStatus.NOT_FOUND, response.status_code)
         self.assertIn("<Code>NoSuchKey</Code>", response.text)
 
 
@@ -257,3 +258,92 @@ class CloudFrontSignedURLTests(S3StorageTests):
         self.assertIn("Key-Pair-Id=test-key", url)
         # CloudFront validates the signature and forwards only the path to the origin
         return super()._get(url.split("?", 1)[0])
+
+
+class TenantS3StorageTestCase(LoggedInTestCase):
+    access_key = os.environ.get("AWS_S3_ACCESS_KEY_ID")
+    secret_key = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
+    bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
+    region_name = os.environ.get("AWS_S3_REGION_NAME")
+    verify = os.environ.get("AWS_S3_VERIFY")
+
+    @classmethod
+    def setUpClass(cls):
+        if not all(
+            (
+                cls.access_key,
+                cls.secret_key,
+                cls.bucket_name,
+                cls.endpoint_url,
+                cls.region_name,
+            )
+        ):
+            raise unittest.SkipTest("S3 environment variables are not configured")
+
+        super().setUpClass()
+
+        cls.storage = TenantS3Storage(
+            bucket_name=cls.bucket_name,
+            endpoint_url=cls.endpoint_url,
+            region_name=cls.region_name,
+            addressing_style="path",
+            verify=cls.verify,
+        )
+
+        try:
+            cls.storage.bucket.create()
+        except ClientError as error:
+            if error.response["Error"]["Code"] not in (
+                "BucketAlreadyOwnedByYou",
+                "BucketAlreadyExists",
+            ):
+                raise
+
+    @override_settings(MULTITENANT_RELATIVE_MEDIA_ROOT="%s")
+    def test_files_are_saved_under_subdirectories_per_tenant(self):
+        connection.set_schema_to_public()
+        timestamp = timezone.now().timestamp()
+        tenant2 = utils.get_tenant_model()(schema_name="tenant2", owner=UserFactory())
+        tenant2.save()
+
+        domain2 = utils.get_tenant_domain_model()(tenant=tenant2, domain="example.com")
+        domain2.save()
+
+        self.assertEqual("public", self.storage.location)
+        public_file_name = self.storage.save(
+            f"hello_world_{timestamp}.txt", ContentFile("Hello World")
+        )
+        public_url = self.storage.url(public_file_name)
+
+        with utils.tenant_context(self.tenant):
+            self.assertEqual("fast", self.storage.location)
+            t1_file_name = self.storage.save(
+                f"hello_from_1_{timestamp}.txt", ContentFile("Hello T1")
+            )
+            t1_url = self.storage.url(t1_file_name)
+
+        with utils.tenant_context(tenant2):
+            self.assertEqual("tenant2", self.storage.location)
+            t2_file_name = self.storage.save(
+                f"hello_from_2_{timestamp}.txt", ContentFile("Hello T2")
+            )
+            t2_url = self.storage.url(t2_file_name)
+
+        # assert urls are correct
+        self.assertIn("/public/", public_url)
+        self.assertIn("/fast/", t1_url)
+        self.assertIn("/tenant2/", t2_url)
+
+        # assert contents are correct
+        response = requests.get(public_url, timeout=10, verify=self.verify)
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertEqual("Hello World", response.text)
+
+        response = requests.get(t1_url, timeout=10, verify=self.verify)
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertEqual("Hello T1", response.text)
+
+        response = requests.get(t2_url, timeout=10, verify=self.verify)
+        self.assertEqual(HTTPStatus.OK, response.status_code)
+        self.assertEqual("Hello T2", response.text)

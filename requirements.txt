@@ -1,3 +1,4 @@
+django-storages[s3]>=1.14.6
 kiwitcms-django-tenants==3.8.5
 sqlparse>=0.5.4 # not directly required, pinned by Snyk to avoid a vulnerability
 django>=6.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
