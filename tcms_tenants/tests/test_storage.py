@@ -182,6 +182,8 @@ class S3StorageTests(SimpleTestCase):
         super().setUpClass()
 
         cls.storage = S3Storage(
+            access_key=cls.access_key,
+            secret_key=cls.secret_key,
             bucket_name=cls.bucket_name,
             endpoint_url=cls.endpoint_url,
             region_name=cls.region_name,
@@ -236,6 +238,8 @@ class CloudFrontSignedURLTests(S3StorageTests):
 
         endpoint = urlparse(cls.endpoint_url)
         cls.storage = S3Storage(
+            access_key=cls.access_key,
+            secret_key=cls.secret_key,
             bucket_name=cls.bucket_name,
             endpoint_url=cls.endpoint_url,
             region_name=cls.region_name,
@@ -292,6 +296,8 @@ class TenantS3StorageTestCase(LoggedInTestCase):
         super().setUpClass()
 
         cls.storage = TenantS3Storage(
+            access_key=cls.access_key,
+            secret_key=cls.secret_key,
             bucket_name=cls.bucket_name,
             endpoint_url=cls.endpoint_url,
             region_name=cls.region_name,
