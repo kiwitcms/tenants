@@ -30,9 +30,11 @@ services:
             - 9000:9000
         volumes:
             - rustfs_data:/data
+            - ./ssl/rustfs:/opt/tls:ro
         environment:
             RUSTFS_ACCESS_KEY: rustfsadmin
             RUSTFS_SECRET_KEY: rustfsadmin
+            RUSTFS_TLS_PATH: /opt/tls
 
 volumes:
     postgresql_database_data:

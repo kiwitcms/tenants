@@ -155,6 +155,7 @@ class S3StorageTests(SimpleTestCase):
     bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
     endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
     region_name = os.environ.get("AWS_S3_REGION_NAME")
+    verify = os.environ.get("AWS_S3_VERIFY")
 
     @classmethod
     def setUpClass(cls):
@@ -176,6 +177,7 @@ class S3StorageTests(SimpleTestCase):
             endpoint_url=cls.endpoint_url,
             region_name=cls.region_name,
             addressing_style="path",
+            verify=cls.verify,
         )
 
         try:
@@ -188,7 +190,7 @@ class S3StorageTests(SimpleTestCase):
                 raise
 
     def _get(self, url):  # pylint: disable=no-self-use
-        return requests.get(url, timeout=10)
+        return requests.get(url, timeout=10, verify=self.verify)
 
     def test_upload_and_read_via_s3_endpoint(self):
         file_name = f"hello_world_{timezone.now().timestamp()}.txt"
@@ -229,6 +231,7 @@ class CloudFrontSignedURLTests(S3StorageTests):
             endpoint_url=cls.endpoint_url,
             region_name=cls.region_name,
             addressing_style="path",
+            verify=cls.verify,
             custom_domain=f"{endpoint.netloc}/{cls.bucket_name}",
             url_protocol=f"{endpoint.scheme}:",
             cloudfront_key_id="test-key",
