@@ -8,6 +8,7 @@ import shutil
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from storages.backends.s3 import S3Storage
 
 from django_tenants import utils
 
@@ -43,3 +44,24 @@ class TenantFileSystemStorage(FileSystemStorage):
     def delete_recursively(self, path):
         if self.exists(path):
             shutil.rmtree(path)
+
+
+class TenantS3Storage(S3Storage):  # pylint: disable=abstract-method
+    def __init__(self, **kwargs):
+        self._location = kwargs.get("location")
+        if self._location is None:
+            self._location = self.get_default_settings()["location"]
+
+        super().__init__(**kwargs)
+
+    @property
+    def location(self):
+        relative_media_root = getattr(settings, "MULTITENANT_RELATIVE_MEDIA_ROOT", "%s")
+        return os.path.join(
+            self._location,
+            utils.parse_tenant_config_path(relative_media_root),
+        )
+
+    def delete_recursively(self, path):  # pylint: disable=unused-argument
+        # S3 cleanup will be implemented separately
+        pass
