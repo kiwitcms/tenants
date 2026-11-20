@@ -9,6 +9,7 @@ import shutil
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from storages.backends.s3 import S3Storage
+from storages.utils import safe_join as storages_safe_join
 
 from django_tenants import utils
 
@@ -62,6 +63,14 @@ class TenantS3Storage(S3Storage):  # pylint: disable=abstract-method
             utils.parse_tenant_config_path(relative_media_root),
         )
 
-    def delete_recursively(self, path):  # pylint: disable=unused-argument
-        # S3 cleanup will be implemented separately
-        pass
+    def path(self, name):
+        """
+        Return the object's S3 key. Unlike a filesystem path it doesn't
+        start with a slash.
+        """
+        return storages_safe_join(self.location, name)
+
+    def delete_recursively(self, path):
+        prefix = path.rstrip("/") + "/"
+        for obj in self.bucket.objects.filter(Prefix=prefix):
+            obj.delete()

@@ -363,3 +363,82 @@ class TenantS3StorageTestCase(LoggedInTestCase):
         response = requests.get(t2_url, timeout=10, verify=self.verify)
         self.assertEqual(HTTPStatus.OK, response.status_code)
         self.assertEqual("Hello T2", response.text)
+
+
+@override_settings(
+    MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    STORAGES={
+        "default": {
+            "BACKEND": "tcms_tenants.storage.TenantS3Storage",
+            "OPTIONS": {
+                "access_key": os.environ.get("AWS_S3_ACCESS_KEY_ID"),
+                "secret_key": os.environ.get("AWS_S3_SECRET_ACCESS_KEY"),
+                "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
+                "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
+                "region_name": os.environ.get("AWS_S3_REGION_NAME"),
+                "addressing_style": "path",
+                "verify": os.environ.get("AWS_S3_VERIFY"),
+            },
+        },
+    },
+)
+class TenantS3DeleteTestCase(TenantDeleteTestCase):
+
+    access_key = os.environ.get("AWS_S3_ACCESS_KEY_ID")
+    secret_key = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
+    bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
+    region_name = os.environ.get("AWS_S3_REGION_NAME")
+    verify = os.environ.get("AWS_S3_VERIFY")
+
+    @classmethod
+    def setUpClass(cls):
+        if not all(
+            (
+                cls.access_key,
+                cls.secret_key,
+                cls.bucket_name,
+                cls.endpoint_url,
+                cls.region_name,
+            )
+        ):
+            raise unittest.SkipTest("S3 environment variables are not configured")
+
+        super().setUpClass()
+
+        # django_tenants' TenantTestCase.setUpClass() doesn't call super(), so
+        # Django never activates the class-level override_settings().
+        # pylint: disable-next=not-a-mapping
+        cls.enterClassContext(override_settings(**cls._overridden_settings))
+
+        try:
+            default_storage.bucket.create()
+        except ClientError as error:
+            if error.response["Error"]["Code"] not in (
+                "BucketAlreadyOwnedByYou",
+                "BucketAlreadyExists",
+            ):
+                raise
+
+    def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        if path.endswith("/"):
+            directories, files = default_storage.listdir(path)
+            self.assertEqual(expected, bool(directories or files))
+        else:
+            super().assertPathExistsViaStorageBackend(path, expected)
+
+    def assertPathExistsViaExternalCheck(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        if path.endswith("/"):
+            objects = default_storage.bucket.objects.filter(Prefix=path)
+            self.assertEqual(expected, bool(list(objects)))
+            return
+
+        response = requests.get(
+            default_storage.url(path), timeout=10, verify=self.verify
+        )
+        self.assertIn(response.status_code, (HTTPStatus.OK, HTTPStatus.NOT_FOUND))
+        self.assertEqual(expected, response.status_code == HTTPStatus.OK)
