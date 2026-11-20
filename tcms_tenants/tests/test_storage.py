@@ -432,6 +432,11 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
     def assertPathExistsViaExternalCheck(  # pylint: disable=invalid-name
         self, path, expected
     ):
+        if path.endswith("/"):
+            objects = default_storage.bucket.objects.filter(Prefix=path)
+            self.assertEqual(expected, bool(list(objects)))
+            return
+
         response = requests.get(
             default_storage.url(path), timeout=10, verify=self.verify
         )
