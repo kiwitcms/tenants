@@ -136,6 +136,8 @@ class TenantDeleteTestCase(LoggedInTestCase):
             self.assertPathExistsViaStorageBackend(file_name, True)
 
             tenant_storage_dir = os.path.dirname(file_name)
+            if not tenant_storage_dir.endswith("/"):
+                tenant_storage_dir += "/"
             self.assertPathExistsViaStorageBackend(tenant_storage_dir, True)
 
         # Delete the tenant
