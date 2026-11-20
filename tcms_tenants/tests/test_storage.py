@@ -456,37 +456,3 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
         response = requests.get(self.storage.url(path), timeout=10, verify=self.verify)
         self.assertIn(response.status_code, (HTTPStatus.OK, HTTPStatus.NOT_FOUND))
         self.assertEqual(expected, response.status_code == HTTPStatus.OK)
-
-    def test_tenant_delete_removes_media_directory(self):
-        connection.set_schema_to_public()
-        tenant = utils.get_tenant_model()(
-            schema_name="tenant2delete", owner=UserFactory(), name="To Delete"
-        )
-        tenant.save()
-
-        # Save a file under this tenant schema's storage
-        with utils.tenant_context(tenant):
-            file_name = self.storage.save(
-                "hello_delete.txt", ContentFile("Hello Delete")
-            )
-            directory = "./"
-
-            self.assertPathExistsViaStorageBackend(file_name, True)
-            self.assertPathExistsViaStorageBackend(directory, True)
-
-        # Delete the tenant
-        tenant.delete()
-
-        with utils.tenant_context(tenant):
-            self.assertPathExistsViaExternalCheck(file_name, False)
-            self.assertPathExistsViaExternalCheck(directory, False)
-
-    def test_tenant_delete_doesnt_raise_when_media_dir_doesnt_exist(self):
-        connection.set_schema_to_public()
-        tenant = utils.get_tenant_model()(
-            schema_name="w0uploads", owner=UserFactory(), name="Without Uploads"
-        )
-        tenant.save()
-
-        # no tenant relative prefix, delete doesn't raise
-        tenant.delete()
