@@ -428,6 +428,24 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
             ):
                 raise
 
+    def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        if path.endswith("/"):
+            # S3 has no directories. A non-empty key prefix is the closest
+            # equivalent. listdir() returns ([], []) for a non-existing prefix.
+            directories, files = self.storage.listdir(path)
+            exists = bool(directories or files)
+        else:
+            try:
+                self.storage.size(path)
+            except FileNotFoundError:
+                exists = False
+            else:
+                exists = True
+
+        self.assertEqual(expected, exists)
+
     def test_tenant_delete_removes_media_directory(self):
         connection.set_schema_to_public()
         tenant = utils.get_tenant_model()(
@@ -440,10 +458,11 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
             file_name = self.storage.save(
                 "hello_delete.txt", ContentFile("Hello Delete")
             )
-            self.assertTrue(self.storage.exists(file_name))
-
+            directory = "./"
             prefix = self.storage.location.rstrip("/") + "/"
-            self.assertTrue(list(self.storage.bucket.objects.filter(Prefix=prefix)))
+
+            self.assertPathExistsViaStorageBackend(file_name, True)
+            self.assertPathExistsViaStorageBackend(directory, True)
 
         # Delete the tenant
         tenant.delete()
