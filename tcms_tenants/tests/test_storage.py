@@ -14,7 +14,6 @@ import requests
 from botocore.exceptions import ClientError
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from django.conf import settings
 from django.db import connection
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -369,7 +368,6 @@ class TenantS3StorageTestCase(LoggedInTestCase):
 @override_settings(
     MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
     STORAGES={
-        **settings.STORAGES,
         "default": {
             "BACKEND": "tcms_tenants.storage.TenantS3Storage",
             "OPTIONS": {
