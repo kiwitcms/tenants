@@ -14,6 +14,7 @@ import requests
 from botocore.exceptions import ClientError
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from django.conf import settings
 from django.db import connection
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -363,3 +364,109 @@ class TenantS3StorageTestCase(LoggedInTestCase):
         response = requests.get(t2_url, timeout=10, verify=self.verify)
         self.assertEqual(HTTPStatus.OK, response.status_code)
         self.assertEqual("Hello T2", response.text)
+
+
+class TenantS3DeleteTestCase(TenantDeleteTestCase):
+    access_key = os.environ.get("AWS_S3_ACCESS_KEY_ID")
+    secret_key = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
+    bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
+    region_name = os.environ.get("AWS_S3_REGION_NAME")
+    verify = os.environ.get("AWS_S3_VERIFY")
+
+    @classmethod
+    def setUpClass(cls):
+        if not all(
+            (
+                cls.access_key,
+                cls.secret_key,
+                cls.bucket_name,
+                cls.endpoint_url,
+                cls.region_name,
+            )
+        ):
+            raise unittest.SkipTest("S3 environment variables are not configured")
+
+        super().setUpClass()
+
+        cls.storage = TenantS3Storage(
+            bucket_name=cls.bucket_name,
+            endpoint_url=cls.endpoint_url,
+            region_name=cls.region_name,
+            addressing_style="path",
+            verify=cls.verify,
+        )
+
+        try:
+            cls.storage.bucket.create()
+        except ClientError as error:
+            if error.response["Error"]["Code"] not in (
+                "BucketAlreadyOwnedByYou",
+                "BucketAlreadyExists",
+            ):
+                raise
+
+    @override_settings(
+        MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+        STORAGES={
+            **settings.STORAGES,
+            "default": {
+                "BACKEND": "tcms_tenants.storage.TenantS3Storage",
+                "OPTIONS": {
+                    "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
+                    "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
+                    "region_name": os.environ.get("AWS_S3_REGION_NAME"),
+                    "addressing_style": "path",
+                    "verify": os.environ.get("AWS_S3_VERIFY"),
+                },
+            },
+        },
+    )
+    def test_tenant_delete_removes_media_directory(self):
+        connection.set_schema_to_public()
+        tenant = utils.get_tenant_model()(
+            schema_name="tenant2delete", owner=UserFactory(), name="To Delete"
+        )
+        tenant.save()
+
+        # Save a file under this tenant schema's storage
+        with utils.tenant_context(tenant):
+            file_name = self.storage.save(
+                "hello_delete.txt", ContentFile("Hello Delete")
+            )
+            self.assertTrue(self.storage.exists(file_name))
+
+            prefix = self.storage.location.rstrip("/") + "/"
+            self.assertTrue(list(self.storage.bucket.objects.filter(Prefix=prefix)))
+
+        # Delete the tenant
+        tenant.delete()
+
+        # All objects under the tenant's storage prefix should be removed
+        self.assertFalse(list(self.storage.bucket.objects.filter(Prefix=prefix)))
+
+    @override_settings(
+        MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+        STORAGES={
+            **settings.STORAGES,
+            "default": {
+                "BACKEND": "tcms_tenants.storage.TenantS3Storage",
+                "OPTIONS": {
+                    "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
+                    "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
+                    "region_name": os.environ.get("AWS_S3_REGION_NAME"),
+                    "addressing_style": "path",
+                    "verify": os.environ.get("AWS_S3_VERIFY"),
+                },
+            },
+        },
+    )
+    def test_tenant_delete_doesnt_raise_when_media_dir_doesnt_exist(self):
+        connection.set_schema_to_public()
+        tenant = utils.get_tenant_model()(
+            schema_name="w0uploads", owner=UserFactory(), name="Without Uploads"
+        )
+        tenant.save()
+
+        # no tenant relative prefix, delete doesn't raise
+        tenant.delete()
