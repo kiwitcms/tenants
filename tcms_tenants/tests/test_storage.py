@@ -98,14 +98,27 @@ class DefaultStorageTestCase(TenantFileSystemStorageTestCase):
     storage = default_storage
 
 
+@override_settings(
+    MEDIA_ROOT="apps_dir/media",
+    MEDIA_URL="/media/",
+    MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    STORAGES={
+        "default": {
+            "BACKEND": "tcms_tenants.storage.TenantFileSystemStorage",
+        },
+    },
+)
 class TenantDeleteTestCase(LoggedInTestCase):
-    storage = TenantFileSystemStorage()
+    def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        self.assertEqual(expected, default_storage.exists(path))
 
-    @override_settings(
-        MEDIA_ROOT="apps_dir/media",
-        MEDIA_URL="/media/",
-        MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
-    )
+    def assertPathExistsViaExternalCheck(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        self.assertEqual(expected, os.path.exists(path))
+
     def test_tenant_delete_removes_media_directory(self):
         connection.set_schema_to_public()
         tenant = utils.get_tenant_model()(
@@ -115,28 +128,23 @@ class TenantDeleteTestCase(LoggedInTestCase):
 
         # Save a file under this tenant schema's storage
         with utils.tenant_context(tenant):
-            file_name = self.storage.save(
+            file_name = default_storage.save(
                 "hello_delete.txt", ContentFile("Hello Delete")
             )
             # convert to absolute path
-            file_name = self.storage.path(file_name)
-            self.assertTrue(self.storage.exists(file_name))
+            file_name = default_storage.path(file_name)
+            self.assertPathExistsViaStorageBackend(file_name, True)
 
             tenant_storage_dir = os.path.dirname(file_name)
-            self.assertTrue(self.storage.exists(tenant_storage_dir))
+            self.assertPathExistsViaStorageBackend(tenant_storage_dir, True)
 
         # Delete the tenant
         tenant.delete()
 
         # The tenant's storage directory (which includes the file) should be removed
-        self.assertFalse(os.path.exists(file_name))
-        self.assertFalse(os.path.exists(tenant_storage_dir))
+        self.assertPathExistsViaExternalCheck(file_name, False)
+        self.assertPathExistsViaExternalCheck(tenant_storage_dir, False)
 
-    @override_settings(
-        MEDIA_ROOT="apps_dir/media",
-        MEDIA_URL="/media/",
-        MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
-    )
     def test_tenant_delete_doesnt_raise_when_media_dir_doesnt_exist(
         self,
     ):  # pylint: disable=no-self-use
