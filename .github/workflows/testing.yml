@@ -52,6 +52,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Generate RustFS TLS certificates
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sscg
+          ./ssl/generate-rustfs-certs.sh
+
       - name: Create database
         run: |
           docker compose pull db
@@ -70,8 +76,9 @@ jobs:
           AWS_S3_ACCESS_KEY_ID: rustfsadmin
           AWS_S3_SECRET_ACCESS_KEY: rustfsadmin
           AWS_STORAGE_BUCKET_NAME: test-bucket
-          AWS_S3_ENDPOINT_URL: http://127.0.0.1:9000
+          AWS_S3_ENDPOINT_URL: https://localhost:9000
           AWS_S3_REGION_NAME: us-east-1
+          AWS_S3_VERIFY: ${{ github.workspace }}/ssl/rustfs/ca.crt
         run: |
           pip install -U pip wheel setuptools
           pip install -r devel.txt \
