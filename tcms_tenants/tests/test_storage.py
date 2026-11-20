@@ -428,20 +428,14 @@ class TenantS3DeleteTestCase(TenantDeleteTestCase):
         if path.rstrip("/") == default_storage.location.rstrip("/"):
             path = "./"
 
-        if path.endswith("/"):
-            # S3 has no directories. A non-empty key prefix is the closest
-            # equivalent. listdir() returns ([], []) for a non-existing prefix.
-            directories, files = default_storage.listdir(path)
-            exists = bool(directories or files)
-        else:
-            try:
-                default_storage.size(path)
-            except FileNotFoundError:
-                exists = False
-            else:
-                exists = True
+        if not path.endswith("/"):
+            super().assertPathExistsViaStorageBackend(path, expected)
+            return
 
-        self.assertEqual(expected, exists)
+        # S3 has no directories. A non-empty key prefix is the closest
+        # equivalent. listdir() returns ([], []) for a non-existing prefix.
+        directories, files = default_storage.listdir(path)
+        self.assertEqual(expected, bool(directories or files))
 
     def assertPathExistsViaExternalCheck(  # pylint: disable=invalid-name
         self, path, expected
