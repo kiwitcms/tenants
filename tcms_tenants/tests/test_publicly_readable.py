@@ -76,6 +76,7 @@ class PubliclyReadableTenantTestCase(LoggedInTestCase):
     def tearDownClass(cls):
         cls.tenant.publicly_readable = False
         cls.tenant.save()
+        super().tearDownClass()
 
     def test_unauthorized_user_can_view(self):
         response = self.client.get(
