@@ -12,17 +12,15 @@ from django_tenants import utils as django_tenant_utils
 from tcms.tests import deny_certain_email_addresses
 
 from tcms_tenants import utils
-from tcms_tenants.tests import LoggedInTestCase
+from tcms_tenants.tests import LoggedInTestCase, UserFactory
 
 
 class TenantDomainTestCase(LoggedInTestCase):
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
-
         with utils.schema_context("public"):
             cls.tenant2 = django_tenant_utils.get_tenant_model()(
-                schema_name="other2", owner=cls.tester
+                schema_name="other2", owner=UserFactory()
             )
             cls.tenant2.save()
 
@@ -30,6 +28,8 @@ class TenantDomainTestCase(LoggedInTestCase):
                 tenant=cls.tenant2, domain="other2.example.com"
             )
             cls.domain2.save()
+
+        super().setUpClass()
 
     def test_should_return_existing_domain_from_db(self):
         with override_settings(KIWI_TENANTS_DOMAIN="qa.kiwitcms.org"):
