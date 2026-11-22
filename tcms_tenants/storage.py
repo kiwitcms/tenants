@@ -62,6 +62,7 @@ class TenantS3Storage(S3Storage):  # pylint: disable=abstract-method
             utils.parse_tenant_config_path(relative_media_root),
         )
 
-    def delete_recursively(self, path):  # pylint: disable=unused-argument
-        # S3 cleanup will be implemented separately
-        pass
+    def delete_recursively(self, path):
+        prefix = path.rstrip("/") + "/"
+        for obj in self.bucket.objects.filter(Prefix=prefix):
+            obj.delete()

@@ -20,6 +20,7 @@ from django.core.files.storage import default_storage
 from django.test import SimpleTestCase, override_settings
 from django.utils import timezone
 from storages.backends.s3 import S3Storage
+from storages.utils import safe_join as storages_safe_join
 
 from django_tenants import utils
 
@@ -113,7 +114,10 @@ class TenantDeleteTestCase(LoggedInTestCase):
         return default_storage.path(name)
 
     def directory_reference(self, file_reference):
-        return os.path.dirname(file_reference)
+        directory = os.path.dirname(file_reference)
+        if not directory.endswith("/"):
+            directory += "/"
+        return directory
 
     def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
         self, path, expected
@@ -142,8 +146,6 @@ class TenantDeleteTestCase(LoggedInTestCase):
             self.assertPathExistsViaStorageBackend(file_name, True)
 
             tenant_storage_dir = self.directory_reference(file_name)
-            if not tenant_storage_dir.endswith("/"):
-                tenant_storage_dir += "/"
             self.assertPathExistsViaStorageBackend(tenant_storage_dir, True)
 
         # Delete the tenant
@@ -369,3 +371,89 @@ class TenantS3StorageTestCase(LoggedInTestCase):
         response = requests.get(t2_url, timeout=10, verify=self.verify)
         self.assertEqual(HTTPStatus.OK, response.status_code)
         self.assertEqual("Hello T2", response.text)
+
+
+@override_settings(
+    MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    STORAGES={
+        "default": {
+            "BACKEND": "tcms_tenants.storage.TenantS3Storage",
+            "OPTIONS": {
+                "access_key": os.environ.get("AWS_S3_ACCESS_KEY_ID"),
+                "secret_key": os.environ.get("AWS_S3_SECRET_ACCESS_KEY"),
+                "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
+                "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
+                "region_name": os.environ.get("AWS_S3_REGION_NAME"),
+                "addressing_style": "path",
+                "verify": os.environ.get("AWS_S3_VERIFY"),
+            },
+        },
+    },
+)
+class TenantS3DeleteTestCase(TenantDeleteTestCase):
+
+    access_key = os.environ.get("AWS_S3_ACCESS_KEY_ID")
+    secret_key = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
+    bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
+    region_name = os.environ.get("AWS_S3_REGION_NAME")
+    verify = os.environ.get("AWS_S3_VERIFY")
+
+    @classmethod
+    def setUpClass(cls):
+        if not all(
+            (
+                cls.access_key,
+                cls.secret_key,
+                cls.bucket_name,
+                cls.endpoint_url,
+                cls.region_name,
+            )
+        ):
+            raise unittest.SkipTest("S3 environment variables are not configured")
+
+        super().setUpClass()
+
+        try:
+            default_storage.bucket.create()
+        except ClientError as error:
+            if error.response["Error"]["Code"] not in (
+                "BucketAlreadyOwnedByYou",
+                "BucketAlreadyExists",
+            ):
+                raise
+
+    def file_reference(self, name):
+        return storages_safe_join(default_storage.location, name)
+
+    def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        if path.endswith("/"):
+            objects = default_storage.bucket.objects.filter(Prefix=path)
+            self.assertEqual(expected, bool(list(objects)))
+            return
+
+        try:
+            default_storage.bucket.Object(path).load()
+        except ClientError as error:
+            if error.response["ResponseMetadata"]["HTTPStatusCode"] == 404:
+                self.assertEqual(expected, False)
+                return
+            raise
+
+        self.assertEqual(expected, True)
+
+    def assertPathExistsViaExternalCheck(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        if path.endswith("/"):
+            objects = default_storage.bucket.objects.filter(Prefix=path)
+            self.assertEqual(expected, bool(list(objects)))
+            return
+
+        response = requests.get(
+            default_storage.url(path), timeout=10, verify=self.verify
+        )
+        self.assertIn(response.status_code, (HTTPStatus.OK, HTTPStatus.NOT_FOUND))
+        self.assertEqual(expected, response.status_code == HTTPStatus.OK)
