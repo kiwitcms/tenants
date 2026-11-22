@@ -3,7 +3,7 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-# pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors,no-self-use
 import json
 import os
 import unittest
@@ -109,6 +109,12 @@ class DefaultStorageTestCase(TenantFileSystemStorageTestCase):
     },
 )
 class TenantDeleteTestCase(LoggedInTestCase):
+    def file_reference(self, name):
+        return default_storage.path(name)
+
+    def directory_reference(self, file_reference):
+        return os.path.dirname(file_reference)
+
     def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
         self, path, expected
     ):
@@ -132,10 +138,10 @@ class TenantDeleteTestCase(LoggedInTestCase):
                 "hello_delete.txt", ContentFile("Hello Delete")
             )
             # convert to absolute path
-            file_name = default_storage.path(file_name)
+            file_name = self.file_reference(file_name)
             self.assertPathExistsViaStorageBackend(file_name, True)
 
-            tenant_storage_dir = os.path.dirname(file_name)
+            tenant_storage_dir = self.directory_reference(file_name)
             if not tenant_storage_dir.endswith("/"):
                 tenant_storage_dir += "/"
             self.assertPathExistsViaStorageBackend(tenant_storage_dir, True)
