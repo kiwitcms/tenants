@@ -3,15 +3,18 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-# pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors,no-self-use
 
+import os
 import shutil
 from datetime import timedelta
 from io import StringIO
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.test import override_settings
 from django.utils import timezone
 
 from django_tenants.utils import tenant_context
@@ -19,12 +22,36 @@ from django_tenants.utils import tenant_context
 from attachments.models import Attachment
 from tcms.tests.factories import TestCaseFactory
 
-from tcms_tenants.storage import TenantFileSystemStorage
 from tcms_tenants.tests import TenantGroupsTestCase, tenants_with_schema
 
 
+@override_settings(
+    MEDIA_ROOT="apps_dir/media",
+    MEDIA_URL="/media/",
+    MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    STORAGES={
+        "default": {
+            "BACKEND": "tcms_tenants.storage.TenantFileSystemStorage",
+        },
+    },
+)
 class RemoveAttachmentsOlderThanTestCase(TenantGroupsTestCase):
-    storage = TenantFileSystemStorage()
+    def file_reference(self, name):
+        return default_storage.path(name)
+
+    def directory_reference(self, file_reference):
+        directory = os.path.dirname(file_reference)
+        if not directory.endswith("/"):
+            directory += "/"
+        return directory
+
+    def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        self.assertEqual(expected, default_storage.exists(path))
+
+    def remove_attachment_storage(self, directory_reference):
+        shutil.rmtree(directory_reference, True)
 
     def add_attachment(self, tenant, file_name, days):
         with tenant_context(tenant):
@@ -40,11 +67,10 @@ class RemoveAttachmentsOlderThanTestCase(TenantGroupsTestCase):
             attachment.created = timezone.now() - timedelta(days=days)
             attachment.save()
 
-            self.addCleanup(
-                shutil.rmtree,
-                self.storage.path(f"attachments/testcases_testcase/{parent_obj.pk}"),
-                True,
+            attachment_dir = self.directory_reference(
+                self.file_reference(attachment.attachment_file.name)
             )
+            self.addCleanup(self.remove_attachment_storage, attachment_dir)
 
             return attachment
 
@@ -81,8 +107,12 @@ class RemoveAttachmentsOlderThanTestCase(TenantGroupsTestCase):
             with tenant_context(tenant):
                 self.assertFalse(Attachment.objects.filter(pk=old.pk).exists())
                 self.assertTrue(Attachment.objects.filter(pk=new.pk).exists())
-                self.assertFalse(self.storage.exists(old.attachment_file.name))
-                self.assertTrue(self.storage.exists(new.attachment_file.name))
+                self.assertPathExistsViaStorageBackend(
+                    self.file_reference(old.attachment_file.name), False
+                )
+                self.assertPathExistsViaStorageBackend(
+                    self.file_reference(new.attachment_file.name), True
+                )
 
     def test_only_selected_tenant_is_affected(self):
         seeded = {}
@@ -118,8 +148,9 @@ class RemoveAttachmentsOlderThanTestCase(TenantGroupsTestCase):
                             pk=seeded[tenant.schema_name].pk
                         ).exists()
                     )
-                    self.assertTrue(
-                        self.storage.exists(
+                    self.assertPathExistsViaStorageBackend(
+                        self.file_reference(
                             seeded[tenant.schema_name].attachment_file.name
-                        )
+                        ),
+                        True,
                     )
