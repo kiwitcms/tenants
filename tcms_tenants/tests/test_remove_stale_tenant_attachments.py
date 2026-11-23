@@ -7,6 +7,7 @@
 
 import os
 import shutil
+import unittest
 from io import StringIO
 
 from django.contrib.contenttypes.models import ContentType
@@ -16,6 +17,9 @@ from django.core.management import call_command
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
 from django.test import override_settings
+
+from botocore.exceptions import ClientError
+from storages.utils import safe_join as storages_safe_join
 
 from django_tenants.utils import tenant_context
 
@@ -286,3 +290,73 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
 
         with tenant_context(self.tenant):
             self.assertTrue(Attachment.objects.filter(pk=missing.pk).exists())
+
+
+@override_settings(
+    MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    STORAGES={
+        "default": {
+            "BACKEND": "tcms_tenants.storage.TenantS3Storage",
+            "OPTIONS": {
+                "access_key": os.environ.get("AWS_S3_ACCESS_KEY_ID"),
+                "secret_key": os.environ.get("AWS_S3_SECRET_ACCESS_KEY"),
+                "bucket_name": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
+                "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL"),
+                "region_name": os.environ.get("AWS_S3_REGION_NAME"),
+                "addressing_style": "path",
+                "verify": os.environ.get("AWS_S3_VERIFY"),
+            },
+        },
+    },
+)
+class RemoveStaleTenantAttachmentsOnS3(RemoveStaleTenantAttachmentsTestCase):
+    access_key = os.environ.get("AWS_S3_ACCESS_KEY_ID")
+    secret_key = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
+    bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+    endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL")
+    region_name = os.environ.get("AWS_S3_REGION_NAME")
+
+    @classmethod
+    def setUpClass(cls):
+        if not all(
+            (
+                cls.access_key,
+                cls.secret_key,
+                cls.bucket_name,
+                cls.endpoint_url,
+                cls.region_name,
+            )
+        ):
+            raise unittest.SkipTest("S3 environment variables are not configured")
+
+        super().setUpClass()
+
+        try:
+            default_storage.bucket.create()
+        except ClientError as error:
+            if error.response["Error"]["Code"] not in (
+                "BucketAlreadyOwnedByYou",
+                "BucketAlreadyExists",
+            ):
+                raise
+
+    def file_reference(self, name):
+        return storages_safe_join(default_storage.location, name)
+
+    def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        try:
+            default_storage.bucket.Object(path).load()
+        except ClientError as error:
+            if error.response["ResponseMetadata"]["HTTPStatusCode"] == 404:
+                self.assertEqual(expected, False)
+                return
+            raise
+
+        self.assertEqual(expected, True)
+
+    def remove_attachment_storage(self, directory_reference):
+        objects = default_storage.bucket.objects.filter(Prefix=directory_reference)
+        for obj in objects:
+            obj.delete()
