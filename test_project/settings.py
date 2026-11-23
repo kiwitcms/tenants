@@ -51,10 +51,11 @@ if os.path.exists(os.path.join(BASE_DIR, "kiwitcms_tenants.egg-info")):
 multi_tenant_settings = os.path.join(BASE_DIR, "tcms_settings_dir", "multi_tenant.py")
 
 # Kiwi TCMS loads extra settings in the same way using exec()
-exec(  # pylint: disable=exec-used
-    open(multi_tenant_settings, "rb").read(),  # pylint: disable=consider-using-with
-    globals(),
-)
+with open(multi_tenant_settings, "rb") as settings_file:
+    exec(  # pylint: disable=exec-used
+        settings_file.read(),
+        globals(),
+    )
 
 
 # these are enabled only for testing purposes
