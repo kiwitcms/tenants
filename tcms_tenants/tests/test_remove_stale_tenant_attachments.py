@@ -3,30 +3,58 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-# pylint: disable=too-many-ancestors
+# pylint: disable=too-many-ancestors,no-self-use
 
+import os
 import shutil
 from io import StringIO
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
+from django.test import override_settings
 
 from django_tenants.utils import tenant_context
 
 from attachments.models import Attachment
 from tcms.tests.factories import TestCaseFactory, TestExecutionFactory, TestPlanFactory
 
-from tcms_tenants.storage import TenantFileSystemStorage
 from tcms_tenants.tests import TenantGroupsTestCase, tenants_with_schema
 
 
+@override_settings(
+    MEDIA_ROOT="apps_dir/media",
+    MEDIA_URL="/media/",
+    MULTITENANT_RELATIVE_MEDIA_ROOT="%s",
+    STORAGES={
+        "default": {
+            "BACKEND": "tcms_tenants.storage.TenantFileSystemStorage",
+        },
+    },
+)
 class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
     attachments_per_model = 100
     pk_offset = 1_000_000_000
-    storage = TenantFileSystemStorage()
+
+    def file_reference(self, name):
+        return default_storage.path(name)
+
+    def directory_reference(self, file_reference):
+        directory = os.path.dirname(file_reference)
+        if not directory.endswith("/"):
+            directory += "/"
+        return directory
+
+    def assertPathExistsViaStorageBackend(  # pylint: disable=invalid-name
+        self, path, expected
+    ):
+        self.assertEqual(expected, default_storage.exists(path))
+
+    def remove_attachment_storage(self, directory_reference):
+        shutil.rmtree(directory_reference, True)
 
     @classmethod
     def setUpClass(cls):
@@ -120,15 +148,15 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
                     f"attachment{index}.txt"
                     for index in range(1, self.attachments_per_model + 1)
                 )
-                parents, _ = self.storage.listdir("attachments")
+                parents, _ = default_storage.listdir("attachments")
                 self.assertEqual(len(parents), 3)
 
                 for parent in parents:
-                    dirs, _ = self.storage.listdir(f"attachments/{parent}")
+                    dirs, _ = default_storage.listdir(f"attachments/{parent}")
                     self.assertEqual(len(dirs), 1)
 
                     for directory in dirs:
-                        sub_dirs, files = self.storage.listdir(
+                        sub_dirs, files = default_storage.listdir(
                             f"attachments/{parent}/{directory}"
                         )
                         self.assertEqual(sub_dirs, [])
@@ -194,14 +222,18 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
             )
 
             # delete the file from disk, keep the object and its parent object
-            self.storage.delete(missing.attachment_file.name)
-            self.assertFalse(self.storage.exists(missing.attachment_file.name))
-            self.assertTrue(self.storage.exists(kept.attachment_file.name))
+            default_storage.delete(missing.attachment_file.name)
+            self.assertPathExistsViaStorageBackend(
+                self.file_reference(missing.attachment_file.name), False
+            )
+            self.assertPathExistsViaStorageBackend(
+                self.file_reference(kept.attachment_file.name), True
+            )
 
-            attachments_dir = f"attachments/testcases_testcase/{test_case.pk}"
-            directory = self.storage.path(attachments_dir)
-
-        self.addCleanup(shutil.rmtree, directory, True)
+            directory = self.directory_reference(
+                self.file_reference(kept.attachment_file.name)
+            )
+            self.addCleanup(self.remove_attachment_storage, directory)
 
         out = StringIO()
         call_command(
@@ -217,7 +249,9 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
         with tenant_context(self.tenant):
             self.assertFalse(Attachment.objects.filter(pk=missing.pk).exists())
             self.assertTrue(Attachment.objects.filter(pk=kept.pk).exists())
-            self.assertTrue(self.storage.exists(kept.attachment_file.name))
+            self.assertPathExistsViaStorageBackend(
+                self.file_reference(kept.attachment_file.name), True
+            )
 
     def test_keeps_attachments_with_missing_file_without_check_storage(self):
         with tenant_context(self.tenant):
@@ -230,14 +264,15 @@ class RemoveStaleTenantAttachmentsTestCase(TenantGroupsTestCase):
                 attachment_file=SimpleUploadedFile("missing.txt", b"content"),
                 creator=self.tester,
             )
-            self.storage.delete(missing.attachment_file.name)
-            self.assertFalse(self.storage.exists(missing.attachment_file.name))
-
-            directory = self.storage.path(
-                f"attachments/testcases_testcase/{test_case.pk}"
+            default_storage.delete(missing.attachment_file.name)
+            self.assertPathExistsViaStorageBackend(
+                self.file_reference(missing.attachment_file.name), False
             )
 
-        self.addCleanup(shutil.rmtree, directory, True)
+            directory = self.directory_reference(
+                self.file_reference(missing.attachment_file.name)
+            )
+            self.addCleanup(self.remove_attachment_storage, directory)
 
         out = StringIO()
         call_command(
