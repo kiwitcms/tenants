@@ -148,6 +148,15 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.13.0 (23 Nov 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Add ``TenantS3Storage`` backend
+- Update django from >=6.0.0 to >=6.1.3
+- Update kiwitcms-django-tenants from 3.8.5 to 3.8.20261123
+- Update sqlparse from >=0.5.4 to >=0.6.1
+
+
 v4.12.0 (16 Nov 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
