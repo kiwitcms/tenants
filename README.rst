@@ -148,6 +148,12 @@ to configure DNS resolution during development::
 Changelog
 ---------
 
+v4.14.0 (26 Nov 2026)
+~~~~~~~~~~~~~~~~~~~~~
+
+- Use ``safe_join()``  for tenant media paths
+
+
 v4.13.0 (23 Nov 2026)
 ~~~~~~~~~~~~~~~~~~~~~
 
