@@ -3,12 +3,13 @@
 # Licensed under GNU Affero General Public License v3 or later (AGPLv3+)
 # https://www.gnu.org/licenses/agpl-3.0.html
 
-import os
 import shutil
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.utils._os import safe_join as django_safe_join
 from storages.backends.s3 import S3Storage
+from storages.utils import safe_join as storages_safe_join
 
 from django_tenants import utils
 
@@ -27,7 +28,7 @@ class TenantFileSystemStorage(FileSystemStorage):
     @property  # not cached like in parent class
     def base_url(self):  # pylint: disable=invalid-overridden-method
         _url = super().base_url
-        _url = os.path.join(
+        _url = django_safe_join(
             _url, utils.parse_tenant_config_path(self.relative_media_root)
         )
         if not _url.endswith("/"):
@@ -36,10 +37,9 @@ class TenantFileSystemStorage(FileSystemStorage):
 
     @property  # not cached like in parent class
     def location(self):  # pylint: disable=invalid-overridden-method
-        _location = os.path.join(
+        return django_safe_join(
             super().location, utils.parse_tenant_config_path(self.relative_media_root)
         )
-        return os.path.abspath(_location)
 
     def delete_recursively(self, path):
         if self.exists(path):
@@ -57,7 +57,7 @@ class TenantS3Storage(S3Storage):  # pylint: disable=abstract-method
     @property
     def location(self):
         relative_media_root = getattr(settings, "MULTITENANT_RELATIVE_MEDIA_ROOT", "%s")
-        return os.path.join(
+        return storages_safe_join(
             self._location,
             utils.parse_tenant_config_path(relative_media_root),
         )
